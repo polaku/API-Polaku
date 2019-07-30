@@ -1,40 +1,79 @@
-const { dbConn } = require('../config')
-
+const { tbl_announcements } = require('../models')
 
 class announcements {
   static create(req, res) {
-    dbConn.query(`INSERT INTO tbl_announcements (title, description, user_id, attachment, start_date, end_date) VALUES ( '${req.body.title}','${req.body.description}', '1', '${req.body.attachment}', '${req.body.startDate}', '${req.body.endDate}')`, function (error, results, fields) {
-        if (error) throw res.send(error);
-        return res.status(200).json({ data: results });
-      });
+    tbl_announcements.create({
+      title: req.body.title,
+      description: req.body.description,
+      user_id: '1',
+      attachment: req.body.attachment,
+      start_date: req.body.startDate,
+      end_date: req.body.endDate
+    })
+      .then(({ dataValues }) => {
+        res.status(201).json(dataValues)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+
+        console.log(err);
+      })
   }
 
   static findAll(req, res) {
-    dbConn.query(`SELECT * FROM tbl_announcements`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_announcements.findAll()
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
   static findOne(req, res) {
-    dbConn.query(`SELECT * FROM tbl_announcements WHERE announcements_id=${req.params.id}`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_announcements.findByPk(Number(req.params.id))
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
   static delete(req, res) {
-    dbConn.query(`DELETE FROM tbl_announcements WHERE announcements_id=${req.params.id}`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_announcements.destroy(
+      { where: { announcements_id: req.params.id } }
+    )
+      .then(() => {
+        res.status(200).json({ info: "Delete Success" })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
   static update(req, res) {
-    dbConn.query(`UPDATE tbl_announcements SET title='${req.body.title}', description='${req.body.description}', attachment='${req.body.attachment}', start_date='${req.body.startDate}', end_date='${req.body.endDate}' WHERE announcements_id=${req.params.id}`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_announcements.update(
+      {
+        title: req.body.title,
+        description: req.body.description,
+        attachment: req.body.attachment,
+        start_date: req.body.startDate,
+        end_date: req.body.endDate
+      }, {
+        where: { announcements_id: Number(req.params.id) }
+      }
+    )
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
 }

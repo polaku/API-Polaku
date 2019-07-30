@@ -1,39 +1,77 @@
-const { dbConn } = require('../config')
+const { tbl_polanews } = require('../models')
 
 class news {
   static create(req, res) {
-    dbConn.query(`INSERT INTO tbl_polanews (title, description, created_by, attachments, status) VALUES ( '${req.body.title}','${req.body.description}', '1', '${req.body.attachments}', '${req.body.status}')`, function (error, results, fields) {
-        if (error) throw res.send(error);
-        return res.status(200).json({ data: results });
-      });
+    tbl_polanews.create({
+      title: req.body.title,
+      description: req.body.description,
+      created_by: '1',
+      attachments: req.body.attachments,
+      status: req.body.status
+    })
+      .then(({ dataValues }) => {
+        res.status(201).json(dataValues)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+
+        console.log(err);
+      })
   }
 
   static findAll(req, res) {
-    dbConn.query(`SELECT * FROM tbl_polanews`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_polanews.findAll()
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
   static findOne(req, res) {
-    dbConn.query(`SELECT * FROM tbl_polanews WHERE polanews_id=${req.params.id}`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_polanews.findByPk(Number(req.params.id))
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
   static delete(req, res) {
-    dbConn.query(`DELETE FROM tbl_polanews WHERE polanews_id=${req.params.id}`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_polanews.destroy(
+      { where: { polanews_id: req.params.id } }
+    )
+      .then(() => {
+        res.status(200).json({ info: "Delete Success" })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
   static update(req, res) {
-    dbConn.query(`UPDATE tbl_polanews SET title='${req.body.title}', description='${req.body.description}', attachments='${req.body.attachments}', status='${req.body.status}' WHERE polanews_id=${req.params.id}`, function (error, results, fields) {
-      if (error) throw res.send(error);
-      return res.status(200).json({ data: results });
-    });
+    tbl_polanews.update(
+      {
+        title: req.body.title,
+        description: req.body.description,
+        attachments: req.body.attachments,
+        status: req.body.status
+      }, {
+        where: { polanews_id: Number(req.params.id) }
+      }
+    )
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
 }
