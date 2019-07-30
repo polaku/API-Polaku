@@ -1,6 +1,6 @@
 const { dbConn } = require('../config')
 
-class announcements {
+class news {
   static create(req, res) {
     dbConn.query(`INSERT INTO tbl_polanews (title, description, created_by, attachments, status) VALUES ( '${req.body.title}','${req.body.description}', '1', '${req.body.attachments}', '${req.body.status}')`, function (error, results, fields) {
         if (error) throw res.send(error);
@@ -38,4 +38,4 @@ class announcements {
 
 }
 
-module.exports = announcements
+module.exports = news
