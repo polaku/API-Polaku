@@ -1,6 +1,9 @@
 const router = require('express').Router()
 const announcementController = require('../controllers/announcement')
 const { upload } = require('../middleware/multer')
+const { authentication } = require('../middleware/auth')
+
+router.use(authentication)
 
 router.post('/', upload.single('attachment'), announcementController.create)
 router.get('/', announcementController.findAll)

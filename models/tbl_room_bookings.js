@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     time_in: DataTypes.TIME,
     time_out: DataTypes.TIME,
     subject: DataTypes.STRING,
-    created_by: DataTypes.INTEGER,
+    user_id: DataTypes.INTEGER,
     time: DataTypes.TIME,
     count: DataTypes.INTEGER,
   }, {

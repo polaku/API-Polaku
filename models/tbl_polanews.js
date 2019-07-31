@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     thumbnail: DataTypes.STRING,
     status: DataTypes.INTEGER,
     total_view: DataTypes.INTEGER,
-    created_by: DataTypes.INTEGER,
+    user_id: DataTypes.INTEGER,
     created_at: DataTypes.STRING,
   }, {
       timestamps: false,

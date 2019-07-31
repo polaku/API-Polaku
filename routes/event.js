@@ -1,6 +1,9 @@
 const router = require('express').Router()
 const eventController = require('../controllers/event')
 const { upload } = require('../middleware/multer')
+const { authentication } = require('../middleware/auth')
+
+router.use(authentication)
 
 router.post('/', upload.single('thumbnail'), eventController.create)
 router.get('/', eventController.findAll)

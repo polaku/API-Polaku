@@ -2,17 +2,19 @@ const { tbl_room_bookings } = require('../models')
 
 class bookingRoom {
   static create(req, res) {
-    tbl_room_bookings.create({
+    let newData = {
       room_id: req.body.room_id,
       date_in: req.body.date_in,
       time_in: req.body.time_in,
       time_out: req.body.time_out,
       subject: req.body.subject,
-      created_by: '1',
+      user_id: req.user.user_id,
       count: req.body.count
-    })
-      .then(({ dataValues }) => {
-        res.status(201).json(dataValues)
+    }
+
+    tbl_room_bookings.create(newData)
+      .then(data => {
+        res.status(201).json(data)
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -56,17 +58,17 @@ class bookingRoom {
   }
 
   static update(req, res) {
-    tbl_room_bookings.update(
-      {
-        date_in: req.body.date_in,
-        time_in: req.body.time_in,
-        time_out: req.body.time_out,
-        subject: req.body.subject,
-        count: req.body.count
-      }, {
-        where: { room_booking_id: Number(req.params.id) }
-      }
-    )
+    let newData = {
+      date_in: req.body.date_in,
+      time_in: req.body.time_in,
+      time_out: req.body.time_out,
+      subject: req.body.subject,
+      count: req.body.count
+    }
+
+    tbl_room_bookings.update(newData, {
+      where: { room_booking_id: Number(req.params.id) }
+    })
       .then(data => {
         res.status(200).json(data)
       })

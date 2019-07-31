@@ -1,18 +1,17 @@
-const { tbl_events } = require('../models')
+const { tbl_contacts } = require('../models')
 
 class news {
   static create(req, res) {
     let newData = {
-      event_name: req.body.event_name,
-      description: req.body.description,
-      start_date: req.body.start_date,
-      end_date: req.body.end_date,
-      location: req.body.location,
-      thumbnail: req.body.thumbnail,
+      name: req.body.name,
+      email: req.user.email,
+      message: req.body.message,
+      contact_categories_id: req.body.contactCategoriesId,
+      company_id: req.body.company_id,
       user_id: req.user.user_id,
     }
 
-    tbl_events.create(newData)
+    tbl_contacts.create(newData)
       .then(data => {
         res.status(201).json(data)
       })
@@ -23,7 +22,7 @@ class news {
   }
 
   static findAll(req, res) {
-    tbl_events.findAll()
+    tbl_contacts.findAll()
       .then(data => {
         res.status(200).json(data)
       })
@@ -34,7 +33,7 @@ class news {
   }
 
   static findOne(req, res) {
-    tbl_events.findByPk(Number(req.params.id))
+    tbl_contacts.findByPk(Number(req.params.id))
       .then(data => {
         res.status(200).json(data)
       })
@@ -45,8 +44,8 @@ class news {
   }
 
   static delete(req, res) {
-    tbl_events.destroy(
-      { where: { event_id: req.params.id } }
+    tbl_contacts.destroy(
+      { where: { contact_id: req.params.id } }
     )
       .then(() => {
         res.status(200).json({ info: "Delete Success" })
@@ -58,18 +57,13 @@ class news {
   }
 
   static update(req, res) {
-    let newData = {
-      event_name: req.body.event_name,
-      description: req.body.description,
-      start_date: req.body.start_date,
-      end_date: req.body.end_date,
-      location: req.body.location,
-      thumbnail: req.body.thumbnail,
-    }
-
-    tbl_events.update(newData, {
-      where: { event_id: Number(req.params.id) }
-    })
+    tbl_contacts.update(
+      {
+        status: req.body.status
+      }, {
+        where: { contact_id: Number(req.params.id) }
+      }
+    )
       .then(data => {
         res.status(200).json(data)
       })

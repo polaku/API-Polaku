@@ -2,19 +2,20 @@ const { tbl_polanews } = require('../models')
 
 class news {
   static create(req, res) {
-    tbl_polanews.create({
+    let newData = {
       title: req.body.title,
       description: req.body.description,
-      created_by: '1',
+      user_id: req.user.user_id,
       attachments: req.body.attachments,
       status: req.body.status
-    })
-      .then(({ dataValues }) => {
-        res.status(201).json(dataValues)
+    }
+
+    tbl_polanews.create(newData)
+      .then(data => {
+        res.status(201).json(data)
       })
       .catch(err => {
         res.status(500).json({ err })
-
         console.log(err);
       })
   }
@@ -55,16 +56,15 @@ class news {
   }
 
   static update(req, res) {
-    tbl_polanews.update(
-      {
-        title: req.body.title,
-        description: req.body.description,
-        attachments: req.body.attachments,
-        status: req.body.status
-      }, {
-        where: { polanews_id: Number(req.params.id) }
-      }
-    )
+    let newData = {
+      title: req.body.title,
+      description: req.body.description,
+      attachments: req.body.attachments,
+      status: req.body.status
+    }
+    tbl_polanews.update(newData, {
+      where: { polanews_id: Number(req.params.id) }
+    })
       .then(data => {
         res.status(200).json(data)
       })

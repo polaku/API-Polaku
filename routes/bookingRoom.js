@@ -1,5 +1,8 @@
 const router = require('express').Router()
 const bookingRoomController = require('../controllers/bookingRoom')
+const { authentication } = require('../middleware/auth')
+
+router.use(authentication)
 
 router.post('/', bookingRoomController.create)
 router.get('/', bookingRoomController.findAll)

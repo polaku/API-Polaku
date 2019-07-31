@@ -2,20 +2,21 @@ const { tbl_announcements } = require('../models')
 
 class announcements {
   static create(req, res) {
-    tbl_announcements.create({
+    let newData = {
       title: req.body.title,
       description: req.body.description,
-      user_id: '1',
+      user_id: req.user.user_id,
       attachment: req.body.attachment,
       start_date: req.body.startDate,
       end_date: req.body.endDate
-    })
-      .then(({ dataValues }) => {
-        res.status(201).json(dataValues)
+    }
+
+    tbl_announcements.create(newData)
+      .then(data => {
+        res.status(201).json(data)
       })
       .catch(err => {
         res.status(500).json({ err })
-
         console.log(err);
       })
   }
@@ -56,17 +57,17 @@ class announcements {
   }
 
   static update(req, res) {
-    tbl_announcements.update(
-      {
-        title: req.body.title,
-        description: req.body.description,
-        attachment: req.body.attachment,
-        start_date: req.body.startDate,
-        end_date: req.body.endDate
-      }, {
-        where: { announcements_id: Number(req.params.id) }
-      }
-    )
+    let newData = {
+      title: req.body.title,
+      description: req.body.description,
+      attachment: req.body.attachment,
+      start_date: req.body.startDate,
+      end_date: req.body.endDate
+    }
+
+    tbl_announcements.update(newData, {
+      where: { announcements_id: Number(req.params.id) }
+    })
       .then(data => {
         res.status(200).json(data)
       })
