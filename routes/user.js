@@ -8,5 +8,6 @@ router.post('/signin', userController.signin)
 router.use(authentication)
 
 router.get('/', userController.findAll)
+router.get('/changePassword', userController.changePassword)
 
 module.exports = router

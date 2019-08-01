@@ -49,6 +49,25 @@ class userController {
       })
   }
 
+  static changePassword(req, res) {
+    let newData
+
+    newData ={
+      password: hash(req.body.password)
+    }
+
+    tbl_users.update(newData, {
+      where: { user_id: Number(req.params.id) }
+    })
+    .then(data => {
+      res.status(200).json(data)
+    })
+    .catch(err => {
+      res.status(500).json({ err })
+      console.log(err);
+    })
+  }
+
 }
 
 module.exports = userController

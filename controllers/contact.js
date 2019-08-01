@@ -2,23 +2,29 @@ const { tbl_contacts } = require('../models')
 
 class news {
   static create(req, res) {
-    let newData = {
-      name: req.body.name,
-      email: req.user.email,
-      message: req.body.message,
-      contact_categories_id: req.body.contactCategoriesId,
-      company_id: req.body.company_id,
-      user_id: req.user.user_id,
-    }
+    let newData
 
-    tbl_contacts.create(newData)
-      .then(data => {
-        res.status(201).json(data)
-      })
-      .catch(err => {
-        res.status(500).json({ err })
-        console.log(err);
-      })
+    if (!req.body.name || !req.user.email || !req.body.message || !req.body.contactCategoriesId || !req.body.company_id) {
+      res.status(400).json({ error: 'Data not complite' })
+    } else {
+      newData = {
+        name: req.body.name,
+        email: req.user.email,
+        message: req.body.message,
+        contact_categories_id: req.body.contactCategoriesId,
+        company_id: req.body.company_id,
+        user_id: req.user.user_id,
+      }
+
+      tbl_contacts.create(newData)
+        .then(data => {
+          res.status(201).json(data)
+        })
+        .catch(err => {
+          res.status(500).json({ err })
+          console.log(err);
+        })
+    }
   }
 
   static findAll(req, res) {
