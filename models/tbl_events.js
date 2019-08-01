@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_events.associate = function (models) {
     // associations can be defined here
-    // tbl_events.belongsTo(models.User, {foreignKey : "user_id"})
+    tbl_events.belongsTo(models.tbl_users, { foreignKey: "user_id" })
   };
 
   return tbl_events;

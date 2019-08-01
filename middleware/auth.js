@@ -26,12 +26,16 @@ function authentication(req, res, next) {
 }
 
 function authorizationAnnouncement(req, res, next) {
-  tbl_announcements.findByPk(Number(req.params.id))
+  tbl_announcements.findByPk(req.params.id)
     .then(data => {
-      if (String(data.user_id) === String(req.user.user_id)) {
-        next()
+      if (data) {
+        if (String(data.user_id) === String(req.user.user_id)) {
+          next()
+        } else {
+          res.status(401).json({ message: 'Unauthorized' })
+        }
       } else {
-        res.status(401).json({ message: 'Unauthorized' })
+        res.status(400).json({ message: 'Data not found' })
       }
     })
     .catch(err => {
@@ -40,12 +44,16 @@ function authorizationAnnouncement(req, res, next) {
 }
 
 function authorizationBookingRoom(req, res, next) {
-  tbl_room_bookings.findByPk(Number(req.params.id))
+  tbl_room_bookings.findByPk(req.params.id)
     .then(data => {
-      if (String(data.user_id) === String(req.user.user_id)) {
-        next()
+      if (data) {
+        if (String(data.user_id) === String(req.user.user_id)) {
+          next()
+        } else {
+          res.status(401).json({ message: 'Unauthorized' })
+        }
       } else {
-        res.status(401).json({ message: 'Unauthorized' })
+        res.status(400).json({ message: 'Data not found' })
       }
     })
     .catch(err => {
@@ -54,12 +62,16 @@ function authorizationBookingRoom(req, res, next) {
 }
 
 function authorizationContact(req, res, next) {
-  tbl_contacts.findByPk(Number(req.params.id))
+  tbl_contacts.findByPk(req.params.id)
     .then(data => {
-      if (String(data.user_id) === String(req.user.user_id)) {
-        next()
+      if (data) {
+        if (String(data.user_id) === String(req.user.user_id)) {
+          next()
+        } else {
+          res.status(401).json({ message: 'Unauthorized' })
+        }
       } else {
-        res.status(401).json({ message: 'Unauthorized' })
+        res.status(400).json({ message: 'Data not found' })
       }
     })
     .catch(err => {
@@ -68,12 +80,16 @@ function authorizationContact(req, res, next) {
 }
 
 function authorizationEvent(req, res, next) {
-  tbl_events.findByPk(Number(req.params.id))
+  tbl_events.findByPk(req.params.id)
     .then(data => {
-      if (String(data.user_id) === String(req.user.user_id)) {
-        next()
+      if (data) {
+        if (String(data.user_id) === String(req.user.user_id)) {
+          next()
+        } else {
+          res.status(401).json({ message: 'Unauthorized' })
+        }
       } else {
-        res.status(401).json({ message: 'Unauthorized' })
+        res.status(400).json({ message: 'Data not found' })
       }
     })
     .catch(err => {
@@ -82,12 +98,16 @@ function authorizationEvent(req, res, next) {
 }
 
 function authorizationNews(req, res, next) {
-  tbl_polanews.findByPk(Number(req.params.id))
+  tbl_polanews.findByPk(req.params.id)
     .then(data => {
-      if (String(data.user_id) === String(req.user.user_id)) {
-        next()
+      if (data) {
+        if (String(data.user_id) === String(req.user.user_id)) {
+          next()
+        } else {
+          res.status(401).json({ message: 'Unauthorized' })
+        }
       } else {
-        res.status(401).json({ message: 'Unauthorized' })
+        res.status(400).json({ message: 'Data not found' })
       }
     })
     .catch(err => {
@@ -95,11 +115,11 @@ function authorizationNews(req, res, next) {
     })
 }
 
-module.exports = { 
-  authentication, 
-  authorizationAnnouncement, 
-  authorizationBookingRoom, 
-  authorizationContact, 
-  authorizationEvent, 
-  authorizationNews 
+module.exports = {
+  authentication,
+  authorizationAnnouncement,
+  authorizationBookingRoom,
+  authorizationContact,
+  authorizationEvent,
+  authorizationNews
 }

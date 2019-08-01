@@ -43,7 +43,12 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_users.associate = function (models) {
     // associations can be defined here
-    // tbl_users.belongsTo(models.User, {foreignKey : "user_id"})
+    tbl_users.hasMany(models.tbl_announcements, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_room_bookings, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_contacts, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_events, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_polanews, { foreignKey: "user_id" })
+    tbl_users.hasOne(models.tbl_account_details, { foreignKey: "user_id" })
   };
 
   return tbl_users;

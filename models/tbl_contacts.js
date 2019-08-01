@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_contacts.associate = function (models) {
     // associations can be defined here
-    // tbl_contacts.belongsTo(models.User, {foreignKey : "user_id"})
+    tbl_contacts.belongsTo(models.tbl_users, { foreignKey: "user_id" })
   };
 
   return tbl_contacts;

@@ -1,14 +1,15 @@
-const { tbl_contacts } = require('../models')
+const { tbl_contacts, tbl_account_details } = require('../models')
 
 class news {
-  static create(req, res) {
+  static async create(req, res) {
     let newData
 
-    if (!req.body.name || !req.user.email || !req.body.message || !req.body.contactCategoriesId || !req.body.company_id) {
+    if (!req.user.email || !req.body.message || !req.body.contactCategoriesId || !req.body.company_id) {
       res.status(400).json({ error: 'Data not complite' })
     } else {
+      let nameUser = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
       newData = {
-        name: req.body.name,
+        name: nameUser.fullname,
         email: req.user.email,
         message: req.body.message,
         contact_categories_id: req.body.contactCategoriesId,
@@ -18,7 +19,7 @@ class news {
 
       tbl_contacts.create(newData)
         .then(data => {
-          res.status(201).json(data)
+          res.status(201).json({ message: "Success", data })
         })
         .catch(err => {
           res.status(500).json({ err })
@@ -28,9 +29,9 @@ class news {
   }
 
   static findAll(req, res) {
-    tbl_contacts.findAll()
+    tbl_contacts.findAll({ include: [{ model: tbl_users }] })
       .then(data => {
-        res.status(200).json(data)
+        res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -39,9 +40,9 @@ class news {
   }
 
   static findOne(req, res) {
-    tbl_contacts.findByPk(Number(req.params.id))
+    tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }] })
       .then(data => {
-        res.status(200).json(data)
+        res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -54,7 +55,7 @@ class news {
       { where: { contact_id: req.params.id } }
     )
       .then(() => {
-        res.status(200).json({ info: "Delete Success" })
+        res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -67,11 +68,13 @@ class news {
       {
         status: req.body.status
       }, {
-        where: { contact_id: Number(req.params.id) }
+        where: { contact_id: req.params.id }
       }
     )
-      .then(data => {
-        res.status(200).json(data)
+      .then(async () => {
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+
+        res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
         res.status(500).json({ err })

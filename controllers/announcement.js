@@ -1,4 +1,4 @@
-const { tbl_announcements } = require('../models')
+const { tbl_announcements, tbl_users } = require('../models')
 
 class announcements {
   static create(req, res) {
@@ -33,10 +33,10 @@ class announcements {
 
           tbl_announcements.create(newData)
             .then(data => {
-              res.status(201).json(data)
+              res.status(201).json({ message: "Success", data })
             })
             .catch(err => {
-              res.status(500).json({ err })
+              res.status(500).json({ message: "error", err })
               console.log(err);
             })
         }
@@ -45,9 +45,9 @@ class announcements {
   }
 
   static findAll(req, res) {
-    tbl_announcements.findAll()
+    tbl_announcements.findAll({ include: [{ model: tbl_users }] })
       .then(data => {
-        res.status(200).json(data)
+        res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -56,9 +56,10 @@ class announcements {
   }
 
   static findOne(req, res) {
-    tbl_announcements.findByPk(Number(req.params.id))
-      .then(data => {
-        res.status(200).json(data)
+    tbl_announcements.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+      .then(async data => {
+        console.log(data);
+        res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -71,7 +72,7 @@ class announcements {
       { where: { announcements_id: req.params.id } }
     )
       .then(() => {
-        res.status(200).json({ info: "Delete Success" })
+        res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -109,10 +110,12 @@ class announcements {
           }
 
           tbl_announcements.update(newData, {
-            where: { announcements_id: Number(req.params.id) }
+            where: { announcements_id: req.params.id }, returning: true
           })
-            .then(data => {
-              res.status(200).json(data)
+            .then(async () => {
+              let dataReturning = await tbl_announcements.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+
+              res.status(200).json({ message: "Success", data: dataReturning })
             })
             .catch(err => {
               res.status(500).json({ err })

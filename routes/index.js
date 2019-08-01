@@ -12,6 +12,6 @@ router.use('/news', news)
 router.use('/bookingRoom', bookingRoom)
 router.use('/events', event)
 router.use('/users', user)
-router.use('/contact', contact)
+router.use('/contactUs', contact)
 
 module.exports = router

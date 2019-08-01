@@ -50,7 +50,7 @@ class bookingRoom {
 
                 tbl_room_bookings.create(newData)
                   .then(data => {
-                    res.status(201).json(data)
+                    res.status(201).json({ message: "Success", data })
                   })
                   .catch(err => {
                     res.status(500).json({ err })
@@ -71,9 +71,9 @@ class bookingRoom {
   }
 
   static findAll(req, res) {
-    tbl_room_bookings.findAll()
+    tbl_room_bookings.findAll({ include: [{ model: tbl_users }] })
       .then(data => {
-        res.status(200).json(data)
+        res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -82,9 +82,9 @@ class bookingRoom {
   }
 
   static findOne(req, res) {
-    tbl_room_bookings.findByPk(Number(req.params.id))
+    tbl_room_bookings.findByPk(req.params.id, { include: [{ model: tbl_users }] })
       .then(data => {
-        res.status(200).json(data)
+        res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -97,7 +97,7 @@ class bookingRoom {
       { where: { room_booking_id: req.params.id } }
     )
       .then(() => {
-        res.status(200).json({ info: "Delete Success" })
+        res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -135,7 +135,7 @@ class bookingRoom {
 
           try {
 
-            roomId = await tbl_room_bookings.findByPk(Number(req.params.id))
+            roomId = await tbl_room_bookings.findByPk(req.params.id, { include: [{ model: tbl_users }] })
             room = await tbl_rooms.findByPk(roomId.room_id)
             console.log(room);
 
@@ -150,10 +150,12 @@ class bookingRoom {
                 }
 
                 tbl_room_bookings.update(newData, {
-                  where: { room_booking_id: Number(req.params.id) }
+                  where: { room_booking_id: req.params.id }
                 })
-                  .then(data => {
-                    res.status(200).json(data)
+                  .then(async () => {
+                    let dataReturning = await tbl_room_bookings.findByPk(req.params.id)
+
+                    res.status(200).json({ message: "Success", data: dataReturning })
                   })
                   .catch(err => {
                     res.status(500).json({ err })

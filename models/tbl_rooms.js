@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_rooms.associate = function (models) {
     // associations can be defined here
-    // tbl_rooms.belongsTo(models.User, {foreignKey : "user_id"})
+    tbl_rooms.hasMany(models.tbl_room_bookings, { foreignKey: "room_id" })
   };
 
   return tbl_rooms;

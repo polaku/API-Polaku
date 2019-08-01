@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_polanews.associate = function (models) {
     // associations can be defined here
-    // tbl_polanews.belongsTo(models.User, {foreignKey : "user_id"})
+    tbl_polanews.belongsTo(models.tbl_users, { foreignKey: "user_id" })
   };
 
   return tbl_polanews;

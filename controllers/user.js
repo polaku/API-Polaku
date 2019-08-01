@@ -12,7 +12,7 @@ class userController {
 
     tbl_users.create(newData)
       .then(data => {
-        res.status(201).json(data)
+        res.status(201).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -25,7 +25,7 @@ class userController {
         if (userFound) {
           if (compare(req.body.password, userFound.password)) {
             let token = sign({ user_id: userFound.user_id })
-            res.status(200).json({ token, username: userFound.username })
+            res.status(200).json({ message: "Success", token, username: userFound.username })
           } else {
             res.status(400).json({ msg: "Bad request1" })
           }
@@ -41,7 +41,7 @@ class userController {
   static findAll(req, res) {
     tbl_users.findAll()
       .then(data => {
-        res.status(200).json(data)
+        res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -52,20 +52,22 @@ class userController {
   static changePassword(req, res) {
     let newData
 
-    newData ={
+    newData = {
       password: hash(req.body.password)
     }
 
     tbl_users.update(newData, {
-      where: { user_id: Number(req.params.id) }
+      where: { user_id: Number(req.user.user_id) }
     })
-    .then(data => {
-      res.status(200).json(data)
-    })
-    .catch(err => {
-      res.status(500).json({ err })
-      console.log(err);
-    })
+      .then(async () => {
+        let dataReturning = await tbl_users.findByPk(req.user.user_id)
+
+        res.status(200).json({ message: "Success", data: dataReturning })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
   }
 
 }
