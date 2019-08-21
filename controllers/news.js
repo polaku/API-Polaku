@@ -1,4 +1,4 @@
-const { tbl_polanews } = require('../models')
+const { tbl_polanews, tbl_users } = require('../models')
 
 class news {
   static create(req, res) {
@@ -27,7 +27,12 @@ class news {
   }
 
   static findAll(req, res) {
-    tbl_polanews.findAll({ include: [{ model: tbl_users }] })
+    tbl_polanews.findAll({
+      include: [{ model: tbl_users }],
+      order: [
+        ['created_at', 'DESC']
+      ],
+    })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })

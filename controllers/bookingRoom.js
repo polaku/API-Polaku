@@ -1,8 +1,9 @@
-const { tbl_room_bookings, tbl_rooms } = require('../models')
+const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_detail } = require('../models')
 
 class bookingRoom {
   static async create(req, res) {
-    let dateIn, timeIn, timeOut, room, newData
+    let dateIn, timeIn, timeOut, room, newData, data_bookingRoomSelected,
+      statusInvalid = false
 
     if (!req.body.room_id || !req.body.date_in || !req.body.time_in || !req.body.time_out || !req.body.subject || !req.body.count) {
       res.status(400).json({ error: 'Data not complite' })
@@ -17,61 +18,94 @@ class bookingRoom {
         timeIn = req.body.time_in.split(':')
         timeOut = req.body.time_out.split(':')
 
-        //Validation Time in and Time Out
-        if (Number(timeIn[0]) < 8) {
-          res.status(400).json({ error: 'Time in must higher than 8' })
-        } else if (Number(timeIn[0]) > 17) {
-          res.status(400).json({ error: 'Time in must smaller than 17' })
-        } else if (Number(timeOut[0]) < 8) {
-          res.status(400).json({ error: `Time out must higher than ${Number(timeIn[0])}` })
-        } else if (Number(timeOut[0]) > 17) {
-          res.status(400).json({ error: 'Limit time out is 17' })
-        } else if (Number(timeIn[0]) > Number(timeOut[0])) {
-          res.status(400).json({ error: 'Time out must be higher than time in' })
-        } else if ((Number(dateIn[1]) == Number(new Date().getMonth() + 1) && Number(dateIn[2]) < Number(new Date().getDate())) && Number(timeIn[0]) < new Date().getHours()) {
-          res.status(400).json({ error: `Time in must higher than ${new Date().getHours()}` })
+        //Validation time
+        data_bookingRoomSelected = await tbl_room_bookings.findAll()
+
+        data_bookingRoomSelected = data_bookingRoomSelected.filter(el => {
+          return el.date_in === req.body.date_in
+        })
+
+        data_bookingRoomSelected.forEach(el => {
+          let everyTimeIn, everyTimeOut
+          everyTimeIn = el.time_in.split(':')
+          everyTimeOut = el.time_out.split(':')
+
+          if (
+            (Number(everyTimeIn[0]) < Number(timeIn[0]) && Number(timeIn[0]) < Number(everyTimeOut[0])) ||
+            (Number(everyTimeIn[0]) < Number(timeOut[0]) && Number(timeOut[0]) < Number(everyTimeOut[0])) ||
+            Number(everyTimeIn[0]) === Number(timeIn[0]) || 
+            Number(timeOut[0]) === Number(everyTimeOut[0])
+          ) {
+            statusInvalid = true
+          }
+        })
+
+        if (statusInvalid) {
+          res.status(400).json({ message: 'Error Time', info: 'Waktu yang pesan sudah terpesan oleh orang lain, harap menentukan waktu yang lain' })
         } else {
 
-          try {
-            room = await tbl_rooms.findByPk(Number(req.body.room_id))
-            console.log(room);
+          //Validation Time in and Time Out
+          if (Number(timeIn[0]) < 8) {
+            res.status(400).json({ error: 'Time in must higher than 8' })
+          } else if (Number(timeIn[0]) > 17) {
+            res.status(400).json({ error: 'Time in must smaller than 17' })
+          } else if (Number(timeOut[0]) < 8) {
+            res.status(400).json({ error: `Time out must higher than ${Number(timeIn[0])}` })
+          } else if (Number(timeOut[0]) > 17) {
+            res.status(400).json({ error: 'Limit time out is 17' })
+          } else if (Number(timeIn[0]) > Number(timeOut[0])) {
+            res.status(400).json({ error: 'Time out must be higher than time in' })
+          } else if ((Number(dateIn[1]) == Number(new Date().getMonth() + 1) && Number(dateIn[2]) < Number(new Date().getDate())) && Number(timeIn[0]) < new Date().getHours()) {
+            res.status(400).json({ error: `Time in must higher than ${new Date().getHours()}` })
+          } else {
 
-            if (room) {
-              if (room.max >= req.body.count) {
-                newData = {
-                  room_id: req.body.room_id,
-                  date_in: req.body.date_in,
-                  time_in: req.body.time_in,
-                  time_out: req.body.time_out,
-                  subject: req.body.subject,
-                  user_id: req.user.user_id,
-                  count: req.body.count
+            try {
+              room = await tbl_rooms.findByPk(Number(req.body.room_id))
+              console.log(room);
+
+              if (room) {
+                if (room.max >= req.body.count) {
+                  newData = {
+                    room_id: req.body.room_id,
+                    date_in: req.body.date_in,
+                    time_in: req.body.time_in,
+                    time_out: req.body.time_out,
+                    subject: req.body.subject,
+                    user_id: req.user.user_id,
+                    count: req.body.count
+                  }
+
+                  tbl_room_bookings.create(newData)
+                    .then(data => {
+                      res.status(201).json({ message: "Success", data })
+                    })
+                    .catch(err => {
+                      res.status(500).json({ err })
+                      console.log(err);
+                    })
+                } else {
+                  res.status(400).json({ error: 'Total person too much' })
                 }
-
-                tbl_room_bookings.create(newData)
-                  .then(data => {
-                    res.status(201).json({ message: "Success", data })
-                  })
-                  .catch(err => {
-                    res.status(500).json({ err })
-                    console.log(err);
-                  })
               } else {
-                res.status(400).json({ error: 'Total person too much' })
+                res.status(400).json({ error: 'Bad request!' })
               }
-            } else {
-              res.status(400).json({ error: 'Bad request!' })
+            } catch (err) {
+              res.status(500).json(err)
             }
-          } catch (err) {
-            res.status(500).json(err)
           }
         }
+
       }
     }
   }
 
-  static findAll(req, res) {
-    tbl_room_bookings.findAll({ include: [{ model: tbl_users }] })
+  static findAllBookingRooms(req, res) {
+    tbl_room_bookings.findAll({ include: [{ model: tbl_users }],
+      order: [
+      ['date_in', 'ASC'],
+      ['time_in', 'ASC'],
+  ],
+})
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })
@@ -175,6 +209,73 @@ class bookingRoom {
     }
   }
 
+  static findAllRooms(req, res) {
+    tbl_rooms.findAll()
+      .then(data => {
+        res.status(200).json({ message: "Success", data })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
+  }
+
+  static findAllRoomsInMonth(req, res) {
+    tbl_room_bookings.findAll({
+      where: { room_id: req.params.idRoom },
+      include: [{ model: tbl_users }],
+      order: [
+        ['date_in', 'ASC'],
+        ['time_in', 'ASC']
+      ],
+    })
+      .then(data => {
+        let temp = []
+        data.forEach(element => {
+          let date_in = element.date_in.split('-')
+          if (Number(date_in[1]) === Number(req.params.month)) {
+            temp.push(element)
+          }
+        });
+        res.status(200).json({ message: "Success", data: temp })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
+  }
+
+  static findAllMyRoomsInMonth(req, res) {
+    tbl_room_bookings.findAll({
+      where: { room_id: req.params.idRoom, user_id: req.user.user_id },
+      include: [{ model: tbl_users }]
+    })
+      .then(data => {
+        let temp = []
+        data.forEach(element => {
+          let date_in = element.date_in.split('-')
+          if (Number(date_in[1]) === Number(req.params.month)) {
+            temp.push(element)
+          }
+        });
+        res.status(200).json({ message: "Success", data: temp })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
+  }
+
+  static findListRoom(req, res) {
+    tbl_rooms.findAll()
+      .then(data => {
+        res.status(200).json({ message: "Success", data })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
+  }
 }
 
 module.exports = bookingRoom

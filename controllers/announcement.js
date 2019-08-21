@@ -45,7 +45,12 @@ class announcements {
   }
 
   static findAll(req, res) {
-    tbl_announcements.findAll({ include: [{ model: tbl_users }] })
+    tbl_announcements.findAll({
+      include: [{ model: tbl_users }],
+      order: [
+        ['created_date', 'DESC']
+      ],
+    })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })

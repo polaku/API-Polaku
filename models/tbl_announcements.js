@@ -15,13 +15,14 @@ module.exports = (sequelize, DataTypes) => {
     all_client: DataTypes.STRING,
     attachment: DataTypes.STRING,
     thumbnail: DataTypes.STRING,
+    created_date: DataTypes.DATE,
   }, {
       timestamps: false,
     });
   tbl_announcements.removeAttribute('id');
 
   tbl_announcements.associate = function (models) {
-    // associations can be defined here
+    // associations can be defitbl_usersned here
     tbl_announcements.belongsTo(models.tbl_users, { foreignKey: "user_id" })
   };
 

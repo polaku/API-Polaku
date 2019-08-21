@@ -7,6 +7,9 @@ const event = require('../routes/event')
 const user = require('../routes/user')
 const contact = require('../routes/contact')
 
+router.get('/', (req, res)=>{
+    res.send('Welcome to server polaku')
+})
 router.use('/announcement', announcement)
 router.use('/news', news)
 router.use('/bookingRoom', bookingRoom)

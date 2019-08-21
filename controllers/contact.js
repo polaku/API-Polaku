@@ -1,4 +1,4 @@
-const { tbl_contacts, tbl_account_details } = require('../models')
+const { tbl_contacts, tbl_account_details, tbl_users, tbl_contact_categories } = require('../models')
 
 class news {
   static async create(req, res) {
@@ -29,7 +29,7 @@ class news {
   }
 
   static findAll(req, res) {
-    tbl_contacts.findAll({ include: [{ model: tbl_users }] })
+    tbl_contacts.findAll({ include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })
@@ -40,7 +40,7 @@ class news {
   }
 
   static findOne(req, res) {
-    tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+    tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })
@@ -72,7 +72,7 @@ class news {
       }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
 
         res.status(200).json({ message: "Success", data: dataReturning })
       })

@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     company_id: DataTypes.INTEGER,
     user_id: DataTypes.INTEGER,
     status: DataTypes.STRING,
+    created: DataTypes.DATE
   }, {
       timestamps: false,
     });
@@ -20,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
   tbl_contacts.associate = function (models) {
     // associations can be defined here
     tbl_contacts.belongsTo(models.tbl_users, { foreignKey: "user_id" })
+    tbl_contacts.belongsTo(models.tbl_contact_categories, { foreignKey: "contact_categories_id" })
   };
 
   return tbl_contacts;

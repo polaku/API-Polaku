@@ -7,10 +7,11 @@ router.use(authentication)
 
 router.post('/', upload.single('thumbnail'), eventController.create)
 router.get('/', eventController.findAll)
+router.post('/follow', eventController.followEvent)
+router.get('/myevents', eventController.findAllByMe)
 router.get('/:id', eventController.findOne)
 
 router.use('/:id',authorizationEvent)
-
 router.delete('/:id', eventController.delete)
 router.put('/:id', upload.single('thumbnail'), eventController.update)
 
