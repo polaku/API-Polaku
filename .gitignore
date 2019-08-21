@@ -1,3 +1,7 @@
 node_modules
 uploads
+<<<<<<< HEAD
 public
+=======
+.env
+>>>>>>> ad8e6832496191135d0bd0ab22d58643232fca72
