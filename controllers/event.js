@@ -1,10 +1,10 @@
-const { tbl_events, tbl_users, tbl_event_responses } = require('../models')
+const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details } = require('../models')
 
-class news {
+class event {
   static create(req, res) {
     let newData, startDate, endDate
 
-    if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location || !req.body.thumbnail) {
+    if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
       res.status(400).json({ error: 'Data not complite' })
     } else {
       startDate = req.body.start_date.split('-')
@@ -15,17 +15,16 @@ class news {
       } else if (Number(endDate[2]) > 31 || Number(endDate[2]) < 1 || Number(endDate[1]) > 12 || Number(endDate[1]) < 1 || Number(endDate[1]) < Number(new Date().getMonth() + 1) || (Number(endDate[1]) == Number(new Date().getMonth() + 1) && Number(endDate[2]) < Number(new Date().getDate())) || Number(endDate[2]) < Number(startDate[2])) {
         res.status(400).json({ error: 'End date invalid' })
       } else {
-        console.log(req.body.thumbnail);
-        
         newData = {
           event_name: req.body.event_name,
           description: req.body.description,
           start_date: req.body.start_date,
           end_date: req.body.end_date,
           location: req.body.location,
-          thumbnail: req.body.thumbnail,
           user_id: req.user.user_id,
         }
+
+        if (req.file) newData.thumbnail = req.file.path
 
         tbl_events.create(newData)
           .then(async (data) => {
@@ -52,9 +51,13 @@ class news {
 
   static findAll(req, res) {
     tbl_events.findAll({
-      include: [{ model: tbl_users }],
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }],
       order: [
-        ['start_date', 'ASC']
+        ['start_date', 'ASC'],
+        ['created_at', 'DESC']
       ],
     })
       .then(data => {
@@ -69,7 +72,12 @@ class news {
   }
 
   static findOne(req, res) {
-    tbl_events.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+    tbl_events.findByPk(req.params.id, {
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }]
+    })
       .then(async (data) => {
         let user = tbl_users.findByPk(data.user_id)
         res.status(200).json({ message: "Success", data })
@@ -96,7 +104,7 @@ class news {
   static update(req, res) {
     let newData
 
-    if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location || !req.body.thumbnail) {
+    if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
       res.status(400).json({ error: 'Data not complite' })
     } else {
       if (Number(startDate[2]) > 31 || Number(startDate[2]) < 1 || Number(startDate[1]) > 12 || Number(startDate[1]) < 1 || Number(startDate[1]) < Number(new Date().getMonth() + 1) || Number(startDate[1]) == Number(new Date().getMonth() + 1) && Number(startDate[2]) < Number(new Date().getDate())) {
@@ -110,14 +118,20 @@ class news {
           start_date: req.body.start_date,
           end_date: req.body.end_date,
           location: req.body.location,
-          thumbnail: req.body.thumbnail,
         }
+
+        if (req.file) newData.thumbnail = req.file.path
 
         tbl_events.update(newData, {
           where: { event_id: req.params.id }
         })
           .then(async () => {
-            let dataReturning = await tbl_events.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+            let dataReturning = await tbl_events.findByPk(req.params.id, {
+              include: [{
+                model: tbl_users,
+                include: [{ model: tbl_account_details }]
+              }],
+            })
 
             res.status(200).json({ message: "Success", data: dataReturning })
           })
@@ -132,7 +146,10 @@ class news {
   static findAllByMe(req, res) {
     tbl_events.findAll({
       where: { user_id: req.user.user_id },
-      include: [{ model: tbl_users }],
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }],
       order: [
         ['start_date', 'ASC']
       ],
@@ -149,7 +166,8 @@ class news {
               user_id: req.user.user_id,
             }
           }, {
-            model: tbl_users
+            model: tbl_users,
+            include: [{ model: tbl_account_details }]
           }]
         })
         res.status(200).json({ message: "Success", data, dataFollowing: datas })
@@ -161,6 +179,8 @@ class news {
   }
 
   static followEvent(req, res) {
+    console.log(req.body.response);
+
     tbl_event_responses.findOne({
       where: {
         event_id: req.body.event_id,
@@ -178,6 +198,8 @@ class news {
             }
           })
             .then(data => {
+              console.log(data);
+
               res.status(201).json({ message: "Success Change", data })
             })
         } else {
@@ -203,4 +225,4 @@ class news {
 
 }
 
-module.exports = news
+module.exports = event

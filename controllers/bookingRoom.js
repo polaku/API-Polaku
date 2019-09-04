@@ -1,4 +1,4 @@
-const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_detail } = require('../models')
+const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_details } = require('../models')
 
 class bookingRoom {
   static async create(req, res) {
@@ -33,7 +33,7 @@ class bookingRoom {
           if (
             (Number(everyTimeIn[0]) < Number(timeIn[0]) && Number(timeIn[0]) < Number(everyTimeOut[0])) ||
             (Number(everyTimeIn[0]) < Number(timeOut[0]) && Number(timeOut[0]) < Number(everyTimeOut[0])) ||
-            Number(everyTimeIn[0]) === Number(timeIn[0]) || 
+            Number(everyTimeIn[0]) === Number(timeIn[0]) ||
             Number(timeOut[0]) === Number(everyTimeOut[0])
           ) {
             statusInvalid = true
@@ -100,12 +100,16 @@ class bookingRoom {
   }
 
   static findAllBookingRooms(req, res) {
-    tbl_room_bookings.findAll({ include: [{ model: tbl_users }],
+    tbl_room_bookings.findAll({
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }],
       order: [
-      ['date_in', 'ASC'],
-      ['time_in', 'ASC'],
-  ],
-})
+        ['date_in', 'ASC'],
+        ['time_in', 'ASC'],
+      ],
+    })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })
@@ -116,7 +120,12 @@ class bookingRoom {
   }
 
   static findOne(req, res) {
-    tbl_room_bookings.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+    tbl_room_bookings.findByPk(req.params.id, {
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }]
+    })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })
@@ -169,7 +178,12 @@ class bookingRoom {
 
           try {
 
-            roomId = await tbl_room_bookings.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+            roomId = await tbl_room_bookings.findByPk(req.params.id, {
+              include: [{
+                model: tbl_users,
+                include: [{ model: tbl_account_details }]
+              }]
+            })
             room = await tbl_rooms.findByPk(roomId.room_id)
             console.log(room);
 
@@ -223,7 +237,10 @@ class bookingRoom {
   static findAllRoomsInMonth(req, res) {
     tbl_room_bookings.findAll({
       where: { room_id: req.params.idRoom },
-      include: [{ model: tbl_users }],
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }],
       order: [
         ['date_in', 'ASC'],
         ['time_in', 'ASC']
@@ -248,7 +265,10 @@ class bookingRoom {
   static findAllMyRoomsInMonth(req, res) {
     tbl_room_bookings.findAll({
       where: { room_id: req.params.idRoom, user_id: req.user.user_id },
-      include: [{ model: tbl_users }]
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }]
     })
       .then(data => {
         let temp = []

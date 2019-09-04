@@ -2,10 +2,15 @@
   "development": {
     "username": "root",
     "password": "Testing123.",
-    "database": "dumy_polagroup",
+    "database": "dump_polagroup_polaku",
     "host": "localhost",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "operatorsAliases": "Op",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    }
   },
   "test": {
     "username": "root",

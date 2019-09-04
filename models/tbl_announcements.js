@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     all_client: DataTypes.STRING,
     attachment: DataTypes.STRING,
     thumbnail: DataTypes.STRING,
-    created_date: DataTypes.DATE,
+    created_at: DataTypes.DATE,
+    highlight: DataTypes.INTEGER
   }, {
       timestamps: false,
     });

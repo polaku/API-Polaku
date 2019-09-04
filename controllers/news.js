@@ -2,7 +2,12 @@ const { tbl_polanews, tbl_users } = require('../models')
 
 class news {
   static create(req, res) {
-    let newData
+    let newData, attachment, thumbnail
+
+    if (req.files.length != 0) {
+      attachment = req.files.find(el => el.mimetype === 'application/pdf')
+      thumbnail = req.files.find(el => el.mimetype != 'application/pdf')
+    }
 
     if (!req.body.title || !req.body.description) {
       res.status(400).json({ error: 'Data not complite' })
@@ -11,9 +16,11 @@ class news {
         title: req.body.title,
         description: req.body.description,
         user_id: req.user.user_id,
-        attachments: req.body.attachments,
         status: req.body.status
       }
+
+      if (attachment) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
+      if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
 
       tbl_polanews.create(newData)
         .then(data => {
@@ -67,14 +74,22 @@ class news {
   }
 
   static update(req, res) {
-    let newData
+    let newData, attachment, thumbnail
+
+    if (req.files.length != 0) {
+      attachment = req.files.find(el => el.mimetype === 'application/pdf')
+      thumbnail = req.files.find(el => el.mimetype != 'application/pdf')
+    }
 
     newData = {
       title: req.body.title,
       description: req.body.description,
-      attachments: req.body.attachments,
       status: req.body.status
     }
+
+    if (attachments) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
+    if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+
     tbl_polanews.update(newData, {
       where: { polanews_id: req.params.id }
     })

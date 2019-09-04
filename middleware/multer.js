@@ -2,18 +2,20 @@ const multer = require('multer')
 const path = require('path')
 
 const storage = multer.diskStorage({
-  destination: './public/uploads/',
+  destination: './uploads/',
   filename: function (req, file, cb) {
-    let mimetype = file.mimetype.split('/')
-
-    cb(null, file.fieldname + '-' + Date.now())
-    path.extname(file.originalname)
-    req.body[file.fieldname] = `/public/uploads/${file.fieldname}-` + Date.now() + '.' + mimetype[1]
+    cb(null, Date.now() + '-' + file.originalname )
+    // path.extname(file.originalname)
+    // req.body[file.fieldname] = `public/uploads/${file.fieldname}-` + Date.now() + '.' + mimetype[1]
   }
 })
 
-const upload = multer({
+const uploadAny = multer({
   storage: storage
 })
 
-module.exports = { upload }
+const uploadSingle = multer({
+  storage: storage
+})
+
+module.exports = { uploadAny, uploadSingle }

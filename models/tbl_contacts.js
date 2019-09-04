@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     message: DataTypes.STRING,
     contact_categories_id: DataTypes.INTEGER,
     company_id: DataTypes.INTEGER,
-    created: DataTypes.DATE,
+    categori_id: DataTypes.INTEGER,
+    created_at: DataTypes.DATE,
     user_id: DataTypes.INTEGER,
     created_expired_date: DataTypes.DATE,
     assigned_date: DataTypes.DATE,
@@ -39,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     tbl_contacts.belongsTo(models.tbl_users, { foreignKey: "user_id" })
     tbl_contacts.belongsTo(models.tbl_contact_categories, { foreignKey: "contact_categories_id" })
+    tbl_contacts.belongsTo(models.tbl_categories, { foreignKey: "categori_id" })
   };
 
   return tbl_contacts;

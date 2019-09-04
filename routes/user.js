@@ -4,6 +4,7 @@ const { authentication } = require('../middleware/auth')
 
 router.post('/signup', userController.signup)
 router.post('/signin', userController.signin)
+router.get('/:id', userController.findOne)
 
 router.use(authentication)
 

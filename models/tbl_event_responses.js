@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     event_id: DataTypes.INTEGER,
     user_id: DataTypes.INTEGER,
     response: DataTypes.INTEGER,
-    created: DataTypes.DATE
+    created_at: DataTypes.DATE
   }, {
       timestamps: false,
     });

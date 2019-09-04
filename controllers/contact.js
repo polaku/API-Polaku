@@ -7,16 +7,25 @@ class news {
     let nameUser = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
     console.log(nameUser);
 
+    console.log(req.body)
+
     newData = {
       name: nameUser.fullname,
       email: req.user.email,
       message: req.body.message,
       contact_categories_id: req.body.contactCategoriesId,
+      categori_id: req.body.categoriId,
       company_id: nameUser.company_id,
       user_id: req.user.user_id,
       created_expired_date: new Date().setDate(new Date().getDate() + 1),
       subject: req.body.subject,
-      type: req.body.type
+      type: req.body.type,
+      design_style: req.body.designStyle,
+      design_to: req.body.tujuan,
+      design_type: req.body.desainType,
+      design_size: req.body.ukuran,
+      design_other_specs: req.body.otherSpecs,
+      design_deadline: req.body.deadline,
     }
 
     tbl_contacts.create(newData)
@@ -32,9 +41,9 @@ class news {
   static findAll(req, res) {
     tbl_contacts.findAll({
       where: { user_id: req.user.user_id },
-      include: [{ model: tbl_users }, { model: tbl_contact_categories }],
+      include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }],
       order: [
-        ['created', 'DESC'],
+        ['created_at', 'DESC'],
         ['assigned_date', 'DESC'],
         ['taken_date', 'DESC'],
         ['done_date', 'DESC'],
@@ -51,7 +60,7 @@ class news {
   }
 
   static findOne(req, res) {
-    tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
+    tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })
@@ -83,7 +92,7 @@ class news {
       }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
 
         res.status(200).json({ message: "Success", data: dataReturning })
       })
@@ -104,7 +113,7 @@ class news {
       }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
 
         res.status(200).json({ message: "Success", data: dataReturning })
       })
@@ -125,7 +134,7 @@ class news {
       }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
 
         res.status(200).json({ message: "Success", data: dataReturning })
       })
@@ -146,7 +155,7 @@ class news {
       }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
 
         res.status(200).json({ message: "Success", data: dataReturning })
       })
@@ -165,7 +174,7 @@ class news {
       }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
 
         res.status(200).json({ message: "Success", data: dataReturning })
       })
@@ -185,7 +194,7 @@ class news {
       }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
 
         res.status(200).json({ message: "Success", data: dataReturning })
       })
