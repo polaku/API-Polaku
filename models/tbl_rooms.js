@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     room: DataTypes.STRING,
     max: DataTypes.INTEGER,
-    company_id: DataTypes.INTEGER,
-    // fasilities: DataTypes.STRING,
+    building_id: DataTypes.INTEGER,
+    facilities: DataTypes.STRING,
 		thumbnail: DataTypes.STRING,
   }, {
       timestamps: false,
@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   tbl_rooms.associate = function (models) {
     // associations can be defined here
     tbl_rooms.hasMany(models.tbl_room_bookings, { foreignKey: "room_id" })
+    tbl_rooms.belongsTo(models.tbl_buildings, { foreignKey: "building_id" })
   };
 
   return tbl_rooms;

@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.INTEGER,
     thumbnail: DataTypes.STRING,
     user_id: DataTypes.INTEGER,
-    created_at: DataTypes.DATE
+    created_at: DataTypes.DATE,
+    keterangan: DataTypes.STRING
   }, {
       timestamps: false,
     });
@@ -24,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     tbl_events.belongsTo(models.tbl_users, { foreignKey: "user_id" })
     tbl_events.hasMany(models.tbl_event_responses, { foreignKey: "event_id" })
+    tbl_events.hasMany(models.tbl_event_invites, { foreignKey: "event_id" })
   };
 
   return tbl_events;

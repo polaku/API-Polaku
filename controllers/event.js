@@ -1,18 +1,23 @@
-const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details } = require('../models')
+const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details, tbl_master_creators, tbl_event_invites, tbl_designations, tbl_departments, tbl_notifications } = require('../models')
+const { mailOptions, transporter } = require('../helpers/nodemailer')
+const kue = require('kue')
+const queue = kue.createQueue()
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op;
 
 class event {
-  static create(req, res) {
+  static async create(req, res) {
     let newData, startDate, endDate
 
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
       res.status(400).json({ error: 'Data not complite' })
     } else {
-      startDate = req.body.start_date.split('-')
-      endDate = req.body.end_date.split('-')
+      startDate = req.body.start_date
+      endDate = req.body.end_date
 
-      if (Number(startDate[2]) > 31 || Number(startDate[2]) < 1 || Number(startDate[1]) > 12 || Number(startDate[1]) < 1 || Number(startDate[1]) < Number(new Date().getMonth() + 1) || Number(startDate[1]) == Number(new Date().getMonth() + 1) && Number(startDate[2]) < Number(new Date().getDate())) {
+      if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
         res.status(400).json({ error: 'Start date invalid' })
-      } else if (Number(endDate[2]) > 31 || Number(endDate[2]) < 1 || Number(endDate[1]) > 12 || Number(endDate[1]) < 1 || Number(endDate[1]) < Number(new Date().getMonth() + 1) || (Number(endDate[1]) == Number(new Date().getMonth() + 1) && Number(endDate[2]) < Number(new Date().getDate())) || Number(endDate[2]) < Number(startDate[2])) {
+      } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
         res.status(400).json({ error: 'End date invalid' })
       } else {
         newData = {
@@ -28,18 +33,71 @@ class event {
 
         tbl_events.create(newData)
           .then(async (data) => {
-            console.log("YANG INI", data.null);
             let findNew = await tbl_events.findByPk(data.null)
             res.status(201).json({ message: "Success", data: findNew })
 
             let newData = {
               event_id: data.null,
               user_id: req.user.user_id,
-              response: 'created' //join, not join, cancel join
+              response: 'created', //join, not join, cancel join
+              creator: 1
             }
 
             await tbl_event_responses.create(newData)
 
+            try {
+              if (req.body.option === 'default') {
+                let dataCreator = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+                let newData = {
+                  event_id: data.null,
+                  option: 'company',
+                  company_id: dataCreator.company_id
+                }
+                await tbl_event_invites.create(newData)
+
+              } else if (req.body.option === 'all') {
+                let newData = {
+                  event_id: data.null,
+                  option: 'all',
+                }
+                await tbl_event_invites.create(newData)
+              } else if (req.body.option === 'company') {
+
+                console.log("MASUK COMPANY")
+
+                req.body.invited = JSON.parse(req.body.invited)
+                req.body.invited.forEach(async element => {
+                  let newData = {
+                    event_id: data.null,
+                    option: 'company',
+                    company_id: element
+                  }
+                  await tbl_event_invites.create(newData)
+                });
+              } else if (req.body.option === 'department') {
+                req.body.invited = JSON.parse(req.body.invited)
+                req.body.invited.forEach(async element => {
+                  let newData = {
+                    event_id: data.null,
+                    option: 'department',
+                    departments_id: element
+                  }
+                  await tbl_event_invites.create(newData)
+                });
+              } else if (req.body.option === 'user') {
+                req.body.invited = JSON.parse(req.body.invited)
+                req.body.invited.forEach(async element => {
+                  let newData = {
+                    event_id: data.null,
+                    option: 'user',
+                    user_id: element
+                  }
+                  await tbl_event_invites.create(newData)
+                });
+              }
+            } catch (err) {
+              console.log(err)
+            }
           })
           .catch(err => {
             res.status(500).json({ err })
@@ -49,8 +107,52 @@ class event {
     }
   }
 
-  static findAll(req, res) {
+  static async findAll(req, res) {
+    let paraPegawai = await tbl_account_details.findOne({
+      where: { user_id: req.user.user_id },
+      include: [{
+        model: tbl_designations,
+      }]
+    })
+
     tbl_events.findAll({
+      where: {
+        end_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` },
+        status: 1
+      },
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }, {
+        model: tbl_event_invites,
+        where: {
+          [Op.or]: [
+            { option: 'all' },
+            { option: 'company', company_id: paraPegawai.company_id },
+            { option: 'department', departments_id: paraPegawai.tbl_designation.departments_id },
+            { option: 'user', user_id: req.user.user_id }
+          ]
+        }
+      }],
+      order: [
+        ['start_date', 'ASC'],
+        ['created_at', 'DESC']
+      ],
+    })
+      .then(data => {
+        res.status(200).json({ message: "Success", total_record: data.length, data })
+      })
+      .catch(err => {
+        res.status(500).json({ err });
+        console.log(err);
+      })
+  }
+
+  static findAllEvent(req, res) {
+    tbl_events.findAll({
+      where: {
+        start_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` },
+      },
       include: [{
         model: tbl_users,
         include: [{ model: tbl_account_details }]
@@ -61,9 +163,7 @@ class event {
       ],
     })
       .then(data => {
-        console.log(data);
-
-        res.status(200).json({ message: "Success", data })
+        res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
         res.status(500).json({ err });
@@ -79,7 +179,6 @@ class event {
       }]
     })
       .then(async (data) => {
-        let user = tbl_users.findByPk(data.user_id)
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -107,9 +206,9 @@ class event {
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
       res.status(400).json({ error: 'Data not complite' })
     } else {
-      if (Number(startDate[2]) > 31 || Number(startDate[2]) < 1 || Number(startDate[1]) > 12 || Number(startDate[1]) < 1 || Number(startDate[1]) < Number(new Date().getMonth() + 1) || Number(startDate[1]) == Number(new Date().getMonth() + 1) && Number(startDate[2]) < Number(new Date().getDate())) {
+      if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
         res.status(400).json({ error: 'Start date invalid' })
-      } else if (Number(endDate[2]) > 31 || Number(endDate[2]) < 1 || Number(endDate[1]) > 12 || Number(endDate[1]) < 1 || Number(endDate[1]) < Number(new Date().getMonth() + 1) || (Number(endDate[1]) == Number(new Date().getMonth() + 1) && Number(endDate[2]) < Number(new Date().getDate())) || Number(endDate[2]) < Number(startDate[2])) {
+      } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
         res.status(400).json({ error: 'End date invalid' })
       } else {
         newData = {
@@ -145,7 +244,7 @@ class event {
 
   static findAllByMe(req, res) {
     tbl_events.findAll({
-      where: { user_id: req.user.user_id },
+      where: { user_id: req.user.user_id, status: 1 },
       include: [{
         model: tbl_users,
         include: [{ model: tbl_account_details }]
@@ -179,7 +278,6 @@ class event {
   }
 
   static followEvent(req, res) {
-    console.log(req.body.response);
 
     tbl_event_responses.findOne({
       where: {
@@ -188,9 +286,10 @@ class event {
       }
     })
       .then(data => {
-
+        console.log("MASUK NIH")
         if (data && data.response === req.body.response) {
-          res.status(201).json({ message: `You have ${req.body.response} this event` })
+          console.log("object masukkkkk")
+          res.status(304).json({ message: `You have ${req.body.response} this event` })
         } else if (data && data.response !== req.body.response) {
           tbl_event_responses.update({ response: req.body.response }, {
             where: {
@@ -198,9 +297,7 @@ class event {
             }
           })
             .then(data => {
-              console.log(data);
-
-              res.status(201).json({ message: "Success Change", data })
+              res.status(200).json({ message: "Success Change", data })
             })
         } else {
           if (req.body.response === 'join') {
@@ -211,8 +308,9 @@ class event {
               response: req.body.response //join, not join, cancel join
             }
             tbl_event_responses.create(newData)
-              .then(data => {
-                res.status(201).json({ message: "Success Create", data })
+              .then(async data => {
+                let findNew = await tbl_event_responses.findByPk(data.null)
+                res.status(201).json({ message: "Success Create", data: findNew })
               })
           }
         }
@@ -223,6 +321,200 @@ class event {
       })
   }
 
+  static approvalEvent(req, res) {
+    tbl_events.update({ status: req.body.status }, {
+      where: {
+        event_id: req.params.id,
+      }
+    })
+      .then(async data => {
+        let creator = await tbl_events.findByPk(req.params.id)
+        let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
+
+        if (dataEventInvite[0].option === 'company') {
+          dataEventInvite.forEach(async element => {
+            let paraPegawai = await tbl_account_details.findAll({ where: { company_id: element.company_id } })
+            await paraPegawai.forEach(pegawai => {
+              tbl_users.findByPk(pegawai.user_id)
+                .then(async ({ dataValues }) => {
+
+                  let newDes = creator.event_name.split(" ")
+                  if (newDes.length > 3) {
+                    newDes = newDes.slice(0, 3).join(" ") + '...'
+                  } else {
+                    newDes = newDes.join(" ")
+                  }
+                  let newData = {
+                    description: newDes,
+                    from_user_id: req.user.user_id,
+                    to_user_id: dataValues.user_id,
+                    value: "Event",
+                    link: `/event/detailEvent/${createEvent.null}`,
+                  }
+                  await tbl_notifications.create(newData)
+
+                  if (dataValues.email !== '-') {
+                    mailOptions.to = dataValues.email
+                    mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
+                    queue.create('email').save()
+                  }
+                })
+                .catch(err => {
+                  console.log(err)
+                })
+            });
+          });
+        } else if (dataEventInvite[0].option === 'department') {
+          dataEventInvite.forEach(async element => {
+            let paraPegawai = await tbl_account_details.findAll({
+              include: [{
+                model: tbl_designations,
+                where: { departments_id: element.departments_id }
+              }, {
+                model: tbl_users
+              }]
+            })
+            await paraPegawai.forEach(pegawai => {
+              console.log(pegawai.tbl_user.email)
+              if (pegawai.tbl_user.email !== '-') {
+                mailOptions.to = pegawai.tbl_user.email
+                mailOptions.html = `Dear , <br/><br/>Haii ada acara baru nih <b>${creator.event_name}.`
+                queue.create('email').save()
+              }
+            });
+          });
+        } else if (dataEventInvite[0].option === 'user') {
+          dataEventInvite.forEach(async element => {
+            await tbl_users.findByPk(element.user_id)
+              .then(({ dataValues }) => {
+                mailOptions.to = dataValues.email
+                mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
+                queue.create('email').save()
+              })
+          });
+        } else if (dataEventInvite[0].option === 'all') {
+          let paraPegawai = await tbl_users.findAll()
+          paraPegawai.forEach(element => {
+            if (element.email !== '-') {
+              mailOptions.to = element.email
+              mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
+              queue.create('email').save()
+            }
+          });
+        }
+        res.status(200).json({ message: "Success Change", data })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
+  }
+
+  static async createMasterCreator(req, res) {
+    let newData = {
+      user_id: req.body.user_id,
+      chief: req.user.user_id
+    }
+
+    try {
+      let data = await tbl_master_creators.findOne({ where: { chief: req.user.user_id, user_id: req.body.user_id } })
+
+      if (data) {
+        console.log(data)
+        res.status(400).json({ message: "Sudah ada" })
+      } else {
+        tbl_master_creators.create(newData)
+          .then(async data => {
+            let findNew = await tbl_master_creators.findByPk(data.null)
+            res.status(201).json({ message: "Success", data: findNew })
+          })
+
+      }
+    } catch (err) {
+      res.status(500).json({ err })
+      console.log(err)
+    }
+  }
+
+  static findAllMasterCreator(req, res) {
+    tbl_master_creators.findAll({
+      where: { chief: req.user.user_id },
+      include: [{
+        model: tbl_users,
+        include: [{
+          model: tbl_account_details,
+        }]
+      }, {
+        model: tbl_users,
+        as: 'idChief',
+        include: [{
+          model: tbl_account_details,
+        }]
+      }],
+      order: [
+        ['master_creator_id', 'DESC']
+      ]
+    })
+      .then(data => {
+        res.status(200).json({ message: "Success", data })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
+  }
+
+  static deleteMasterCreator(req, res) {
+    tbl_master_creators.destroy(
+      { where: { master_creator_id: req.params.id } }
+    )
+      .then(() => {
+        res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
+      })
+      .catch(err => {
+        res.status(500).json({ err })
+        console.log(err);
+      })
+  }
+
+  static async tesRoute(req, res) {
+    let creator = await tbl_events.findByPk(req.params.id)
+
+    let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
+
+    dataEventInvite.forEach(async element => {
+      let paraPegawai = await tbl_account_details.findAll({
+        include: [{
+          model: tbl_designations,
+          where: { departments_id: 1 }
+        }, {
+          model: tbl_users
+        }]
+      })
+      res.status(200).json({ length: paraPegawai.length, data: paraPegawai })
+
+      await paraPegawai.forEach(pegawai => {
+        console.log(pegawai.tbl_user.email)
+        if (pegawai.tbl_user.email !== '-') {
+          mailOptions.to = pegawai.tbl_user.email
+          mailOptions.html = `Dear , <br/><br/>Haii ada acara baru nih <b>${creator.event_name}.`
+          queue.create('email').save()
+        }
+      });
+    });
+  }
 }
+
+
+// function
+queue.process('email', function (job, done) {
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      return console.log(error);
+    } else {
+      done()
+    }
+  })
+})
 
 module.exports = event

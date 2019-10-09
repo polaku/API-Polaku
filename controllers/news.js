@@ -23,8 +23,9 @@ class news {
       if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
 
       tbl_polanews.create(newData)
-        .then(data => {
-          res.status(201).json({ message: "Success", data })
+        .then(async data => {
+          let findNew = await tbl_polanews.findByPk(data.null)
+          res.status(201).json({ message: "Success", data: findNew })
         })
         .catch(err => {
           res.status(500).json({ err })

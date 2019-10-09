@@ -1,6 +1,6 @@
 const { tbl_announcements, tbl_users, tbl_account_details } = require('../models')
 
-class announcements {
+class announcement {
   static create(req, res) {
     let startDate, endDate, newData, attachment, thumbnail
     // console.log(req.files)
@@ -12,12 +12,12 @@ class announcements {
     if (!req.body.title || !req.body.description || !req.body.startDate || !req.body.endDate) {
       res.status(400).json({ error: 'Data not complite' })
     } else {
-      startDate = req.body.startDate.split('-')
-      endDate = req.body.endDate.split('-')
+      startDate = req.body.startDate
+      endDate = req.body.endDate
 
-      if (Number(startDate[2]) > 31 || Number(startDate[2]) < 1 || Number(startDate[1]) > 12 || Number(startDate[1]) < 1 || Number(startDate[1]) < Number(new Date().getMonth() + 1) || Number(startDate[1]) == Number(new Date().getMonth() + 1) && Number(startDate[2]) < Number(new Date().getDate())) {
+      if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
         res.status(400).json({ error: 'Start date invalid' })
-      } else if (Number(endDate[2]) > 31 || Number(endDate[2]) < 1 || Number(endDate[1]) > 12 || Number(endDate[1]) < 1 || Number(endDate[1]) < Number(new Date().getMonth() + 1) || (Number(endDate[1]) == Number(new Date().getMonth() + 1) && Number(endDate[2]) < Number(new Date().getDate())) || Number(endDate[2]) < Number(startDate[2])) {
+      } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
         res.status(400).json({ error: 'End date invalid' })
       } else {
         today()
@@ -39,8 +39,9 @@ class announcements {
           if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
 
           tbl_announcements.create(newData)
-            .then(data => {
-              res.status(201).json({ message: "Success", data })
+            .then(async data => {
+              let findNew = await tbl_announcements.findByPk(data.null)
+              res.status(201).json({ message: "Success", data: findNew })
             })
             .catch(err => {
               res.status(500).json({ message: "error", err })
@@ -125,12 +126,12 @@ class announcements {
     if (!req.body.title || !req.body.description || !req.body.startDate || !req.body.endDate) {
       res.status(400).json({ error: 'Data not complite' })
     } else {
-      startDate = req.body.startDate.split('-')
-      endDate = req.body.endDate.split('-')
+      startDate = req.body.startDate
+      endDate = req.body.endDate
 
-      if (Number(startDate[2]) > 31 || Number(startDate[2]) < 1 || Number(startDate[1]) > 12 || Number(startDate[1]) < 1 || Number(startDate[1]) < Number(new Date().getMonth() + 1) || Number(startDate[1]) == Number(new Date().getMonth() + 1) && Number(startDate[2]) < Number(new Date().getDate())) {
+      if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
         res.status(400).json({ error: 'Start date invalid' })
-      } else if (Number(endDate[2]) > 31 || Number(endDate[2]) < 1 || Number(endDate[1]) > 12 || Number(endDate[1]) < 1 || Number(endDate[1]) < Number(new Date().getMonth() + 1) || (Number(endDate[1]) == Number(new Date().getMonth() + 1) && Number(endDate[2]) < Number(new Date().getDate())) || Number(endDate[2]) < Number(startDate[2])) {
+      } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
         res.status(400).json({ error: 'End date invalid' })
       } else {
         today()
@@ -188,4 +189,4 @@ function today() {
   return `${new Date().getFullYear()}${month}${date}`
 }
 
-module.exports = announcements
+module.exports = announcement

@@ -1,6 +1,6 @@
 const { tbl_contacts, tbl_account_details, tbl_users, tbl_contact_categories, tbl_categories } = require('../models')
 
-class news {
+class contact {
   static async create(req, res) {
     let newData
 
@@ -29,8 +29,9 @@ class news {
     }
 
     tbl_contacts.create(newData)
-      .then(data => {
-        res.status(201).json({ message: "Success", data })
+      .then(async data => {
+        let findNew = await tbl_contacts.findByPk(data.null)
+        res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
         res.status(500).json({ err })
@@ -88,8 +89,8 @@ class news {
       {
         status: req.body.status
       }, {
-        where: { contact_id: req.params.id }
-      }
+      where: { contact_id: req.params.id }
+    }
     )
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
@@ -109,8 +110,8 @@ class news {
         assigned_date: new Date(),
         assigned_expired_date: new Date().setHours(new Date().getHours() + 8)
       }, {
-        where: { contact_id: req.params.id }
-      }
+      where: { contact_id: req.params.id }
+    }
     )
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
@@ -130,8 +131,8 @@ class news {
         taken_by: req.params.taken_by,
         taken_date: new Date()
       }, {
-        where: { contact_id: req.params.id }
-      }
+      where: { contact_id: req.params.id }
+    }
     )
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
@@ -151,8 +152,8 @@ class news {
         done_date: new Date(),
         done_expired_date: new Date().setDate(new Date().getDate() + 1)
       }, {
-        where: { contact_id: req.params.id }
-      }
+      where: { contact_id: req.params.id }
+    }
     )
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
@@ -170,8 +171,8 @@ class news {
       {
         status: 'done',
       }, {
-        where: { contact_id: req.params.id }
-      }
+      where: { contact_id: req.params.id }
+    }
     )
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
@@ -190,8 +191,8 @@ class news {
         status: 'cancel',
         cancel_date: new Date()
       }, {
-        where: { contact_id: req.params.id }
-      }
+      where: { contact_id: req.params.id }
+    }
     )
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categories }] })
@@ -217,4 +218,4 @@ class news {
 
 }
 
-module.exports = news
+module.exports = contact

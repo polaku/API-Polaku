@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     role_id: DataTypes.INTEGER,
     activated: DataTypes.INTEGER,
+    flag_password: DataTypes.INTEGER
     /*
     banned: DataTypes.INTEGER,
     ban_reason: DataTypes.STRING,
@@ -34,7 +35,6 @@ module.exports = (sequelize, DataTypes) => {
     smtp_additional_flag: DataTypes.STRING,
     last_postmaster_run: DataTypes.STRING,
     media_path_slug: DataTypes.STRING,
-    flag_password: DataTypes.INTEGER
     */
   }, {
       timestamps: false,
@@ -50,6 +50,11 @@ module.exports = (sequelize, DataTypes) => {
     tbl_users.hasMany(models.tbl_polanews, { foreignKey: "user_id" })
     tbl_users.hasOne(models.tbl_account_details, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_event_responses, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_master_rooms, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_master_creators, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_master_creators, { as: 'idChief', foreignKey: "chief" })
+    tbl_users.hasMany(models.tbl_notifications, { as: 'from_user', foreignKey: "from_user_id" })
+    tbl_users.hasMany(models.tbl_notifications, { as: 'to_user', foreignKey: "to_user_id" })
   };
 
   return tbl_users;
