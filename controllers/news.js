@@ -1,4 +1,5 @@
 const { tbl_polanews, tbl_users } = require('../models')
+const logError = require('../helpers/logError')
 
 class news {
   static create(req, res) {
@@ -10,6 +11,14 @@ class news {
     }
 
     if (!req.body.title || !req.body.description) {
+      let error = {
+        uri: `http://api.polagroup.co.id/news`,
+        method: 'post',
+        status: 400,
+        message: 'Data not complite',
+        user_id: req.user.user_id
+      }
+      logError(error)
       res.status(400).json({ error: 'Data not complite' })
     } else {
       newData = {
@@ -28,6 +37,14 @@ class news {
           res.status(201).json({ message: "Success", data: findNew })
         })
         .catch(err => {
+          let error = {
+            uri: `http://api.polagroup.co.id/news`,
+            method: 'post',
+            status: 500,
+            message: err,
+            user_id: req.user.user_id
+          }
+          logError(error)
           res.status(500).json({ err })
           console.log(err);
         })
@@ -45,6 +62,14 @@ class news {
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/news`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -56,6 +81,14 @@ class news {
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/news/${req.params.id}`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -69,6 +102,14 @@ class news {
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/news/${req.params.id}`,
+          method: 'delete',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -100,6 +141,14 @@ class news {
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/news/${req.params.id}`,
+          method: 'put',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })

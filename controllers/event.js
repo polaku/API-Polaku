@@ -1,23 +1,46 @@
-const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details, tbl_master_creators, tbl_event_invites, tbl_designations, tbl_departments, tbl_notifications } = require('../models')
+const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details, tbl_master_creators, tbl_event_invites, tbl_designations, tbl_notifications, tbl_companys, tbl_departments } = require('../models')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
-const kue = require('kue')
-const queue = kue.createQueue()
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
+const logError = require('../helpers/logError')
 
 class event {
   static async create(req, res) {
     let newData, startDate, endDate
 
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
+      let error = {
+        uri: `http://api.polagroup.co.id/events`,
+        method: 'post',
+        status: 400,
+        message: 'Data not complite',
+        user_id: req.user.user_id
+      }
+      logError(error)
       res.status(400).json({ error: 'Data not complite' })
     } else {
       startDate = req.body.start_date
       endDate = req.body.end_date
 
       if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
+        let error = {
+          uri: `http://api.polagroup.co.id/events`,
+          method: 'post',
+          status: 400,
+          message: 'Start date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'Start date invalid' })
       } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
+        let error = {
+          uri: `http://api.polagroup.co.id/events`,
+          method: 'post',
+          status: 400,
+          message: 'End date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'End date invalid' })
       } else {
         newData = {
@@ -62,9 +85,6 @@ class event {
                 }
                 await tbl_event_invites.create(newData)
               } else if (req.body.option === 'company') {
-
-                console.log("MASUK COMPANY")
-
                 req.body.invited = JSON.parse(req.body.invited)
                 req.body.invited.forEach(async element => {
                   let newData = {
@@ -100,6 +120,14 @@ class event {
             }
           })
           .catch(err => {
+            let error = {
+              uri: `http://api.polagroup.co.id/events`,
+              method: 'post',
+              status: 500,
+              message: err,
+              user_id: req.user.user_id
+            }
+            logError(error)
             res.status(500).json({ err })
             console.log(err);
           })
@@ -108,12 +136,28 @@ class event {
   }
 
   static async findAll(req, res) {
+    let condition = []
     let paraPegawai = await tbl_account_details.findOne({
       where: { user_id: req.user.user_id },
       include: [{
         model: tbl_designations,
       }]
     })
+
+    if (!paraPegawai.tbl_designation) {
+      condition = [
+        { option: 'all' },
+        { option: 'company', company_id: paraPegawai.company_id },
+        { option: 'user', user_id: req.user.user_id }
+      ]
+    } else {
+      condition = [
+        { option: 'all' },
+        { option: 'company', company_id: paraPegawai.company_id },
+        { option: 'department', departments_id: paraPegawai.tbl_designation.departments_id },
+        { option: 'user', user_id: req.user.user_id }
+      ]
+    }
 
     tbl_events.findAll({
       where: {
@@ -126,12 +170,7 @@ class event {
       }, {
         model: tbl_event_invites,
         where: {
-          [Op.or]: [
-            { option: 'all' },
-            { option: 'company', company_id: paraPegawai.company_id },
-            { option: 'department', departments_id: paraPegawai.tbl_designation.departments_id },
-            { option: 'user', user_id: req.user.user_id }
-          ]
+          [Op.or]: condition
         }
       }],
       order: [
@@ -140,9 +179,18 @@ class event {
       ],
     })
       .then(data => {
+        console.log("data", data)
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err });
         console.log(err);
       })
@@ -166,6 +214,14 @@ class event {
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/all`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err });
         console.log(err);
       })
@@ -179,9 +235,27 @@ class event {
       }]
     })
       .then(async (data) => {
-        res.status(200).json({ message: "Success", data })
+        let eventInvited = await tbl_event_invites.findAll({
+          where: { event_id: req.params.id },
+          include: [
+            { model: tbl_companys },
+            { model: tbl_departments },
+            {
+              model: tbl_users,
+              include: [{ model: tbl_account_details }]
+            }]
+        })
+        res.status(200).json({ message: "Success", data, eventInvited })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/${req.params.id}`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -195,6 +269,14 @@ class event {
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/${req.params.id}`,
+          method: 'delete',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -204,11 +286,35 @@ class event {
     let newData
 
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
+      let error = {
+        uri: `http://api.polagroup.co.id/events/${req.params.id}`,
+        method: 'put',
+        status: 400,
+        message: 'Data not complite',
+        user_id: req.user.user_id
+      }
+      logError(error)
       res.status(400).json({ error: 'Data not complite' })
     } else {
       if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/${req.params.id}`,
+          method: 'put',
+          status: 400,
+          message: 'Start date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'Start date invalid' })
       } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/${req.params.id}`,
+          method: 'put',
+          status: 400,
+          message: 'End date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'End date invalid' })
       } else {
         newData = {
@@ -235,6 +341,14 @@ class event {
             res.status(200).json({ message: "Success", data: dataReturning })
           })
           .catch(err => {
+            let error = {
+              uri: `http://api.polagroup.co.id/events/${req.params.id}`,
+              method: 'put',
+              status: 500,
+              message: err,
+              user_id: req.user.user_id
+            }
+            logError(error)
             res.status(500).json({ err })
             console.log(err);
           })
@@ -272,13 +386,20 @@ class event {
         res.status(200).json({ message: "Success", data, dataFollowing: datas })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/myevents`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
   }
 
   static followEvent(req, res) {
-
     tbl_event_responses.findOne({
       where: {
         event_id: req.body.event_id,
@@ -286,10 +407,16 @@ class event {
       }
     })
       .then(data => {
-        console.log("MASUK NIH")
         if (data && data.response === req.body.response) {
-          console.log("object masukkkkk")
-          res.status(304).json({ message: `You have ${req.body.response} this event` })
+          let error = {
+            uri: `http://api.polagroup.co.id/events/follow`,
+            method: 'post',
+            status: 304,
+            message: `The user had ${req.body.response} this event`,
+            user_id: req.user.user_id
+          }
+          logError(error)
+          res.status(304).json({ message: `You had ${req.body.response} this event` })
         } else if (data && data.response !== req.body.response) {
           tbl_event_responses.update({ response: req.body.response }, {
             where: {
@@ -301,7 +428,6 @@ class event {
             })
         } else {
           if (req.body.response === 'join') {
-
             let newData = {
               event_id: req.body.event_id,
               user_id: req.user.user_id,
@@ -316,6 +442,14 @@ class event {
         }
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/follow`,
+          method: 'post',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -330,6 +464,8 @@ class event {
       .then(async data => {
         let creator = await tbl_events.findByPk(req.params.id)
         let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
+
+        res.status(200).json({ message: "Success Change", data })
 
         if (dataEventInvite[0].option === 'company') {
           dataEventInvite.forEach(async element => {
@@ -354,9 +490,21 @@ class event {
                   await tbl_notifications.create(newData)
 
                   if (dataValues.email !== '-') {
+                    mailOptions.subject = "There's new Event!"
                     mailOptions.to = dataValues.email
                     mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
-                    queue.create('email').save()
+                    transporter.sendMail(mailOptions, function (error, info) {
+                      if (error) {
+                        let error = {
+                          uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+                          method: 'put',
+                          status: 0,
+                          message: `Send email to ${dataValues.email} is error`,
+                          user_id: req.user.user_id
+                        }
+                        logError(error)
+                      }
+                    })
                   }
                 })
                 .catch(err => {
@@ -374,37 +522,79 @@ class event {
                 model: tbl_users
               }]
             })
-            await paraPegawai.forEach(pegawai => {
-              console.log(pegawai.tbl_user.email)
+            await paraPegawai.forEach(async pegawai => {
               if (pegawai.tbl_user.email !== '-') {
+                mailOptions.subject = "There's new Event!"
                 mailOptions.to = pegawai.tbl_user.email
                 mailOptions.html = `Dear , <br/><br/>Haii ada acara baru nih <b>${creator.event_name}.`
-                queue.create('email').save()
+                transporter.sendMail(mailOptions, function (error, info) {
+                  if (error) {
+                    let error = {
+                      uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+                      method: 'put',
+                      status: 0,
+                      message: `Send email to ${pegawai.tbl_user.email} is error`,
+                      user_id: req.user.user_id
+                    }
+                    logError(error)
+                  }
+                })
               }
             });
           });
         } else if (dataEventInvite[0].option === 'user') {
           dataEventInvite.forEach(async element => {
             await tbl_users.findByPk(element.user_id)
-              .then(({ dataValues }) => {
+              .then(async ({ dataValues }) => {
+                mailOptions.subject = "There's new Event!"
                 mailOptions.to = dataValues.email
                 mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
-                queue.create('email').save()
+                transporter.sendMail(mailOptions, function (error, info) {
+                  if (error) {
+                    let error = {
+                      uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+                      method: 'put',
+                      status: 0,
+                      message: `Send email to ${dataValues.email} is error`,
+                      user_id: req.user.user_id
+                    }
+                    logError(error)
+                  }
+                })
               })
           });
         } else if (dataEventInvite[0].option === 'all') {
           let paraPegawai = await tbl_users.findAll()
-          paraPegawai.forEach(element => {
+          paraPegawai.forEach(async element => {
             if (element.email !== '-') {
+              mailOptions.subject = "There's new Event!"
               mailOptions.to = element.email
               mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
-              queue.create('email').save()
+              transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                  let error = {
+                    uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+                    method: 'put',
+                    status: 0,
+                    message: `Send email to ${element.email} is error`,
+                    user_id: req.user.user_id
+                  }
+                  logError(error)
+                }
+              })
             }
           });
         }
-        res.status(200).json({ message: "Success Change", data })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+          method: 'put',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -420,7 +610,14 @@ class event {
       let data = await tbl_master_creators.findOne({ where: { chief: req.user.user_id, user_id: req.body.user_id } })
 
       if (data) {
-        console.log(data)
+        let error = {
+          uri: `http://api.polagroup.co.id/events/masterCreator`,
+          method: 'post',
+          status: 400,
+          message: `User ${req.body.user_id} sudah menjadi master room`,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ message: "Sudah ada" })
       } else {
         tbl_master_creators.create(newData)
@@ -431,6 +628,14 @@ class event {
 
       }
     } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/events/masterCreator`,
+        method: 'post',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
       res.status(500).json({ err })
       console.log(err)
     }
@@ -459,6 +664,14 @@ class event {
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/masterCreator`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -472,49 +685,19 @@ class event {
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/events/masterCreator/${req.params.id}`,
+          method: 'delete',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
   }
 
-  static async tesRoute(req, res) {
-    let creator = await tbl_events.findByPk(req.params.id)
-
-    let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
-
-    dataEventInvite.forEach(async element => {
-      let paraPegawai = await tbl_account_details.findAll({
-        include: [{
-          model: tbl_designations,
-          where: { departments_id: 1 }
-        }, {
-          model: tbl_users
-        }]
-      })
-      res.status(200).json({ length: paraPegawai.length, data: paraPegawai })
-
-      await paraPegawai.forEach(pegawai => {
-        console.log(pegawai.tbl_user.email)
-        if (pegawai.tbl_user.email !== '-') {
-          mailOptions.to = pegawai.tbl_user.email
-          mailOptions.html = `Dear , <br/><br/>Haii ada acara baru nih <b>${creator.event_name}.`
-          queue.create('email').save()
-        }
-      });
-    });
-  }
 }
-
-
-// function
-queue.process('email', function (job, done) {
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      return console.log(error);
-    } else {
-      done()
-    }
-  })
-})
 
 module.exports = event

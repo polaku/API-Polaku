@@ -13,23 +13,25 @@ module.exports = (sequelize, DataTypes) => {
     location_id: DataTypes.INTEGER,
     building_id: DataTypes.INTEGER,
     designations_id: DataTypes.INTEGER,
+    position_id: DataTypes.INTEGER,
+    leave: DataTypes.INTEGER,
+    admin_contact_categori: DataTypes.STRING,
+    name_evaluator_1: DataTypes.STRING,
+    name_evaluator_2: DataTypes.STRING,
     /*
     nik: DataTypes.STRING,
     locale: DataTypes.STRING,
     address: DataTypes.STRING,
     language: DataTypes.STRING,
-    date_of_birth: DataTypes.DATE,    
+    date_of_birth: DataTypes.DATE,
     initial: DataTypes.STRING,
-    name_evaluator_1: DataTypes.STRING,
-    name_evaluator_2: DataTypes.STRING,
     direction: DataTypes.STRING,
     dinas: DataTypes.STRING,
-    position_id: DataTypes.INTEGER,
     ext: DataTypes.INTEGER,
     */
   }, {
-      timestamps: false,
-    });
+    timestamps: false,
+  });
   tbl_account_details.removeAttribute('id');
 
   tbl_account_details.associate = function (models) {

@@ -30,7 +30,19 @@ module.exports = (sequelize, DataTypes) => {
     design_type: DataTypes.STRING,
     design_size: DataTypes.STRING,
     design_other_specs: DataTypes.STRING,
-    design_deadline: DataTypes.DATE,    
+    design_deadline: DataTypes.DATE,  
+    review: DataTypes.STRING,
+    date_ijin_absen_start: DataTypes.DATE,
+    date_ijin_absen_end: DataTypes.DATE,
+    leave_request: DataTypes.INTEGER,
+    leave_date: DataTypes.DATE,
+    leave_date_in: DataTypes.DATE,
+    date_imp: DataTypes.DATE,
+    start_time_imp: DataTypes.TIME,
+    end_time_imp: DataTypes.TIME,
+    evaluator_1: DataTypes.INTEGER,
+    evaluator_2: DataTypes.INTEGER,
+    cancel_reason: DataTypes.STRING,
   }, {
       timestamps: false,
     });
@@ -39,8 +51,12 @@ module.exports = (sequelize, DataTypes) => {
   tbl_contacts.associate = function (models) {
     // associations can be defined here
     tbl_contacts.belongsTo(models.tbl_users, { foreignKey: "user_id" })
+    tbl_contacts.belongsTo(models.tbl_companys, { foreignKey: "company_id" })
+    tbl_contacts.belongsTo(models.tbl_users, { as: "evaluator1", foreignKey: "evaluator_1" })
+    tbl_contacts.belongsTo(models.tbl_users, { as: "evaluator2", foreignKey: "evaluator_2" })
     tbl_contacts.belongsTo(models.tbl_contact_categories, { foreignKey: "contact_categories_id" })
-    tbl_contacts.belongsTo(models.tbl_categories, { foreignKey: "categori_id" })
+    tbl_contacts.belongsTo(models.tbl_categoris, { foreignKey: "categori_id" })
+    tbl_contacts.belongsTo(models.tbl_contact_comments, { foreignKey: "categori_id" })
   };
 
   return tbl_contacts;

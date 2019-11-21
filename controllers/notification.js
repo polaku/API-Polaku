@@ -1,6 +1,7 @@
 const { tbl_notifications, tbl_users } = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
+const logError = require('../helpers/logError')
 
 class notification {
   static findAll(req, res) {
@@ -21,6 +22,14 @@ class notification {
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/notification`,
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err });
         console.log(err);
       })
@@ -28,14 +37,20 @@ class notification {
 
   static updateReadInline(req, res) {
 
-    console.log(req.body.notifications_id)
     try {
       req.body.notifications_id.forEach(async element => {
-        let a = await tbl_notifications.update({ read_inline: 1 }, { where: { notifications_id: element } })
-        console.log(a)
+        await tbl_notifications.update({ read_inline: 1 }, { where: { notifications_id: element } })
       });
       res.status(200).json({ message: "Success" })
     } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/notification`,
+        method: 'put',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
       res.status(500).json({ err });
       console.log(err);
     }
@@ -48,6 +63,14 @@ class notification {
         res.status(200).json({ message: "Success", notifications_id: req.params.id })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/notification/${req.params.id}`,
+          method: 'put',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err });
         console.log(err);
       })

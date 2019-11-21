@@ -1,4 +1,5 @@
 const { tbl_announcements, tbl_users, tbl_account_details } = require('../models')
+const logError = require('../helpers/logError')
 
 class announcement {
   static create(req, res) {
@@ -10,21 +11,61 @@ class announcement {
     }
 
     if (!req.body.title || !req.body.description || !req.body.startDate || !req.body.endDate) {
+      let error = {
+        uri: 'http://api.polagroup.co.id/announcement',
+        method: 'post',
+        status: 400,
+        message: 'Data not complite',
+        user_id: req.user.user_id
+      }
+      logError(error)
       res.status(400).json({ error: 'Data not complite' })
     } else {
       startDate = req.body.startDate
       endDate = req.body.endDate
 
       if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
+        let error = {
+          uri: 'http://api.polagroup.co.id/announcement',
+          method: 'post',
+          status: 400,
+          message: 'Start date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'Start date invalid' })
       } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
+        let error = {
+          uri: 'http://api.polagroup.co.id/announcement',
+          method: 'post',
+          status: 400,
+          message: 'End date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'End date invalid' })
       } else {
         today()
 
         if (Number(today) >= Number(startDate.join(''))) {
+          let error = {
+            uri: 'http://api.polagroup.co.id/announcement',
+            method: 'post',
+            status: 400,
+            message: 'Start date invalid',
+            user_id: req.user.user_id
+          }
+          logError(error)
           res.status(400).json({ error: 'Start date invalid' })
         } else if (Number(startDate.join('')) >= Number(endDate.join(''))) {
+          let error = {
+            uri: 'http://api.polagroup.co.id/announcement',
+            method: 'post',
+            status: 400,
+            message: 'End date invalid',
+            user_id: req.user.user_id
+          }
+          logError(error)
           res.status(400).json({ error: 'End date invalid' })
         } else {
           newData = {
@@ -44,6 +85,14 @@ class announcement {
               res.status(201).json({ message: "Success", data: findNew })
             })
             .catch(err => {
+              let error = {
+                uri: 'http://api.polagroup.co.id/announcement',
+                method: 'post',
+                status: 500,
+                message: err,
+                user_id: req.user.user_id
+              }
+              logError(error)
               res.status(500).json({ message: "error", err })
               console.log(err);
             })
@@ -80,6 +129,14 @@ class announcement {
         res.status(200).json({ message: "Success", data, dataPilihan })
       })
       .catch(err => {
+        let error = {
+          uri: 'http://api.polagroup.co.id/announcement',
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -97,6 +154,14 @@ class announcement {
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
+        let error = {
+          uri: 'http://api.polagroup.co.id/announcement',
+          method: 'get',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -110,6 +175,14 @@ class announcement {
         res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
+        let error = {
+          uri: `http://api.polagroup.co.id/announcement/${req.params.id}`,
+          method: 'delete',
+          status: 500,
+          message: err,
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(500).json({ err })
         console.log(err);
       })
@@ -124,21 +197,61 @@ class announcement {
     }
 
     if (!req.body.title || !req.body.description || !req.body.startDate || !req.body.endDate) {
+      let error = {
+        uri: `http://api.polagroup.co.id/announcement/${req.params.id}`,
+        method: 'put',
+        status: 400,
+        message: 'Data not complite',
+        user_id: req.user.user_id
+      }
+      logError(error)
       res.status(400).json({ error: 'Data not complite' })
     } else {
       startDate = req.body.startDate
       endDate = req.body.endDate
 
       if (new Date(startDate).getDate() > 31 || new Date(startDate).getDate() < 1 || new Date(startDate).getMonth() + 1 > 12 || new Date(startDate).getMonth() + 1 < 1 || new Date(startDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || new Date(startDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(startDate).getDate() < Number(new Date().getDate())) {
+        let error = {
+          uri: `http://api.polagroup.co.id/announcement/${req.params.id}`,
+          method: 'put',
+          status: 400,
+          message: 'Start date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'Start date invalid' })
       } else if (new Date(endDate).getDate() > 31 || new Date(endDate).getDate() < 1 || new Date(endDate).getMonth() + 1 > 12 || new Date(endDate).getMonth() + 1 < 1 || new Date(endDate).getMonth() + 1 < Number(new Date().getMonth() + 1) || (new Date(endDate).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(endDate).getDate() < Number(new Date().getDate())) || new Date(endDate).getDate() < new Date(startDate).getDate()) {
+        let error = {
+          uri: `http://api.polagroup.co.id/announcement/${req.params.id}`,
+          method: 'put',
+          status: 400,
+          message: 'Start date invalid',
+          user_id: req.user.user_id
+        }
+        logError(error)
         res.status(400).json({ error: 'End date invalid' })
       } else {
         today()
 
         if (Number(today) >= Number(startDate.join(''))) {
+          let error = {
+            uri: `http://api.polagroup.co.id/announcement/${req.params.id}`,
+            method: 'put',
+            status: 400,
+            message: 'Start date invalid',
+            user_id: req.user.user_id
+          }
+          logError(error)
           res.status(400).json({ error: 'Start date invalid' })
         } else if (Number(startDate.join('')) >= Number(endDate.join(''))) {
+          let error = {
+            uri: `http://api.polagroup.co.id/announcement/${req.params.id}`,
+            method: 'put',
+            status: 400,
+            message: 'End date invalid',
+            user_id: req.user.user_id
+          }
+          logError(error)
           res.status(400).json({ error: 'End date invalid' })
         } else {
           newData = {
@@ -165,6 +278,14 @@ class announcement {
               res.status(200).json({ message: "Success", data: dataReturning })
             })
             .catch(err => {
+              let error = {
+                uri: `http://api.polagroup.co.id/announcement/${req.params.id}`,
+                method: 'put',
+                status: 500,
+                message: err,
+                user_id: req.user.user_id
+              }
+              logError(error)
               res.status(500).json({ err })
               console.log(err);
             })

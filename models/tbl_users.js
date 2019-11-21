@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     role_id: DataTypes.INTEGER,
     activated: DataTypes.INTEGER,
-    flag_password: DataTypes.INTEGER
+    flag_password: DataTypes.INTEGER,
     /*
     banned: DataTypes.INTEGER,
     ban_reason: DataTypes.STRING,
@@ -46,6 +46,8 @@ module.exports = (sequelize, DataTypes) => {
     tbl_users.hasMany(models.tbl_announcements, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_room_bookings, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_contacts, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_contacts, { as: "evaluator1", foreignKey: "evaluator_1" })
+    tbl_users.hasMany(models.tbl_contacts, { as: "evaluator2", foreignKey: "evaluator_2" })
     tbl_users.hasMany(models.tbl_events, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_polanews, { foreignKey: "user_id" })
     tbl_users.hasOne(models.tbl_account_details, { foreignKey: "user_id" })
@@ -55,6 +57,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_users.hasMany(models.tbl_master_creators, { as: 'idChief', foreignKey: "chief" })
     tbl_users.hasMany(models.tbl_notifications, { as: 'from_user', foreignKey: "from_user_id" })
     tbl_users.hasMany(models.tbl_notifications, { as: 'to_user', foreignKey: "to_user_id" })
+    tbl_users.hasMany(models.tbl_contact_comments, { foreignKey: "user_id" })
   };
 
   return tbl_users;

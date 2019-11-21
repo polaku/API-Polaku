@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_event_responses.belongsTo(models.tbl_events, { foreignKey: 'event_id' })
     models.tbl_events.belongsToMany(models.tbl_users, { through: tbl_event_responses, foreignKey: 'event_id' })
     models.tbl_users.belongsToMany(models.tbl_events, { through: tbl_event_responses, foreignKey: 'user_id' })
+    tbl_event_responses.belongsTo(models.tbl_users, { foreignKey: 'user_id' })
   };
 
   return tbl_event_responses;

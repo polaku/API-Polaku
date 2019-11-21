@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     thumbnail: DataTypes.STRING,
     user_id: DataTypes.INTEGER,
     created_at: DataTypes.DATE,
-    keterangan: DataTypes.STRING
+    keterangan: DataTypes.STRING,
+    room_booking_id: DataTypes.INTEGER
   }, {
       timestamps: false,
     });
@@ -26,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_events.belongsTo(models.tbl_users, { foreignKey: "user_id" })
     tbl_events.hasMany(models.tbl_event_responses, { foreignKey: "event_id" })
     tbl_events.hasMany(models.tbl_event_invites, { foreignKey: "event_id" })
+    tbl_events.belongsTo(models.tbl_room_bookings, { foreignKey: "room_booking_id" })
   };
 
   return tbl_events;

@@ -11,7 +11,6 @@ router.get('/all', eventController.findAllEvent)
 router.post('/follow', eventController.followEvent)
 router.get('/myevents', eventController.findAllByMe)
 router.put('/approvalEvent/:id', eventController.approvalEvent)
-router.put('/tesRoute/:id', eventController.tesRoute)
 
 router.post('/masterCreator', eventController.createMasterCreator)
 router.get('/masterCreator', eventController.findAllMasterCreator)

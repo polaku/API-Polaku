@@ -624,7 +624,7 @@
     - `token`: `<Token>`, required
   - Body:
     - `message`: `String`, required
-    - `contactCategoriesId`: `String`, required
+    - `contactcategorisId`: `String`, required
     - `company_id`: `Date`, required
   - Expected response :
     - Success (status: `201`)

@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_contact_categories.associate = function (models) {
     // associations can be defined here
-    tbl_contact_categories.hasMany(models.tbl_categories, { foreignKey: "contact_categories_id" })
+    tbl_contact_categories.hasMany(models.tbl_categoris, { foreignKey: "contact_categories_id" })
     tbl_contact_categories.hasMany(models.tbl_contacts, { foreignKey: "contact_categories_id" })
   };
 

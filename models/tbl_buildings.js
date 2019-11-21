@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     building: DataTypes.STRING,
     company_id: DataTypes.INTEGER,
+    location_id: DataTypes.INTEGER,
   }, {
       timestamps: false,
     });
@@ -16,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     tbl_buildings.belongsTo(models.tbl_companys, { foreignKey: "company_id" })
     tbl_buildings.hasMany(models.tbl_rooms, { foreignKey: "building_id" })
+    tbl_buildings.belongsTo(models.tbl_locations, { foreignKey: "location_id" })
   };
 
   return tbl_buildings;
