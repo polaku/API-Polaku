@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "root",
-    "password": "Testing123.",
-    "database": "dump_polagroup_polaku",
+    "password": "",
+    "database": "dump_polaadmin_polaku",
     "host": "localhost",
     "dialect": "mysql",
     "operatorsAliases": "Op",

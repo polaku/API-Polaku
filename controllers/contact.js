@@ -1,5 +1,7 @@
 const { tbl_contacts, tbl_account_details, tbl_users, tbl_contact_categories, tbl_categoris, tbl_companys, tbl_contact_comments } = require('../models')
 const logError = require('../helpers/logError')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op;
 
 class contact {
   static async create(req, res) {
@@ -61,7 +63,19 @@ class contact {
 
   static findAll(req, res) {
     tbl_contacts.findAll({
-      where: { user_id: req.user.user_id },
+      where: {
+        user_id: req.user.user_id,
+        [Op.or]: [
+          { status: 'new' },
+          { status: 'new2' },
+          { done_expired_date: { [Op.gte]: new Date() } }, //for contact_us
+          { cancel_date: { [Op.gte]: new Date() } },
+          { date_ijin_absen_end: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` } },
+          { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-$01` } },
+          { type: 'request', done_date: { [Op.gte]: new Date() } },
+          { type: 'request', leave_date: { [Op.ne]: null } },
+        ]
+      },
       include: [{ model: tbl_users, include: [{ model: tbl_account_details }] },
       { model: tbl_companys },
       { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
@@ -77,7 +91,20 @@ class contact {
       ],
     })
       .then(data => {
-        res.status(200).json({ message: "Success", data })
+        let newData = []
+        data.forEach(element => {
+          if (element.leave_date !== null) {
+            let date = element.leave_date.split(',')
+            date = date[date.length - 1]
+            date = date.split(' ')
+            if (date[0] >= `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01`) {
+              newData.push(element)
+            }
+          } else {
+            newData.push(element)
+          }
+        });
+        res.status(200).json({ message: "Success", length: data.length, data: newData })
       })
       .catch(err => {
         let error = {
@@ -282,7 +309,6 @@ class contact {
   }
 
   static cancel(req, res) {
-    console.log("MASUK")
     tbl_contacts.update(
       {
         status: 'cancel',
@@ -368,13 +394,26 @@ class contact {
 
   static async approved(req, res) {
     let contact = await tbl_contacts.findByPk(req.params.id)
-    let newStatus = req.body.status
-    if (!contact.evaluator_2) newStatus = 'approved'
+    let newData = {
+      status: req.body.status
+    }
+
+    if (!contact.evaluator_2 || req.body.status === 'approved') {
+      if (contact.leave_request) {
+        let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+        let sisaCuti = Number(userDetail.leave) - Number(contact.leave_request)
+
+        await tbl_account_details.update({ leave: sisaCuti }, { where: { user_id: req.user.user_id } })
+      }
+
+      newData = {
+        status: 'approved',
+        done_date: new Date()
+      }
+    }
 
     tbl_contacts.update(
-      {
-        status: newStatus,
-      }, {
+      newData, {
       where: { contact_id: req.params.id }
     })
       .then(async () => {

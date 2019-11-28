@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
       timestamps: false,
     });
-  tbl_users.removeAttribute('id');
+  tbl_users.removeAttribute('id'); 
 
   tbl_users.associate = function (models) {
     // associations can be defined here
@@ -58,6 +58,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_users.hasMany(models.tbl_notifications, { as: 'from_user', foreignKey: "from_user_id" })
     tbl_users.hasMany(models.tbl_notifications, { as: 'to_user', foreignKey: "to_user_id" })
     tbl_users.hasMany(models.tbl_contact_comments, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_kritik_sarans, { foreignKey: "user_id" })
   };
 
   return tbl_users;

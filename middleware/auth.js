@@ -8,9 +8,9 @@ const {
 const { verify } = require('../helpers/jwt')
 
 function authentication(req, res, next) {
-  console.log(req.headers.token)
+  
   let decoded = verify(req.headers.token);
-console.log(decoded)
+
   tbl_users.findByPk(Number(decoded.user_id))
     .then(userFound => {
       if (userFound) {

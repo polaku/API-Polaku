@@ -68,7 +68,6 @@ class user {
               isCreatorAssistant: statusCreatorAssistant,
               adminContactCategori: detailUser.admin_contact_categori,
             })
-            console.log(detailUser.admin_contact_categori)
 
             MyContactUs && MyContactUs.forEach(async element => {
               await tbl_contacts.update({ status: 'done' }, { where: { contact_id: element.contact_id } })
@@ -112,7 +111,7 @@ class user {
     tbl_users.findAll({
       include: [{
         model: tbl_account_details,
-        where: { company_id: detailAccount.company_id },
+        // where: { company_id: detailAccount.company_id },
       }]
     })
       .then(data => {
@@ -235,7 +234,6 @@ class user {
             adminContactCategori: detailUser.admin_contact_categori,
           })
 
-          console.log(MyContactUs)
           MyContactUs && MyContactUs.forEach(async element => {
             await tbl_contacts.update({ status: 'done' }, { where: { contact_id: element.contact_id } })
           });
@@ -336,7 +334,7 @@ class user {
   }
 
   static changeAvatar(req, res) {
-    tbl_account_details.update({ avatar: req.file.path }, {
+    tbl_account_details.update({ avatar: `http://api.polagroup.co.id/${req.file.path}` }, {
       where: { user_id: req.user.user_id }
     })
       .then(async () => {
@@ -362,8 +360,6 @@ class user {
   }
 
   static async forgetPassword(req, res) {
-    let newData
-    console.log(req.body)
     // let username = await tbl_users.findOne({ where: { username: req.body.username } })
 
     // if (username) {

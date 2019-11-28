@@ -192,7 +192,6 @@ class bookingRoom {
 
                         if (partisipan.length != 0) {
                           partisipan.forEach(async el => {
-                            console.log(el)
                             if (Number(el) === Number(req.user.user_id)) {
                               tbl_event_responses.update({ response: 'waiting' }, { where: { event_response_id: creatorBookingRoom.null, user_id: el } })
                                 .then(() => { })
@@ -237,7 +236,6 @@ class bookingRoom {
                                   user_id: el,
                                 }
                                 await tbl_event_invites.create(newData1)
-                                console.log(newData1)
 
                                 mailOptions.subject = "You have invited!"
                                 mailOptions.to = dataValues.email
@@ -256,7 +254,7 @@ class bookingRoom {
                                 })
                               })
                           })
-                        }
+                        } 20
                       } catch (err) {
                         let error = {
                           uri: `http://api.polagroup.co.id/bookingRoom`,
@@ -338,8 +336,22 @@ class bookingRoom {
         ['time_in', 'ASC'],
       ],
     })
-      .then(data => {
-        res.status(200).json({ message: "Success", data })
+      .then(async (data) => {
+        let event = {}, eventResponses = []
+
+        event = await tbl_events.findOne({ where: { room_booking_id: req.params.id } })
+        if (event) {
+          eventResponses = await tbl_event_responses.findAll({
+            where: { event_id: event.event_id },
+            include: [
+              {
+                model: tbl_users,
+                include: [{ model: tbl_account_details }]
+              }]
+          })
+        }
+
+        res.status(200).json({ message: "Success", data, eventResponses })
       })
       .catch(err => {
         let error = {
@@ -402,7 +414,7 @@ class bookingRoom {
         let event = {}, eventResponses = []
 
         event = await tbl_events.findOne({ where: { room_booking_id: req.params.id } })
-		if(event){
+        if (event) {
           eventResponses = await tbl_event_responses.findAll({
             where: { event_id: event.event_id },
             include: [
@@ -410,9 +422,9 @@ class bookingRoom {
                 model: tbl_users,
                 include: [{ model: tbl_account_details }]
               }]
-            })
-		}
-		
+          })
+        }
+
         res.status(200).json({ message: "Success", data, eventResponses })
       })
       .catch(err => {
@@ -646,7 +658,7 @@ class bookingRoom {
               }
               logError(error)
               res.status(500).json(err)
-              console.log("err", err)
+              console.log(err)
             }
           }
         }
@@ -734,7 +746,6 @@ class bookingRoom {
       let data = await tbl_master_rooms.findOne({ where: { chief: req.user.user_id, user_id: req.body.user_id } })
 
       if (data) {
-        console.log(data)
         let error = {
           uri: `http://api.polagroup.co.id/bookingRoom/roomMaster`,
           method: 'post',
@@ -780,7 +791,6 @@ class bookingRoom {
     })
       .then(async data => {
         let dataCompany = await tbl_companys.findAll()
-        console.log(req.user.user_id)
         res.status(200).json({ message: "Success", data, dataCompany })
       })
       .catch(err => {

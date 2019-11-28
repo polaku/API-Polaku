@@ -52,7 +52,7 @@ class event {
           user_id: req.user.user_id,
         }
 
-        if (req.file) newData.thumbnail = req.file.path
+        if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
 
         tbl_events.create(newData)
           .then(async (data) => {
@@ -179,7 +179,6 @@ class event {
       ],
     })
       .then(data => {
-        console.log("data", data)
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
@@ -325,7 +324,7 @@ class event {
           location: req.body.location,
         }
 
-        if (req.file) newData.thumbnail = req.file.path
+        if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
 
         tbl_events.update(newData, {
           where: { event_id: req.params.id }

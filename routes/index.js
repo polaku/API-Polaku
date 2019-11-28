@@ -9,6 +9,7 @@ const contact = require('../routes/contact')
 const company = require('../routes/company')
 const department = require('../routes/department')
 const notification = require('../routes/notification')
+const kritikSaran = require('../routes/kritikSaran')
 
 router.get('/', (req, res)=>{
     res.send('Welcome to server polaku')
@@ -22,5 +23,6 @@ router.use('/contactUs', contact)
 router.use('/company', company)
 router.use('/department', department)
 router.use('/notification', notification)
+router.use('/kritikSaran', kritikSaran)
 
 module.exports = router
