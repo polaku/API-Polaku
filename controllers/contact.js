@@ -76,12 +76,13 @@ class contact {
           { type: 'request', leave_date: { [Op.ne]: null } },
         ]
       },
-      include: [{ model: tbl_users, include: [{ model: tbl_account_details }] },
-      { model: tbl_companys },
-      { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
-      { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] },
-      { model: tbl_contact_categories },
-      { model: tbl_categoris }],
+      include: [
+        { model: tbl_users, include: [{ model: tbl_account_details }] },
+        { model: tbl_companys },
+        { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
+        { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] },
+        { model: tbl_contact_categories },
+        { model: tbl_categoris }],
       order: [
         ['created_at', 'DESC'],
         ['assigned_date', 'DESC'],
