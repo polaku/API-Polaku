@@ -9,16 +9,51 @@
     - `username`: `String`, required
     - `email`: `String`, required
     - `password`: `String`, required
+    - `email`: `String`, required
+    - `role_id`: `String`, 
+    - `avatar`: `File/Image`, 
+    - `fullname`: `String`, required
+    - `initial`: `String`, required
+    - `nik`: `String`, required
+    - `address`: `String`, required
+    - `date_of_birth`: `Date`, required
+    - `leave`: `String`, required
+    - `building_id`: `String`, required
+    - `company_id`: `String`, required
+    - `designations_id`: `String`, required
+    - `phone`: `Integer`, required
+    - `name_evaluator_1`: `String`, required
+    - `name_evaluator_2`: `String`, 
   - Expected response :
     - Success (status: `201`)
       ```json
         {
           "message": "Success",
           "data": {
-            "user_id": null,
+            "user_id": "...",
             "username": "...",
             "email": "...",
-            "password": "<HashedPassword>"
+            "password": "<HashedPassword>",
+            "email": "testing@email.com",
+            "role_id": "...",
+            "activated": "...",
+            "flag_password": "...",
+            "tbl_account_detail": {
+                "account_details_id": "...",
+                "user_id": "...",
+                "fullname": "...",
+                "phone": "...",
+                "avatar": "...",
+                "company_id": "...",
+                "location_id": "...",
+                "building_id": "...",
+                "designations_id": "...",
+                "position_id": "...",
+                "leave": "...",
+                "admin_contact_categori": "...",
+                "name_evaluator_1": "...",
+                "name_evaluator_2": "..."
+            }
           }
         }
       ```
@@ -36,7 +71,16 @@
         {
           "message": "Success",
           "token": "<Token>",
-          "username": "..."
+          "username": "...",
+          "user_id": "...",
+          "role_id": "...",
+          "status": "...",
+          "position": "...",
+          "sisaCuti": "...",
+          "isRoomMaster": "...",
+          "isCreatorMaster": "...",
+          "isCreatorAssistant": "...",
+          "adminContactCategori": "..."
         }
       ```
     - Error (status: `400, 500`)
@@ -57,8 +101,25 @@
               "username": "...",
               "password": "<HashedPassword>",
               "email": "...",
-              "role": "...",
+              "role_id": "...",
               "activated": "...",
+              "flag_password": "...",
+              "tbl_account_detail": {
+                  "account_details_id": "...",
+                  "user_id": "...",
+                  "fullname": "...",
+                  "phone": "...",
+                  "avatar": "...",
+                  "company_id": "...",
+                  "location_id": "...",
+                  "building_id": "...",
+                  "designations_id": "...",
+                  "position_id": "...",
+                  "leave": "...",
+                  "admin_contact_categori": "...",
+                  "name_evaluator_1": "...",
+                  "name_evaluator_2": "..."
+              }
             }
           ]
         }
@@ -84,12 +145,161 @@
             "email": "...",
             "role": "...",
             "activated": "...",
+            "flag_password": "...",
           }
         }
       ```
     - Error (status: `400, 500`)
 
+- **Check Token**
+  - URL:
+    - `GET /users/checktoken`
+  - Header:
+    - `token`: `<Token>`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+            "status": "...",
+            "username": "...",
+            "user_id": "...",
+            "role_id": "...",
+            "isRoomMaster": "...",
+            "isCreatorMaster": "...",
+            "isCreatorAssistant": "...",
+            "position": "...",
+            "sisaCuti": "...",
+            "adminContactCategori": "...",
+            "evaluator1": {
+                "idEvaluator1": "...",
+                "name": "..."
+            }, (OPTIONAL)
+            "evaluator2": {
+                "idEvaluator2 ": "...",
+                "name": "..."
+            } (OPTIONAL)
+          }
+        }
+      ```
+    - Error (status: `400, 500`)
+
+- **Activation Account**
+  - URL:
+    - `PUT /users/activationAccount`
+  - Header:
+    - `token`: `<Token>`, required
+  - Body:
+    - `passwordLama`: `String`, required
+    - `passwordBaru`: `String`, required
+    - `email`: `String`, required
+    - `noHP`: `String`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+            "user_id": "...",
+            "username": "...",
+            "password": "<HashedPassword>",
+            "email": "...",
+            "role_id": "...",
+            "activated": "...",
+            "flag_password": "..."
+          }
+        }
+      ```
+    - Error (status: `400, 500`)
+
+- **Edit Profil**
+  - URL:
+    - `PUT /users/editProfil`
+  - Header:
+    - `token`: `<Token>`, required
+  - Body:
+    - `fullname`: `String`, required
+    - `username`: `String`, required
+    - `email`: `String`, required
+    - `noHP`: `String`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+              "user_id": "...",
+              "username": "...",
+              "password": "<HashedPassword>",
+              "email": "...",
+              "role_id": "...",
+              "activated": "...",
+              "flag_password": "...",
+              "tbl_account_detail": {
+                  "account_details_id": "...",
+                  "user_id": "...",
+                  "fullname": "...",
+                  "phone": "...",
+                  "avatar": "...",
+                  "company_id": "...",
+                  "location_id": "...",
+                  "building_id": "...",
+                  "designations_id": "...",
+                  "position_id": "...",
+                  "leave": "...",
+                  "admin_contact_categori": "...",
+                  "name_evaluator_1": "...",
+                  "name_evaluator_2": "..."
+              }
+            }
+        }
+      ```
+    - Error (status: `400, 500`)
+
+- **Change Avatar**
+  - URL:
+    - `PUT /users/changeAvatar`
+  - Header:
+    - `token`: `<Token>`, required
+  - Body:
+    - `avatar`: `File`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+              "user_id": "...",
+              "username": "...",
+              "password": "<HashedPassword>",
+              "email": "...",
+              "role_id": "...",
+              "activated": "...",
+              "flag_password": "...",
+              "tbl_account_detail": {
+                  "account_details_id": "...",
+                  "user_id": "...",
+                  "fullname": "...",
+                  "phone": "...",
+                  "avatar": "...",
+                  "company_id": "...",
+                  "location_id": "...",
+                  "building_id": "...",
+                  "designations_id": "...",
+                  "position_id": "...",
+                  "leave": "...",
+                  "admin_contact_categori": "...",
+                  "name_evaluator_1": "...",
+                  "name_evaluator_2": "..."
+              }
+            }
+        }
+      ```
+    - Error (status: `400, 500`)
+
 <br>
+//
 
 ## **Announcement Route**
 
@@ -364,10 +574,12 @@
   - Body:
     - `event_name`: `String`, required
     - `description`: `String`, required
-    - `startDate`: `Date`, required
-    - `endDate`: `Date`, required
+    - `start_date`: `Date`, required
+    - `end_date`: `Date`, required
     - `location`: `String`, required
     - `thumbnail`: `File`, required
+    - `option`: `String`, required
+    - `invited`: `Array of String`, required
   - Expected response :
     - Success (status: `201`)
       ```json
@@ -377,17 +589,22 @@
             "event_id": null,
             "event_name": "...",
             "description": "...",
-            "startDate": "...",
-            "endDate": "...",
+            "start_date": "...",
+            "end_date": "...",
             "location": "...",
+            "color": "...",
+            "status": 0,
             "thumbnail": "...",
-            "user_id": "..."
+            "user_id": "...",
+            "created_at": "...",
+            "keterangan": "...",
+            "room_booking_id": "..."
           }
         }
       ```
     - Error (status: `400, 401, 500`)
 
-- **List Event**
+- **List All Event (Only Approve Event)**
   - URL:
     - `GET /event`
   - Header:
@@ -402,16 +619,222 @@
               "event_id": "...",
               "event_name": "...",
               "description": "...",
-              "startDate": "...",
-              "endDate": "...",
+              "start_date": "...",
+              "end_date": "...",
               "location": "...",
+              "color": null,
+              "status": 1,
               "thumbnail": "...",
-              "user_id": "..."
+              "user_id": "...",
+              "created_at": "...",
+              "keterangan": "...",
+              "room_booking_id": "...",
+              "tbl_users": [
+                  {
+                      "user_id": "...",
+                      "username": "...",
+                      "password": "...",
+                      "email": "...",
+                      "role_id": "...",
+                      "activated": "...",
+                      "flag_password": "...",
+                      "tbl_event_responses": {
+                          "event_response_id": "...",
+                          "event_id": "...",
+                          "user_id": "...",
+                          "response": "...",
+                          "creator": "...",
+                          "created_at": "..."
+                      },
+                      "tbl_account_detail": {
+                          "account_details_id": "...",
+                          "user_id": "...",
+                          "fullname": "...",
+                          "phone": "...",
+                          "avatar": "...",
+                          "company_id": "...",
+                          "location_id": "...",
+                          "building_id": "...",
+                          "designations_id": "...",
+                          "position_id": "...",
+                          "leave": "...",
+                          "admin_contact_categori":"...",
+                          "name_evaluator_1": "...",
+                          "name_evaluator_2": "..."
+                      }
+                  }
+              ],
+              "tbl_event_invites": [
+                  {
+                      "event_invite_id": "...",
+                      "event_id": "...",
+                      "option": "...",
+                      "company_id": "...",
+                      "departments_id": "...",
+                      "user_id": "...",
+                      "created_at": "..."
+                  }
+              ]
             }
           ]
         }
       ```
     - Error (status: `400, 401, 500`)
+
+- **List All Event**
+  - URL:
+    - `GET /event/all`
+  - Header:
+    - `token`: `<Token>`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": [
+            {
+              "event_id": "...",
+              "event_name": "...",
+              "description": "...",
+              "start_date": "...",
+              "end_date": "...",
+              "location": "...",
+              "color": null,
+              "status": 1,
+              "thumbnail": "...",
+              "user_id": "...",
+              "created_at": "...",
+              "keterangan": "...",
+              "room_booking_id": "...",
+              "tbl_users": [
+                  {
+                      "user_id": "...",
+                      "username": "...",
+                      "password": "...",
+                      "email": "...",
+                      "role_id": "...",
+                      "activated": "...",
+                      "flag_password": "...",
+                      "tbl_event_responses": {
+                          "event_response_id": "...",
+                          "event_id": "...",
+                          "user_id": "...",
+                          "response": "...",
+                          "creator": "...",
+                          "created_at": "..."
+                      },
+                      "tbl_account_detail": {
+                          "account_details_id": "...",
+                          "user_id": "...",
+                          "fullname": "...",
+                          "phone": "...",
+                          "avatar": "...",
+                          "company_id": "...",
+                          "location_id": "...",
+                          "building_id": "...",
+                          "designations_id": "...",
+                          "position_id": "...",
+                          "leave": "...",
+                          "admin_contact_categori":"...",
+                          "name_evaluator_1": "...",
+                          "name_evaluator_2": "..."
+                      }
+                  }
+              ],
+              "tbl_event_invites": [
+                  {
+                      "event_invite_id": "...",
+                      "event_id": "...",
+                      "option": "...",
+                      "company_id": "...",
+                      "departments_id": "...",
+                      "user_id": "...",
+                      "created_at": "..."
+                  }
+              ]
+            }
+          ]
+        }
+      ```
+    - Error (status: `400, 401, 500`)
+
+- **List All My Event**
+  - URL:
+    - `GET /event/myevents`
+  - Header:
+    - `token`: `<Token>`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": [
+            {
+              "event_id": "...",
+              "event_name": "...",
+              "description": "...",
+              "start_date": "...",
+              "end_date": "...",
+              "location": "...",
+              "color": null,
+              "status": 1,
+              "thumbnail": "...",
+              "user_id": "...",
+              "created_at": "...",
+              "keterangan": "...",
+              "room_booking_id": "...",
+              "tbl_users": [
+                  {
+                      "user_id": "...",
+                      "username": "...",
+                      "password": "...",
+                      "email": "...",
+                      "role_id": "...",
+                      "activated": "...",
+                      "flag_password": "...",
+                      "tbl_event_responses": {
+                          "event_response_id": "...",
+                          "event_id": "...",
+                          "user_id": "...",
+                          "response": "...",
+                          "creator": "...",
+                          "created_at": "..."
+                      },
+                      "tbl_account_detail": {
+                          "account_details_id": "...",
+                          "user_id": "...",
+                          "fullname": "...",
+                          "phone": "...",
+                          "avatar": "...",
+                          "company_id": "...",
+                          "location_id": "...",
+                          "building_id": "...",
+                          "designations_id": "...",
+                          "position_id": "...",
+                          "leave": "...",
+                          "admin_contact_categori":"...",
+                          "name_evaluator_1": "...",
+                          "name_evaluator_2": "..."
+                      }
+                  }
+              ],
+              "tbl_event_invites": [
+                  {
+                      "event_invite_id": "...",
+                      "event_id": "...",
+                      "option": "...",
+                      "company_id": "...",
+                      "departments_id": "...",
+                      "user_id": "...",
+                      "created_at": "..."
+                  }
+              ]
+            }
+          ]
+        }
+      ```
+    - Error (status: `400, 401, 500`)
+
 
 - **Get A Event**
   - URL:
@@ -427,11 +850,62 @@
               "event_id": "...",
               "event_name": "...",
               "description": "...",
-              "startDate": "...",
-              "endDate": "...",
+              "start_date": "...",
+              "end_date": "...",
               "location": "...",
+              "color": null,
+              "status": 1,
               "thumbnail": "...",
-              "user_id": "..."
+              "user_id": "...",
+              "created_at": "...",
+              "keterangan": "...",
+              "room_booking_id": "...",
+              "tbl_users": [
+                  {
+                      "user_id": "...",
+                      "username": "...",
+                      "password": "...",
+                      "email": "...",
+                      "role_id": "...",
+                      "activated": "...",
+                      "flag_password": "...",
+                      "tbl_event_responses": {
+                          "event_response_id": "...",
+                          "event_id": "...",
+                          "user_id": "...",
+                          "response": "...",
+                          "creator": "...",
+                          "created_at": "..."
+                      },
+                      "tbl_account_detail": {
+                          "account_details_id": "...",
+                          "user_id": "...",
+                          "fullname": "...",
+                          "phone": "...",
+                          "avatar": "...",
+                          "company_id": "...",
+                          "location_id": "...",
+                          "building_id": "...",
+                          "designations_id": "...",
+                          "position_id": "...",
+                          "leave": "...",
+                          "admin_contact_categori":"...",
+                          "name_evaluator_1": "...",
+                          "name_evaluator_2": "..."
+                      }
+                  }
+              ],
+              "tbl_event_invites": [
+                  {
+                      "event_invite_id": "...",
+                      "event_id": "...",
+                      "option": "...",
+                      "company_id": "...",
+                      "departments_id": "...",
+                      "user_id": "...",
+                      "created_at": "..."
+                  }
+              ]
             }
         }
       ```
@@ -465,7 +939,7 @@
     - `location`: `String`, required
     - `thumbnail`: `File`
   - Expected response :
-    - Success (status: `201`)
+    - Success (status: `200`)
       ```json
         {
           "message": "Success",
@@ -483,6 +957,179 @@
       ```
     - Error (status: `400, 401, 500`)
 
+- **Follow A Event**
+  - URL:
+    - `PUT /event/follow`
+  - Header:
+    - `token`: `<Token>`, required
+  - Body:
+    - `event_id`: `String`, required
+    - `response`: `String`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+            "event_id": "...",
+            "event_name": "...",
+            "description": "...",
+            "start_date": "...",
+            "end_date": "...",
+            "location": "...",
+            "color": "...",
+            "status": "...",
+            "thumbnail": "...",
+            "user_id": "...",
+            "created_at": "...",
+            "keterangan": "...",
+            "room_booking_id": "..."
+          }
+        }
+      ```
+    - Error (status: `400, 401, 500`)
+
+- **Approve Event**
+  - URL:
+    - `PUT /event/approvalEvent/:id`
+  - Header:
+    - `token`: `<Token>`, required
+  - Body:
+    - `status`: `Boolean`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+            "event_id": "...",
+            "event_name": "...",
+            "description": "...",
+            "start_date": "...",
+            "end_date": "...",
+            "location": "...",
+            "color": "...",
+            "status": "...",
+            "thumbnail": "...",
+            "user_id": "...",
+            "created_at": "...",
+            "keterangan": "...",
+            "room_booking_id": "..."
+          }
+        }
+      ```
+    - Error (status: `400, 401, 500`)
+
+- **Assign Master Creator**
+  - URL:
+    - `POST /event/masterCreator`
+  - Header:
+    - `token`: `<Token>`, required
+  - Body:
+    - `user_id`: `String`, required
+    - `chief`: `String`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+            "master_creator_id": "...",
+            "user_id": "...",
+            "chief": "..."
+          }
+        }
+      ```
+    - Error (status: `400, 401, 500`)
+
+- **Get All Master Creator**
+  - URL:
+    - `GET /event/masterCreator`
+  - Header:
+    - `token`: `<Token>`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Success",
+          "data": {
+            "master_creator_id": "...",
+            "user_id": "...",
+            "chief": "...",
+            "tbl_user": {
+                "user_id": "...",
+                "username": "...",
+                "password": "...",
+                "email": "...",
+                "role_id": "...",
+                "activated": "...",
+                "flag_password": "...",
+                "tbl_account_detail": {
+                    "account_details_id": "...",
+                    "user_id": "...",
+                    "fullname": "...",
+                    "phone": "...",
+                    "avatar": "...",
+                    "company_id": "...",
+                    "location_id": "...",
+                    "building_id": "...",
+                    "designations_id": "...",
+                    "position_id": "...",
+                    "leave": "...",
+                    "admin_contact_categori": "...",
+                    "name_evaluator_1": "...",
+                    "name_evaluator_2": "..."
+                }
+            },
+            "idChief": {
+                "user_id": "...",
+                "username": "...",
+                "password": "...",
+                "email": "...",
+                "role_id": "...",
+                "activated": "...",
+                "flag_password": "...",
+                "tbl_account_detail": {
+                    "account_details_id": "...",
+                    "user_id": "...",
+                    "fullname": "...",
+                    "phone": "...",
+                    "avatar": "...",
+                    "company_id": "...",
+                    "location_id": "...",
+                    "building_id": "...",
+                    "designations_id": "...",
+                    "position_id": "...",
+                    "leave": "...",
+                    "admin_contact_categori": "...",
+                    "name_evaluator_1": "...",
+                    "name_evaluator_2": "..."
+                }
+            }
+        }
+          }
+        }
+      ```
+    - Error (status: `400, 401, 500`)
+
+
+
+- **Delete A Master Creator**
+  - URL:
+    - `DELETE /events/masterCreator/:id`
+  - Header:
+    - `token`: `<Token>`, required
+  - Expected response :
+    - Success (status: `200`)
+      ```json
+        {
+          "message": "Delete Success",
+          "id_deleted": "..."
+        }
+      ```
+    - Error (status: `400, 401, 500`)
+
+
 <br>
 
 ## **Booking Room Route**
@@ -498,7 +1145,7 @@
     - `time_in`: `Time`, required
     - `time_out`: `Time`, required
     - `subject`: `String`, required
-    - `count`: `Integer`, required
+    - `partisipan`: `Array of String`, required
   - Expected response :
     - Success (status: `201`)
       ```json
@@ -511,6 +1158,8 @@
             "time_in": "...",
             "time_out": "...",
             "subject": "...",
+            "user_id": 913,
+            "created_at": "...",
             "count": "..."
           }
         }
@@ -528,15 +1177,89 @@
         {
           "message": "Success",
           "data": [
-            {
-              "room_booking_id": "...",
-              "room_id": "...",
-              "date_in": "...",
-              "time_in": "...",
-              "time_out": "...",
-              "subject": "...",
-              "count": "..."
-            }
+              {
+                  "room_booking_id": "...",
+                  "room_id": "...",
+                  "date_in": "...",
+                  "time_in": "...",
+                  "time_out": "...",
+                  "subject": "...",
+                  "user_id": "...",
+                  "created_at": "...",
+                  "count": "...",
+                  "tbl_user": {
+                      "user_id": "...",
+                      "username": "...",
+                      "password": "...",
+                      "email": "...",
+                      "role_id": "...",
+                      "activated": "...",
+                      "flag_password": "...",
+                      "tbl_account_detail": {
+                          "account_details_id": "...",
+                          "user_id": "...",
+                          "fullname": "...",
+                          "phone": "...",
+                          "avatar": "...",
+                          "company_id": "...",
+                          "location_id": "...",
+                          "building_id": "...",
+                          "designations_id": "...",
+                          "position_id": "...",
+                          "leave": "...",
+                          "admin_contact_categori": "...",
+                          "name_evaluator_1": "...",
+                          "name_evaluator_2": "..."
+                      }
+                  },
+                  "tbl_room": {
+                      "room_id": "...",
+                      "room": "...",
+                      "max": "...",
+                      "facilities": "...",
+                      "thumbnail": "...",
+                      "company_id": "...",
+                      "building_id": "...",
+                      "location_id": "..."
+                  }
+              }
+          ],
+          "eventResponses": [
+              [
+                  {
+                      "event_response_id": "...",
+                      "event_id": "...",
+                      "user_id": "...",
+                      "response": "...",
+                      "creator": "...",
+                      "created_at": "...",
+                      "tbl_user": {
+                          "user_id": "...",
+                          "username": "...",
+                          "password": "...",
+                          "email": "...",
+                          "role_id": "...",
+                          "activated": "...",
+                          "flag_password": "...",
+                          "tbl_account_detail": {
+                              "account_details_id": "...",
+                              "user_id": "...",
+                              "fullname": "...",
+                              "phone": "...",
+                              "avatar": "...",
+                              "company_id": "...",
+                              "location_id": "...",
+                              "building_id": "...",
+                              "designations_id": "...",
+                              "position_id": "...",
+                              "leave": "...",
+                              "admin_contact_categori": "...",
+                              "name_evaluator_1": "...",
+                              "name_evaluator_2": "..."
+                          }
+                      }
+                  }
+              ]
           ]
         }
       ```

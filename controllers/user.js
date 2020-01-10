@@ -1,4 +1,4 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts } = require('../models')
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings } = require('../models')
 const { compare, hash } = require('../helpers/bcrypt')
 const { sign, verify } = require('../helpers/jwt')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
@@ -8,16 +8,47 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 
 class user {
-  static signup(req, res) {
-    let newData = {
+  static async signup(req, res) {
+    console.log(req.body)
+
+    // //nik, address, initial, date_of_birth
+    let newUser = {
       username: req.body.username,
+      password: hash(req.body.password),
       email: req.body.email,
-      password: hash(req.body.password)
+      permission: "all",
+      role_id: req.body.role || 3,
+      activated: req.body.role || 1,
     }
 
-    tbl_users.create(newData)
+    tbl_users.create(newUser)
       .then(async data => {
-        let findNew = await tbl_users.findByPk(data.null)
+
+        let building = await tbl_buildings.findByPk(req.body.building_id)
+
+        let newAccountDetail = {
+          user_id: data.null,
+          fullname: req.body.fullname,
+          initial: req.body.initial,
+          nik: req.body.nik,
+          address: req.body.address,
+          date_of_birth: req.body.dateOfBirth,
+          leave: req.body.leave,
+          building_id: req.body.building_id,
+          location_id: building.location_id,
+          company_id: req.body.company_id,
+          designations_id: req.body.designations_id,
+          phone: req.body.phone,
+          name_evaluator_1: req.body.name_evaluator_1,
+          name_evaluator_2: req.body.name_evaluator_2,
+        }
+
+        if (req.file) newAccountDetail.avatar = `http://api.polagroup.co.id/${req.file.path}`
+
+        let createAccountDetail = await tbl_account_details.create(newAccountDetail)
+
+        let findNew = await tbl_users.findByPk(createAccountDetail.user_id, { include: [{ as: "userId", model: tbl_account_details }] })
+
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -33,14 +64,21 @@ class user {
   }
 
   static signin(req, res) {
-    let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs
+    let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1,evaluator2
     tbl_users.findOne({ where: { username: req.body.username } })
       .then(async userFound => {
         if (userFound) {
           if (compare(req.body.password, userFound.password)) {
             let token = sign({ user_id: userFound.user_id })
 
-            detailUser = await tbl_account_details.findOne({ where: { user_id: userFound.user_id } })
+            detailUser = await tbl_account_details.findOne({
+              where: { user_id: userFound.user_id },
+              include:
+                [
+                  { as: "idEvaluator1", model: tbl_users, include: [{ model: tbl_account_details }] },
+                  { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] }
+                ]
+            })
             roomMaster = await tbl_master_rooms.findOne({ where: { user_id: userFound.user_id, chief: 1 } })
             creatorMaster = await tbl_master_creators.findOne({ where: { user_id: userFound.user_id, chief: 1 } })
             creatorAssistant = await tbl_master_creators.findOne({ where: { user_id: userFound.user_id, chief: { [Op.ne]: 1 } } })
@@ -53,6 +91,9 @@ class user {
             roomMaster ? statusRoomMaster = true : statusRoomMaster = false
             creatorMaster ? statusCreatorMaster = true : statusCreatorMaster = false
             creatorAssistant ? statusCreatorAssistant = true : statusCreatorAssistant = false
+
+            detailUser.idEvaluator1 ? evaluator1 = { idEvaluator1: detailUser.idEvaluator1.user_id, name: detailUser.idEvaluator1.tbl_account_detail.fullname } : null
+            detailUser.idEvaluator2 ? evaluator2 = { idEvaluator2: detailUser.idEvaluator2.user_id, name: detailUser.idEvaluator2.tbl_account_detail.fullname } : null
 
             res.status(200).json({
               message: "Success",
@@ -67,6 +108,8 @@ class user {
               isCreatorMaster: statusCreatorMaster,
               isCreatorAssistant: statusCreatorAssistant,
               adminContactCategori: detailUser.admin_contact_categori,
+              evaluator1,
+              evaluator2
             })
 
             MyContactUs && MyContactUs.forEach(async element => {
@@ -199,14 +242,21 @@ class user {
   }
 
   static checktoken(req, res) {
-    let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs
+    let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1, evaluator2
     let decoded = verify(req.headers.token);
 
     tbl_users.findByPk(Number(decoded.user_id))
       .then(async userFound => {
         if (userFound) {
           req.user = userFound
-          detailUser = await tbl_account_details.findOne({ where: { user_id: decoded.user_id } })
+          detailUser = await tbl_account_details.findOne({
+            where: { user_id: userFound.user_id },
+            include:
+              [
+                { as: "idEvaluator1", model: tbl_users, include: [{ model: tbl_account_details }] },
+                { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] }
+              ]
+          })
           roomMaster = await tbl_master_rooms.findOne({ where: { user_id: decoded.user_id, chief: 1 } })
           creatorMaster = await tbl_master_creators.findOne({ where: { user_id: decoded.user_id, chief: 1 } })
           creatorAssistant = await tbl_master_creators.findOne({ where: { user_id: decoded.user_id, chief: { [Op.ne]: 1 } } })
@@ -215,23 +265,29 @@ class user {
               user_id: userFound.user_id, status: 'confirmation', done_expired_date: { [Op.lte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` }
             }
           })
-
+          console.log(detailUser)
           // Admin Booking Room
           roomMaster ? statusRoomMaster = true : statusRoomMaster = false
           creatorMaster ? statusCreatorMaster = true : statusCreatorMaster = false
           creatorAssistant ? statusCreatorAssistant = true : statusCreatorAssistant = false
 
+          detailUser.idEvaluator1 ? evaluator1 = { idEvaluator1: detailUser.idEvaluator1.user_id, name: detailUser.idEvaluator1.tbl_account_detail.fullname } : null
+          detailUser.idEvaluator2 ? evaluator2 = { idEvaluator2: detailUser.idEvaluator2.user_id, name: detailUser.idEvaluator2.tbl_account_detail.fullname } : null
+
           res.status(200).json({
-            status: 'Oke',
+            message: 'Oke',
             username: userFound.username,
             user_id: userFound.user_id,
             role_id: userFound.role_id,
+            status: userFound.flag_password,
             isRoomMaster: statusRoomMaster,
             isCreatorMaster: statusCreatorMaster,
             isCreatorAssistant: statusCreatorAssistant,
             position: detailUser.position_id,
             sisaCuti: detailUser.leave,
             adminContactCategori: detailUser.admin_contact_categori,
+            evaluator1,
+            evaluator2 
           })
 
           MyContactUs && MyContactUs.forEach(async element => {

@@ -51,6 +51,8 @@ module.exports = (sequelize, DataTypes) => {
     tbl_users.hasMany(models.tbl_events, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_polanews, { foreignKey: "user_id" })
     tbl_users.hasOne(models.tbl_account_details, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_account_details, { as: "idEvaluator1", foreignKey: "name_evaluator_1" })
+    tbl_users.hasMany(models.tbl_account_details, { as: "idEvaluator2", foreignKey: "name_evaluator_2" })
     tbl_users.hasMany(models.tbl_event_responses, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_master_rooms, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_master_creators, { foreignKey: "user_id" })

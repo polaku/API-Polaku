@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     position_id: DataTypes.INTEGER,
     leave: DataTypes.INTEGER,
     admin_contact_categori: DataTypes.STRING,
-    name_evaluator_1: DataTypes.STRING,
-    name_evaluator_2: DataTypes.STRING,
+    name_evaluator_1: DataTypes.INTEGER,
+    name_evaluator_2: DataTypes.INTEGER,
     /*
     nik: DataTypes.STRING,
     locale: DataTypes.STRING,
@@ -36,7 +36,9 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_account_details.associate = function (models) {
     // associations can be defined here
-    tbl_account_details.belongsTo(models.tbl_users, { foreignKey: "user_id" })
+    tbl_account_details.belongsTo(models.tbl_users, { as: "userId", foreignKey: "user_id" })
+    tbl_account_details.belongsTo(models.tbl_users, { as: "idEvaluator1", foreignKey: "name_evaluator_1" })
+    tbl_account_details.belongsTo(models.tbl_users, { as: "idEvaluator2", foreignKey: "name_evaluator_2" })
     tbl_account_details.belongsTo(models.tbl_companys, { foreignKey: "company_id" })
     tbl_account_details.belongsTo(models.tbl_designations, { foreignKey: "designations_id" })
   };

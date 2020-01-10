@@ -167,12 +167,14 @@ class event {
       include: [{
         model: tbl_users,
         include: [{ model: tbl_account_details }]
-      }, {
+      },
+      {
         model: tbl_event_invites,
         where: {
           [Op.or]: condition
         }
-      }],
+      }
+      ],
       order: [
         ['start_date', 'ASC'],
         ['created_at', 'DESC']
@@ -283,6 +285,8 @@ class event {
 
   static update(req, res) {
     let newData
+    let startDate = req.body.start_date
+    let endDate = req.body.end_date
 
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
       let error = {
@@ -422,8 +426,10 @@ class event {
               event_response_id: data.event_response_id,
             }
           })
-            .then(data => {
-              res.status(200).json({ message: "Success Change", data })
+            .then(async () => {
+              let findNew = await tbl_events.findByPk(req.body.event_id)
+
+              res.status(200).json({ message: "Success Change", data: findNew })
             })
         } else {
           if (req.body.response === 'join') {
@@ -464,126 +470,126 @@ class event {
         let creator = await tbl_events.findByPk(req.params.id)
         let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
 
-        res.status(200).json({ message: "Success Change", data })
+        res.status(200).json({ message: "Success Change", data : creator })
 
-        if (dataEventInvite[0].option === 'company') {
-          dataEventInvite.forEach(async element => {
-            let paraPegawai = await tbl_account_details.findAll({ where: { company_id: element.company_id } })
-            await paraPegawai.forEach(pegawai => {
-              tbl_users.findByPk(pegawai.user_id)
-                .then(async ({ dataValues }) => {
+        // if (dataEventInvite[0].option === 'company') {
+        //   dataEventInvite.forEach(async element => {
+        //     let paraPegawai = await tbl_account_details.findAll({ where: { company_id: element.company_id } })
+        //     await paraPegawai.forEach(pegawai => {
+        //       tbl_users.findByPk(pegawai.user_id)
+        //         .then(async ({ dataValues }) => {
 
-                  let newDes = creator.event_name.split(" ")
-                  if (newDes.length > 3) {
-                    newDes = newDes.slice(0, 3).join(" ") + '...'
-                  } else {
-                    newDes = newDes.join(" ")
-                  }
-                  let newData = {
-                    description: newDes,
-                    from_user_id: req.user.user_id,
-                    to_user_id: dataValues.user_id,
-                    value: "Event",
-                    link: `/event/detailEvent/${createEvent.null}`,
-                  }
-                  await tbl_notifications.create(newData)
+        //           let newDes = creator.event_name.split(" ")
+        //           if (newDes.length > 3) {
+        //             newDes = newDes.slice(0, 3).join(" ") + '...'
+        //           } else {
+        //             newDes = newDes.join(" ")
+        //           }
+        //           let newData = {
+        //             description: newDes,
+        //             from_user_id: req.user.user_id,
+        //             to_user_id: dataValues.user_id,
+        //             value: "Event",
+        //             link: `/event/detailEvent/${createEvent.null}`,
+        //           }
+        //           await tbl_notifications.create(newData)
 
-                  if (dataValues.email !== '-') {
-                    mailOptions.subject = "There's new Event!"
-                    mailOptions.to = dataValues.email
-                    mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
-                    transporter.sendMail(mailOptions, function (error, info) {
-                      if (error) {
-                        let error = {
-                          uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
-                          method: 'put',
-                          status: 0,
-                          message: `Send email to ${dataValues.email} is error`,
-                          user_id: req.user.user_id
-                        }
-                        logError(error)
-                      }
-                    })
-                  }
-                })
-                .catch(err => {
-                  console.log(err)
-                })
-            });
-          });
-        } else if (dataEventInvite[0].option === 'department') {
-          dataEventInvite.forEach(async element => {
-            let paraPegawai = await tbl_account_details.findAll({
-              include: [{
-                model: tbl_designations,
-                where: { departments_id: element.departments_id }
-              }, {
-                model: tbl_users
-              }]
-            })
-            await paraPegawai.forEach(async pegawai => {
-              if (pegawai.tbl_user.email !== '-') {
-                mailOptions.subject = "There's new Event!"
-                mailOptions.to = pegawai.tbl_user.email
-                mailOptions.html = `Dear , <br/><br/>Haii ada acara baru nih <b>${creator.event_name}.`
-                transporter.sendMail(mailOptions, function (error, info) {
-                  if (error) {
-                    let error = {
-                      uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
-                      method: 'put',
-                      status: 0,
-                      message: `Send email to ${pegawai.tbl_user.email} is error`,
-                      user_id: req.user.user_id
-                    }
-                    logError(error)
-                  }
-                })
-              }
-            });
-          });
-        } else if (dataEventInvite[0].option === 'user') {
-          dataEventInvite.forEach(async element => {
-            await tbl_users.findByPk(element.user_id)
-              .then(async ({ dataValues }) => {
-                mailOptions.subject = "There's new Event!"
-                mailOptions.to = dataValues.email
-                mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
-                transporter.sendMail(mailOptions, function (error, info) {
-                  if (error) {
-                    let error = {
-                      uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
-                      method: 'put',
-                      status: 0,
-                      message: `Send email to ${dataValues.email} is error`,
-                      user_id: req.user.user_id
-                    }
-                    logError(error)
-                  }
-                })
-              })
-          });
-        } else if (dataEventInvite[0].option === 'all') {
-          let paraPegawai = await tbl_users.findAll()
-          paraPegawai.forEach(async element => {
-            if (element.email !== '-') {
-              mailOptions.subject = "There's new Event!"
-              mailOptions.to = element.email
-              mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
-              transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                  let error = {
-                    uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
-                    method: 'put',
-                    status: 0,
-                    message: `Send email to ${element.email} is error`,
-                    user_id: req.user.user_id
-                  }
-                  logError(error)
-                }
-              })
-            }
-          });
-        }
+        //           if (dataValues.email !== '-') {
+        //             mailOptions.subject = "There's new Event!"
+        //             mailOptions.to = dataValues.email
+        //             mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
+        //             transporter.sendMail(mailOptions, function (error, info) {
+        //               if (error) {
+        //                 let error = {
+        //                   uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+        //                   method: 'put',
+        //                   status: 0,
+        //                   message: `Send email to ${dataValues.email} is error`,
+        //                   user_id: req.user.user_id
+        //                 }
+        //                 logError(error)
+        //               }
+        //             })
+        //           }
+        //         })
+        //         .catch(err => {
+        //           console.log(err)
+        //         })
+        //     });
+        //   });
+        // } else if (dataEventInvite[0].option === 'department') {
+        //   dataEventInvite.forEach(async element => {
+        //     let paraPegawai = await tbl_account_details.findAll({
+        //       include: [{
+        //         model: tbl_designations,
+        //         where: { departments_id: element.departments_id }
+        //       }, {
+        //         model: tbl_users
+        //       }]
+        //     })
+        //     await paraPegawai.forEach(async pegawai => {
+        //       if (pegawai.tbl_user.email !== '-') {
+        //         mailOptions.subject = "There's new Event!"
+        //         mailOptions.to = pegawai.tbl_user.email
+        //         mailOptions.html = `Dear , <br/><br/>Haii ada acara baru nih <b>${creator.event_name}.`
+        //         transporter.sendMail(mailOptions, function (error, info) {
+        //           if (error) {
+        //             let error = {
+        //               uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+        //               method: 'put',
+        //               status: 0,
+        //               message: `Send email to ${pegawai.tbl_user.email} is error`,
+        //               user_id: req.user.user_id
+        //             }
+        //             logError(error)
+        //           }
+        //         })
+        //       }
+        //     });
+        //   });
+        // } else if (dataEventInvite[0].option === 'user') {
+        //   dataEventInvite.forEach(async element => {
+        //     await tbl_users.findByPk(element.user_id)
+        //       .then(async ({ dataValues }) => {
+        //         mailOptions.subject = "There's new Event!"
+        //         mailOptions.to = dataValues.email
+        //         mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
+        //         transporter.sendMail(mailOptions, function (error, info) {
+        //           if (error) {
+        //             let error = {
+        //               uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+        //               method: 'put',
+        //               status: 0,
+        //               message: `Send email to ${dataValues.email} is error`,
+        //               user_id: req.user.user_id
+        //             }
+        //             logError(error)
+        //           }
+        //         })
+        //       })
+        //   });
+        // } else if (dataEventInvite[0].option === 'all') {
+        //   let paraPegawai = await tbl_users.findAll()
+        //   paraPegawai.forEach(async element => {
+        //     if (element.email !== '-') {
+        //       mailOptions.subject = "There's new Event!"
+        //       mailOptions.to = element.email
+        //       mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
+        //       transporter.sendMail(mailOptions, function (error, info) {
+        //         if (error) {
+        //           let error = {
+        //             uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
+        //             method: 'put',
+        //             status: 0,
+        //             message: `Send email to ${element.email} is error`,
+        //             user_id: req.user.user_id
+        //           }
+        //           logError(error)
+        //         }
+        //       })
+        //     }
+        //   });
+        // }
       })
       .catch(err => {
         let error = {

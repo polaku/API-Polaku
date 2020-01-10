@@ -169,8 +169,29 @@ class contact {
   }
 
   static update(req, res) {
+
     tbl_contacts.update(
       {
+        message: req.body.message,
+        contact_categories_id: req.body.contactCategoriesId,
+        categori_id: req.body.categoriId,
+        user_id: req.user.user_id,
+        subject: req.body.subject,
+        type: req.body.type,
+        design_style: req.body.designStyle,
+        design_to: req.body.tujuan,
+        design_type: req.body.desainType,
+        design_size: req.body.ukuran,
+        design_other_specs: req.body.otherSpecs,
+        design_deadline: req.body.deadline,
+        review: req.body.review,
+        date_ijin_absen_start: req.body.date_ijin_absen_start,
+        date_ijin_absen_end: req.body.date_ijin_absen_end,
+        leave_request: req.body.leave_request,
+        leave_date: req.body.leave_date,
+        date_imp: req.body.date_imp,
+        start_time_imp: req.body.start_time_imp,
+        end_time_imp: req.body.end_time_imp,
         status: req.body.status
       }, {
       where: { contact_id: req.params.id }

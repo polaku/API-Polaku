@@ -4,7 +4,7 @@ const { authentication } = require('../middleware/auth')
 const { uploadSingle } = require('../middleware/multer')
 
 router.get('/', authentication, userController.findAll)
-router.post('/signup', userController.signup)
+router.post('/signup', uploadSingle.single('avatar'), userController.signup)
 router.post('/signin', userController.signin)
 router.put('/forgetPassword', userController.forgetPassword)
 router.get('/checktoken', userController.checktoken)

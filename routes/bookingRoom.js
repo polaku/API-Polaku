@@ -4,8 +4,8 @@ const { authentication, authorizationBookingRoom } = require('../middleware/auth
 
 router.use(authentication)
 
-router.post('/', bookingRoomController.create)
-router.get('/', bookingRoomController.findAllBookingRooms)
+router.post('/', bookingRoomController.create) //
+router.get('/', bookingRoomController.findAllBookingRooms) // 
 router.get('/myRoom', bookingRoomController.findAllMyBookingRooms)
 
 //Room

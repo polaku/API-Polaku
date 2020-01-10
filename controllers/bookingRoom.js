@@ -9,7 +9,7 @@ class bookingRoom {
   static async create(req, res) {
     let dateIn, timeIn, timeOut, room, newData, data_bookingRoomSelected, statusInvalid = false, partisipan = [], created, countPartisipan = 0
 
-    if (req.body.partisipan) partisipan = req.body.partisipan
+    if (req.body.partisipan) partisipan = JSON.parse(req.body.partisipan)
     if (req.body.count) countPartisipan = req.body.count
 
     room = await tbl_rooms.findByPk(req.body.room_id)
@@ -48,7 +48,7 @@ class bookingRoom {
         data_bookingRoomSelected = await tbl_room_bookings.findAll()
 
         data_bookingRoomSelected = data_bookingRoomSelected.filter(el => {
-          return el.date_in === req.body.date_in
+          return el.date_in === req.body.date_in.slice(0, 10)
         })
 
         data_bookingRoomSelected.forEach(el => {
@@ -180,15 +180,15 @@ class bookingRoom {
                           status: 1
                         }
                         let createEvent = await tbl_events.create(newDataEvent)
-
                         let newDataEventResponse = {
                           event_id: createEvent.null,
                           user_id: req.user.user_id,
                           response: 'creator',
                           creator: 1
                         }
-
+                        
                         let creatorBookingRoom = await tbl_event_responses.create(newDataEventResponse)
+                        console.log(creatorBookingRoom)
 
                         if (partisipan.length != 0) {
                           partisipan.forEach(async el => {
@@ -277,7 +277,7 @@ class bookingRoom {
                         user_id: req.user.user_id
                       }
                       logError(error)
-                      res.status(500).json({ err })
+                      // res.status(500).json({ err })
                       console.log(err);
                     })
                 } else {
@@ -322,7 +322,7 @@ class bookingRoom {
 
   static findAllBookingRooms(req, res) {
     tbl_room_bookings.findAll({
-      // where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
+      where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
       include: [{
         model: tbl_users,
         include: [{ model: tbl_account_details }]
@@ -337,21 +337,30 @@ class bookingRoom {
       ],
     })
       .then(async (data) => {
-        let event = {}, eventResponses = []
+        let event = {}, eventResponses = [], counter = 0
+        console.log(data.length)
 
-        event = await tbl_events.findOne({ where: { room_booking_id: req.params.id } })
-        if (event) {
-          eventResponses = await tbl_event_responses.findAll({
-            where: { event_id: event.event_id },
-            include: [
-              {
-                model: tbl_users,
-                include: [{ model: tbl_account_details }]
-              }]
+        if( data.length !== 0 ) {
+            data.forEach(async el => {
+            event = await tbl_events.findOne({ where: { room_booking_id: el.room_booking_id } })
+            if (event) {
+              let eventRespon = await tbl_event_responses.findAll({
+                where: { event_id: event.event_id },
+                include: [
+                  {
+                    model: tbl_users,
+                    include: [{ model: tbl_account_details }]
+                  }]
+              })
+              eventResponses.push(eventRespon)
+            }
+            counter++
+            if (counter === data.length) res.status(200).json({ message: "Success", data, eventResponses })
+
           })
+        }else{
+          res.status(200).json({ message: "Success", data, eventResponses })
         }
-
-        res.status(200).json({ message: "Success", data, eventResponses })
       })
       .catch(err => {
         let error = {
@@ -625,7 +634,7 @@ class bookingRoom {
                 time_in: req.body.time_in,
                 time_out: req.body.time_out,
                 subject: req.body.subject,
-                count: countPartisipan
+                // count: countPartisipan
               }
 
               tbl_room_bookings.update(newData, {
@@ -1047,14 +1056,19 @@ class bookingRoom {
       })
   }
 
-  static createRoom(req, res) {
+  static async createRoom(req, res) {
+
+    let building = await tbl_buildings.findByPk(req.body.building_id)
+
     let newData = {
       room: req.body.room,
       max: req.body.max,
       facilities: req.body.facilities,
+      company_id: building.company_id,
       building_id: req.body.building_id,
-      location_id: req.body.location_id
+      location_id: building.location_id,
     }
+    console.log(newData)
 
     tbl_rooms.create(newData)
       .then(async data => {
