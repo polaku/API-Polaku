@@ -61,6 +61,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_users.hasMany(models.tbl_notifications, { as: 'to_user', foreignKey: "to_user_id" })
     tbl_users.hasMany(models.tbl_contact_comments, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_kritik_sarans, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_kpims, { foreignKey: "user_id" })
   };
 
   return tbl_users;

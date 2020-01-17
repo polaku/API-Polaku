@@ -10,6 +10,8 @@ const company = require('../routes/company')
 const department = require('../routes/department')
 const notification = require('../routes/notification')
 const kritikSaran = require('../routes/kritikSaran')
+const kpim = require('../routes/kpim')
+const tal = require('../routes/tal')
 
 router.get('/', (req, res)=>{
     res.send('Welcome to server polaku')
@@ -24,5 +26,7 @@ router.use('/company', company)
 router.use('/department', department)
 router.use('/notification', notification)
 router.use('/kritikSaran', kritikSaran)
+router.use('/kpim', kpim)
+router.use('/tal', tal)
 
 module.exports = router

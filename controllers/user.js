@@ -64,7 +64,7 @@ class user {
   }
 
   static signin(req, res) {
-    let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1,evaluator2
+    let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1, evaluator2
     tbl_users.findOne({ where: { username: req.body.username } })
       .then(async userFound => {
         if (userFound) {
@@ -95,6 +95,8 @@ class user {
             detailUser.idEvaluator1 ? evaluator1 = { idEvaluator1: detailUser.idEvaluator1.user_id, name: detailUser.idEvaluator1.tbl_account_detail.fullname } : null
             detailUser.idEvaluator2 ? evaluator2 = { idEvaluator2: detailUser.idEvaluator2.user_id, name: detailUser.idEvaluator2.tbl_account_detail.fullname } : null
 
+            let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userFound.user_id } })
+
             res.status(200).json({
               message: "Success",
               token,
@@ -109,7 +111,8 @@ class user {
               isCreatorAssistant: statusCreatorAssistant,
               adminContactCategori: detailUser.admin_contact_categori,
               evaluator1,
-              evaluator2
+              evaluator2,
+              bawahan
             })
 
             MyContactUs && MyContactUs.forEach(async element => {
@@ -265,7 +268,7 @@ class user {
               user_id: userFound.user_id, status: 'confirmation', done_expired_date: { [Op.lte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` }
             }
           })
-          console.log(detailUser)
+
           // Admin Booking Room
           roomMaster ? statusRoomMaster = true : statusRoomMaster = false
           creatorMaster ? statusCreatorMaster = true : statusCreatorMaster = false
@@ -273,6 +276,8 @@ class user {
 
           detailUser.idEvaluator1 ? evaluator1 = { idEvaluator1: detailUser.idEvaluator1.user_id, name: detailUser.idEvaluator1.tbl_account_detail.fullname } : null
           detailUser.idEvaluator2 ? evaluator2 = { idEvaluator2: detailUser.idEvaluator2.user_id, name: detailUser.idEvaluator2.tbl_account_detail.fullname } : null
+
+          let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userFound.user_id } })
 
           res.status(200).json({
             message: 'Oke',
@@ -287,7 +292,8 @@ class user {
             sisaCuti: detailUser.leave,
             adminContactCategori: detailUser.admin_contact_categori,
             evaluator1,
-            evaluator2 
+            evaluator2,
+            bawahan
           })
 
           MyContactUs && MyContactUs.forEach(async element => {
