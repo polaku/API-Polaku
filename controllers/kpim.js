@@ -23,171 +23,171 @@ class kpim {
         ],
       })
 
-      cekKPIMTEAM(req.body.user_id, req.body.year)
+      cekKPIMTEAM(req.body.user_id, req.body.year, req.body.month)
       //cek TAL bulan sudah ada atau belum
-      // let talMonth = await tbl_kpims.findOne({
-      //   where: {
-      //     indicator_kpim: 'TAL', year: req.body.year, user_id: req.body.user_id
-      //   },
-      //   include: [{ model: tbl_kpim_scores }],
-      //   order: [
-      //     [tbl_kpim_scores, 'month', 'ASC']
-      //   ],
-      // })
+      let talMonth = await tbl_kpims.findOne({
+        where: {
+          indicator_kpim: 'TAL', year: req.body.year, user_id: req.body.user_id
+        },
+        include: [{ model: tbl_kpim_scores }],
+        order: [
+          [tbl_kpim_scores, 'month', 'ASC']
+        ],
+      })
 
-      // if (talMonth) { //JIKA SUDAH ADA TAL DI TAHUN TSB
-      //   if (req.body.indicator_kpim.toLowerCase() === "tal") {
-      //     if (!talMonth.tbl_kpim_scores[0]) {
-      //       for (let i = req.body.month; i < 12; i++) {
-      //         let newData = {
-      //           kpim_id: talMonth.kpim_id,
-      //           month: i,
-      //           target_monthly: 0
-      //         }
-      //         await tbl_kpim_scores.create(newData)
-      //       }
+      if (talMonth) { //JIKA SUDAH ADA TAL DI TAHUN TSB
+        if (req.body.indicator_kpim.toLowerCase() === "tal") {
+          if (!talMonth.tbl_kpim_scores[0]) {
+            for (let i = req.body.month; i < 12; i++) {
+              let newData = {
+                kpim_id: talMonth.kpim_id,
+                month: i,
+                target_monthly: 0
+              }
+              await tbl_kpim_scores.create(newData)
+            }
 
-      //       let dataReturn = await tbl_kpims.findByPk(talMonth.kpim_id, {
-      //         include: [{ model: tbl_kpim_scores }],
-      //         order: [
-      //           [tbl_kpim_scores, 'month', 'ASC']
-      //         ],
-      //       })
+            let dataReturn = await tbl_kpims.findByPk(talMonth.kpim_id, {
+              include: [{ model: tbl_kpim_scores }],
+              order: [
+                [tbl_kpim_scores, 'month', 'ASC']
+              ],
+            })
 
-      //       res.status(201).json({ message: "Success", data: dataReturn })
-      //     } else if (req.body.month < talMonth.tbl_kpim_scores[0].month) {
-      //       console.log("MASUK")
-      //       for (let i = req.body.month; i < talMonth.tbl_kpim_scores[0].month; i++) {
-      //         let newData = {
-      //           kpim_id: talMonth.kpim_id,
-      //           month: i,
-      //           target_monthly: 0
-      //         }
-      //         await tbl_kpim_scores.create(newData)
-      //       }
+            res.status(201).json({ message: "Success", data: dataReturn })
+          } else if (req.body.month < talMonth.tbl_kpim_scores[0].month) {
+            console.log("MASUK")
+            for (let i = req.body.month; i < talMonth.tbl_kpim_scores[0].month; i++) {
+              let newData = {
+                kpim_id: talMonth.kpim_id,
+                month: i,
+                target_monthly: 0
+              }
+              await tbl_kpim_scores.create(newData)
+            }
 
-      //       let dataReturn = await tbl_kpims.findByPk(talMonth.kpim_id, {
-      //         include: [{ model: tbl_kpim_scores }],
-      //         order: [
-      //           [tbl_kpim_scores, 'month', 'ASC']
-      //         ],
-      //       })
+            let dataReturn = await tbl_kpims.findByPk(talMonth.kpim_id, {
+              include: [{ model: tbl_kpim_scores }],
+              order: [
+                [tbl_kpim_scores, 'month', 'ASC']
+              ],
+            })
 
-      //       res.status(201).json({ message: "Success", data: dataReturn })
-      //     } else {
-      //       res.status(400).json({ message: "Error" })
-      //     }
-      //   } else {
-      //     if (talMonth.tbl_kpim_scores[0].month > req.body.month) {
-      //       for (let i = req.body.month; i < talMonth.tbl_kpim_scores[0].month; i++) {
-      //         let newData = {
-      //           kpim_id: talMonth.kpim_id,
-      //           month: i,
-      //           target_monthly: 0
-      //         }
-      //         await tbl_kpim_scores.create(newData)
-      //       }
-      //     }
+            res.status(201).json({ message: "Success", data: dataReturn })
+          } else {
+            res.status(400).json({ message: "Error" })
+          }
+        } else {
+          if (talMonth.tbl_kpim_scores[0].month > req.body.month) {
+            for (let i = req.body.month; i < talMonth.tbl_kpim_scores[0].month; i++) {
+              let newData = {
+                kpim_id: talMonth.kpim_id,
+                month: i,
+                target_monthly: 0
+              }
+              await tbl_kpim_scores.create(newData)
+            }
+          }
 
-      //     let newKPIMScore = {
-      //       indicator_kpim: req.body.indicator_kpim,
-      //       target: req.body.target,
-      //       unit: req.body.unit,
-      //       year: req.body.year,
-      //       user_id: req.body.user_id
-      //     }
+          let newKPIMScore = {
+            indicator_kpim: req.body.indicator_kpim,
+            target: req.body.target,
+            unit: req.body.unit,
+            year: req.body.year,
+            user_id: req.body.user_id
+          }
 
-      //     let createKPIM = await tbl_kpims.create(newKPIMScore)
+          let createKPIM = await tbl_kpims.create(newKPIMScore)
 
-      //     if (createKPIM) {
-      //       await targetPerbulan.forEach(async (element, index) => {
-      //         if (element !== 0 || element) {
-      //           let newData = {
-      //             kpim_id: createKPIM.null,
-      //             month: index + 1,
-      //             target_monthly: element || 0
-      //           }
-      //           await tbl_kpim_scores.create(newData)
-      //         }
-      //       });
+          if (createKPIM) {
+            await targetPerbulan.forEach(async (element, index) => {
+              if (element !== 0 || element) {
+                let newData = {
+                  kpim_id: createKPIM.null,
+                  month: index + 1,
+                  target_monthly: element || 0
+                }
+                await tbl_kpim_scores.create(newData)
+              }
+            });
 
-      //       createKPIM.kpim_id = createKPIM.null
-      //       res.status(201).json({ message: "Success", data: createKPIM })
-      //     }
-      //   }
-      // } else { //JIKA BELUM ADA TAL DI TAHUN TSB
-      //   if (req.body.indicator_kpim.toLowerCase() === "tal") {
-      //     let newKPIM = {
-      //       indicator_kpim: 'TAL',
-      //       unit: 'point',
-      //       year: req.body.year,
-      //       user_id: req.body.user_id
-      //     }
-      //     let tal = await tbl_kpims.create(newKPIM)
+            createKPIM.kpim_id = createKPIM.null
+            res.status(201).json({ message: "Success", data: createKPIM })
+          }
+        }
+      } else { //JIKA BELUM ADA TAL DI TAHUN TSB
+        if (req.body.indicator_kpim.toLowerCase() === "tal") {
+          let newKPIM = {
+            indicator_kpim: 'TAL',
+            unit: 'point',
+            year: req.body.year,
+            user_id: req.body.user_id
+          }
+          let tal = await tbl_kpims.create(newKPIM)
 
-      //     if (tal) {
-      //       for (let i = req.body.month; i <= 12; i++) {
-      //         let newData = {
-      //           kpim_id: tal.null,
-      //           month: i,
-      //           target_monthly: 0
-      //         }
-      //         await tbl_kpim_scores.create(newData)
-      //       }
-      //     }
+          if (tal) {
+            for (let i = req.body.month; i <= 12; i++) {
+              let newData = {
+                kpim_id: tal.null,
+                month: i,
+                target_monthly: 0
+              }
+              await tbl_kpim_scores.create(newData)
+            }
+          }
 
-      //     res.status(201).json({ message: "Success", data: tal })
+          res.status(201).json({ message: "Success", data: tal })
 
-      //   } else {
-      //     let newKPIM = {
-      //       indicator_kpim: 'TAL',
-      //       unit: 'point',
-      //       year: req.body.year,
-      //       user_id: req.body.user_id
-      //     }
-      //     let tal = await tbl_kpims.create(newKPIM)
+        } else {
+          let newKPIM = {
+            indicator_kpim: 'TAL',
+            unit: 'point',
+            year: req.body.year,
+            user_id: req.body.user_id
+          }
+          let tal = await tbl_kpims.create(newKPIM)
 
-      //     if (tal) {
-      //       await targetPerbulan.forEach(async (element, index) => {
-      //         if (Number(element) !== 0) {
-      //           let newData = {
-      //             kpim_id: tal.null,
-      //             month: index + 1,
-      //             target_monthly: 0
-      //           }
-      //           await tbl_kpim_scores.create(newData)
-      //         }
-      //       });
-      //     }
+          if (tal) {
+            await targetPerbulan.forEach(async (element, index) => {
+              if (Number(element) !== 0) {
+                let newData = {
+                  kpim_id: tal.null,
+                  month: index + 1,
+                  target_monthly: 0
+                }
+                await tbl_kpim_scores.create(newData)
+              }
+            });
+          }
 
-      //     let newKPIMScore = {
-      //       indicator_kpim: req.body.indicator_kpim,
-      //       target: req.body.target,
-      //       unit: req.body.unit,
-      //       year: req.body.year,
-      //       user_id: req.body.user_id
-      //     }
+          let newKPIMScore = {
+            indicator_kpim: req.body.indicator_kpim,
+            target: req.body.target,
+            unit: req.body.unit,
+            year: req.body.year,
+            user_id: req.body.user_id
+          }
 
-      //     let createKPIM = await tbl_kpims.create(newKPIMScore)
+          let createKPIM = await tbl_kpims.create(newKPIMScore)
 
-      //     if (createKPIM) {
-      //       await targetPerbulan.forEach(async (element, index) => {
-      //         if (element !== 0 || element) {
-      //           let newData = {
-      //             kpim_id: createKPIM.null,
-      //             month: index + 1,
-      //             target_monthly: element || 0
-      //           }
-      //           await tbl_kpim_scores.create(newData)
-      //         }
-      //       });
+          if (createKPIM) {
+            await targetPerbulan.forEach(async (element, index) => {
+              if (element !== 0 || element) {
+                let newData = {
+                  kpim_id: createKPIM.null,
+                  month: index + 1,
+                  target_monthly: element || 0
+                }
+                await tbl_kpim_scores.create(newData)
+              }
+            });
 
-      //       createKPIM.kpim_id = createKPIM.null
-      //       res.status(201).json({ message: "Success", data: createKPIM })
-      //     }
-      //   }
+            createKPIM.kpim_id = createKPIM.null
+            res.status(201).json({ message: "Success", data: createKPIM })
+          }
+        }
 
-      // }
+      }
     } catch (err) {
       console.log(err)
       res.status(500).json(err)
@@ -439,7 +439,8 @@ class kpim {
   }
 }
 
-async function cekKPIMTEAM(userId, year) {
+
+async function cekKPIMTEAM(userId, year, month) {
   console.log("MASUKKKK")
   try{
     let userDetail = await tbl_account_details.findByPk(userId)
@@ -460,6 +461,24 @@ async function cekKPIMTEAM(userId, year) {
     if(KPIM_team){
       console.log("Sudah Ada")
     }else{
+      let newKPIM = {
+        indicator_kpim: 'KPIM TEAM',
+        unit: 'point',
+        year: year,
+        user_id: userId
+      }
+      let tal = await tbl_kpims.create(newKPIM)
+
+      if (tal) {
+        for (let i = month; i <= 12; i++) {
+          let newData = {
+            kpim_id: tal.null,
+            month: i,
+            target_monthly: 0
+          }
+          await tbl_kpim_scores.create(newData)
+        }
+      }
       console.log("Belum Ada")
     }
 
