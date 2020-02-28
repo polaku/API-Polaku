@@ -6,7 +6,7 @@ router.use(authentication)
 router.post('/', talController.create)
 router.get('/', talController.findAll)
 // router.get('/:id', talController.findOne)
-// router.put('/:id', talController.update)
-// router.delete('/:id', talController.delete)
+router.put('/:id', talController.update)
+router.delete('/:id', talController.delete)
 
 module.exports = router

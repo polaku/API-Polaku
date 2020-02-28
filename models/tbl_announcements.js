@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
   tbl_announcements.removeAttribute('id');
 
   tbl_announcements.associate = function (models) {
-    // associations can be defitbl_usersned here
+    // associations can be defined here
     tbl_announcements.belongsTo(models.tbl_users, { foreignKey: "user_id" })
   };
 

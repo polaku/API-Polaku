@@ -6,6 +6,7 @@ router.use(authentication)
 router.post('/', kpimController.create)
 router.get('/', kpimController.findAll)
 router.get('/:id', kpimController.findOne)
+router.put('/sendGrade', kpimController.sendGrade)
 router.put('/:id', kpimController.update)
 router.delete('/:id', kpimController.delete)
 

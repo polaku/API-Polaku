@@ -6,26 +6,18 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     indicator_tal: DataTypes.STRING,
-    load: DataTypes.STRING,
-    when_day: DataTypes.STRING,
-    when_date: DataTypes.STRING,
-    weight: DataTypes.STRING,
-    achievement: DataTypes.STRING,
-    link: DataTypes.STRING,
-    week: DataTypes.STRING,
-    month: DataTypes.STRING,
-    year: DataTypes.STRING,
-    active_flag: DataTypes.BOOLEAN,
+    kpim_score_id: DataTypes.INTEGER,
     user_id: DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
   }, {
-      timestamps: false,
-    });
+    timestamps: false,
+  });
   tbl_tals.removeAttribute('id');
 
   tbl_tals.associate = function (models) {
     // associations can be defined here
     tbl_tals.belongsTo(models.tbl_users, { foreignKey: "user_id" })
+    tbl_tals.belongsTo(models.tbl_kpim_scores, { foreignKey: "kpim_score_id" })
+    tbl_tals.hasMany(models.tbl_tal_scores, { foreignKey: "tal_id" })
   };
 
   return tbl_tals;

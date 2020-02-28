@@ -20,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
   tbl_kpims.associate = function (models) {
     // associations can be defined here
     tbl_kpims.belongsTo(models.tbl_users, { foreignKey: "user_id" })
+    tbl_kpims.hasMany(models.tbl_kpim_scores, { foreignKey: "kpim_id" })
+
   };
 
   return tbl_kpims;

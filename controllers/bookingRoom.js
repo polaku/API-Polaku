@@ -61,7 +61,9 @@ class bookingRoom {
             (Number(everyTimeIn[0]) < Number(timeOut[0]) && Number(timeOut[0]) < Number(everyTimeOut[0]) && Number(req.body.room_id) === Number(el.room_id)) ||
             (Number(everyTimeIn[0]) === Number(timeIn[0]) && Number(req.body.room_id) === Number(el.room_id)) ||
             (Number(timeOut[0]) === Number(everyTimeOut[0]) && Number(req.body.room_id) === Number(el.room_id)) ||
-            (Number(timeOut[0]) >= Number(everyTimeOut[0]) && Number(everyTimeIn[0]) > Number(timeIn[0]) && Number(req.body.room_id) === Number(el.room_id))
+            (Number(timeOut[0]) >= Number(everyTimeOut[0]) && Number(everyTimeIn[0]) > Number(timeIn[0]) && Number(req.body.room_id) === Number(el.room_id)) ||
+            (Number(timeOut[0]) === Number(everyTimeIn[0]) && (Number(timeOut[1]) > Number(everyTimeIn[1]) && Number(req.body.room_id) === Number(el.room_id))) ||
+            (Number(timeIn[0]) === Number(everyTimeOut[0]) && (Number(timeIn[1]) < Number(everyTimeOut[1]) && Number(req.body.room_id) === Number(el.room_id)))
           ) {
             statusInvalid = true
           }
@@ -186,7 +188,7 @@ class bookingRoom {
                           response: 'creator',
                           creator: 1
                         }
-                        
+
                         let creatorBookingRoom = await tbl_event_responses.create(newDataEventResponse)
                         console.log(creatorBookingRoom)
 
@@ -340,8 +342,8 @@ class bookingRoom {
         let event = {}, eventResponses = [], counter = 0
         console.log(data.length)
 
-        if( data.length !== 0 ) {
-            data.forEach(async el => {
+        if (data.length !== 0) {
+          data.forEach(async el => {
             event = await tbl_events.findOne({ where: { room_booking_id: el.room_booking_id } })
             if (event) {
               let eventRespon = await tbl_event_responses.findAll({
@@ -358,7 +360,7 @@ class bookingRoom {
             if (counter === data.length) res.status(200).json({ message: "Success", data, eventResponses })
 
           })
-        }else{
+        } else {
           res.status(200).json({ message: "Success", data, eventResponses })
         }
       })
@@ -793,7 +795,10 @@ class bookingRoom {
   static findAllRoomMaster(req, res) {
     tbl_master_rooms.findAll({
       where: { chief: req.user.user_id },
-      include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }],
+      include: [{
+        model: tbl_users,
+        include: [{ model: tbl_account_details }]
+      }],
       order: [
         ['master_room_id', 'DESC']
       ]

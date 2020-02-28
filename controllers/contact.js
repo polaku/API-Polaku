@@ -70,17 +70,23 @@ class contact {
           { status: 'new2' },
           { done_expired_date: { [Op.gte]: new Date() } }, //for contact_us
           { cancel_date: { [Op.gte]: new Date() } },
-          { date_ijin_absen_end: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` } },
-          { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-$01` } },
+          { date_ijin_absen_start: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` } },
+          { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` } },
           { type: 'request', done_date: { [Op.gte]: new Date() } },
           { type: 'request', leave_date: { [Op.ne]: null } },
         ]
       },
       include: [
-        { model: tbl_users, include: [{ model: tbl_account_details }] },
+        {
+          model: tbl_users, include: [{ model: tbl_account_details }]
+        },
         { model: tbl_companys },
-        { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
-        { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] },
+        {
+          model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }]
+        },
+        {
+          model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }]
+        },
         { model: tbl_contact_categories },
         { model: tbl_categoris }],
       order: [
@@ -124,7 +130,7 @@ class contact {
   static findOne(req, res) {
     tbl_contacts.findByPk(req.params.id, {
       include: [
-        { model: tbl_users },
+        { model: tbl_users},
         { model: tbl_contact_categories },
         { model: tbl_categoris },
         { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
