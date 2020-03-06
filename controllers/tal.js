@@ -1,6 +1,7 @@
 const { tbl_tals, tbl_users, tbl_account_details, tbl_tal_scores, tbl_kpim_scores, tbl_kpims } = require('../models')
 const logError = require('../helpers/logError')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
+const inputNilaiKPIMTeam = require('../helpers/inputKPIMTEAM')
 
 const Op = require("sequelize").Op
 
@@ -69,7 +70,7 @@ class tal {
 
             tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
           })
-          
+
           await tbl_kpim_scores.update({ score_kpim_monthly: (tempScoreTALweek / counterWeek) }, { where: { kpim_score_id: req.body.kpim_score_id } })
           // ========== UPDATE KPIM SCORE (END)  ========== 
 
@@ -233,10 +234,7 @@ class tal {
             }
 
             tempTotalWeight += Number(talScore.tbl_tal_scores[0].weight)
-
-            console.log(talScore.tal_id, Number(talScore.tbl_tal_scores[0].weight))
           })
-          // res.status(200).json({allTALUser})
         }
 
         if (tempTotalWeight <= 100 || !req.body.weight) {
@@ -288,6 +286,8 @@ class tal {
 
             await tbl_kpim_scores.update({ score_kpim_monthly: (tempScoreTALweek / counterWeek) }, { where: { kpim_score_id: KPIMScoreUpdate.kpim_score_id } })
             // ========== UPDATE KPIM SCORE (END)  ========== 
+
+            await inputNilaiKPIMTeam(KPIMSelected.user_id, KPIMSelected.year, talScore.month)
           }
 
           if (updateTAL) res.status(200).json({ message: "Success", data: updateTAL })

@@ -328,7 +328,7 @@ class user {
         }
       })
       .catch(err => {
-        console.log(">>>>>>>>>>>>>>", err)
+        console.log(err)
         res.status(401).json({ status: 'Token expired2' })
       })
   }
@@ -594,11 +594,9 @@ class user {
         let company = await tbl_companys.findAll()
         let position = await tbl_positions.findAll()
 
-        // console.log(result)
         result.Sheet1.forEach(async el => {
 
           if (el.action === "CREATE") {
-            console.log(el.posisi)
             let gedung = building.find(building => building.building === el.gedung)
             let evaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el.nik_evaluator_1))
             let evaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el.nik_evaluator_2))
@@ -623,8 +621,6 @@ class user {
               role_id: 3,
               activated: 1,
             }
-
-            console.log(newUser)
 
             tbl_users.create(newUser)
               .then(async data => {
@@ -658,8 +654,6 @@ class user {
                   }
                 }
                 newAccountDetail.nik = tempNIK
-
-                console.log(newAccountDetail)
 
                 let createAccountDetail = await tbl_account_details.create(newAccountDetail)
               })

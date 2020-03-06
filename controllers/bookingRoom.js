@@ -190,7 +190,6 @@ class bookingRoom {
                         }
 
                         let creatorBookingRoom = await tbl_event_responses.create(newDataEventResponse)
-                        console.log(creatorBookingRoom)
 
                         if (partisipan.length != 0) {
                           partisipan.forEach(async el => {
@@ -340,7 +339,6 @@ class bookingRoom {
     })
       .then(async (data) => {
         let event = {}, eventResponses = [], counter = 0
-        console.log(data.length)
 
         if (data.length !== 0) {
           data.forEach(async el => {
@@ -669,7 +667,7 @@ class bookingRoom {
               }
               logError(error)
               res.status(500).json(err)
-              console.log("err", err)
+              console.log(err)
             }
           }
         }
@@ -1073,7 +1071,6 @@ class bookingRoom {
       building_id: req.body.building_id,
       location_id: building.location_id,
     }
-    console.log(newData)
 
     tbl_rooms.create(newData)
       .then(async data => {

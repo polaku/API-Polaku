@@ -1,6 +1,7 @@
 const { tbl_kpims, tbl_kpim_scores, tbl_users, tbl_account_details, tbl_tals, tbl_tal_scores } = require('../models')
 const logError = require('../helpers/logError')
 const Op = require("sequelize").Op;
+const inputNilaiKPIMTeam = require('../helpers/inputKPIMTEAM')
 
 class kpim {
   static async create(req, res) {
@@ -23,17 +24,7 @@ class kpim {
         ],
       })
 
-      cekKPIMTEAM(req.body.user_id, req.body.year, req.body.month)
-      //cek TAL bulan sudah ada atau belum
-      let talMonth = await tbl_kpims.findOne({
-        where: {
-          indicator_kpim: 'TAL', year: req.body.year, user_id: req.body.user_id
-        },
-        include: [{ model: tbl_kpim_scores }],
-        order: [
-          [tbl_kpim_scores, 'month', 'ASC']
-        ],
-      })
+      await createKPIMTeam(req.body.user_id, req.body.year, req.body.month)
 
       if (talMonth) { //JIKA SUDAH ADA TAL DI TAHUN TSB
         if (req.body.indicator_kpim.toLowerCase() === "tal") {
@@ -54,9 +45,10 @@ class kpim {
               ],
             })
 
+            await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
+
             res.status(201).json({ message: "Success", data: dataReturn })
           } else if (req.body.month < talMonth.tbl_kpim_scores[0].month) {
-            console.log("MASUK")
             for (let i = req.body.month; i < talMonth.tbl_kpim_scores[0].month; i++) {
               let newData = {
                 kpim_id: talMonth.kpim_id,
@@ -72,6 +64,8 @@ class kpim {
                 [tbl_kpim_scores, 'month', 'ASC']
               ],
             })
+
+            await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
 
             res.status(201).json({ message: "Success", data: dataReturn })
           } else {
@@ -111,6 +105,8 @@ class kpim {
               }
             });
 
+            await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
+
             createKPIM.kpim_id = createKPIM.null
             res.status(201).json({ message: "Success", data: createKPIM })
           }
@@ -135,6 +131,8 @@ class kpim {
               await tbl_kpim_scores.create(newData)
             }
           }
+
+          await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
 
           res.status(201).json({ message: "Success", data: tal })
 
@@ -181,6 +179,8 @@ class kpim {
                 await tbl_kpim_scores.create(newData)
               }
             });
+
+            await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
 
             createKPIM.kpim_id = createKPIM.null
             res.status(201).json({ message: "Success", data: createKPIM })
@@ -328,12 +328,12 @@ class kpim {
               await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: kpimMonth.kpim_id } })
             }
 
+            inputNilaiKPIMTeam(kpimSelected.user_id, kpimSelected.year, kpimMonth.month, 'atas')
+            res.status(200).json({ message: "Success", data: updateKPIMScore })
           }
-          res.status(200).json({ message: "Success", data: updateKPIMScore })
         } else {
           throw { Error: "Total bobot lebih dari 100%" }
         }
-
 
       } else {
         if (typeof req.body.monthly === 'object') targetPerbulan = req.body.monthly
@@ -349,11 +349,14 @@ class kpim {
 
         if (updateKPIM) {
           await targetPerbulan.forEach(async (element, index) => {
+
             let newData = {
               bobot: element.bobot,
               target_monthly: element.target_monthly,
-              pencapaian_monthly: element.pencapaian_monthly
+              pencapaian_monthly: element.pencapaian_monthly,
+              score_kpim_monthly: ((Number(element.pencapaian_monthly) / Number(element.target_monthly)) * 100)
             }
+
             let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: element.kpim_score_id } })
 
             if (updateKPIMScore) {
@@ -365,8 +368,12 @@ class kpim {
               await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
             }
           });
+          let kpimSelected = await tbl_kpims.findByPk(req.params.id)
+
+          await inputNilaiKPIMTeam(kpimSelected.user_id, kpimSelected.year, req.body.month)
+
+          res.status(200).json({ message: "Success", data: updateKPIM })
         }
-        res.status(200).json({ message: "Success", data: updateKPIM })
       }
     } catch (err) {
       console.log(err)
@@ -410,11 +417,8 @@ class kpim {
   static async sendGrade(req, res) {
     let arrayKPIMScoreId = null
     try {
-      console.log(req.body.arrayKPIMScoreId)
       if (typeof req.body.arrayKPIMScoreId === 'object') arrayKPIMScoreId = req.body.arrayKPIMScoreId
       else arrayKPIMScoreId = JSON.parse(req.body.arrayKPIMScoreId)
-
-      console.log(arrayKPIMScoreId)
 
       arrayKPIMScoreId.forEach(async kpimScoreId => {
 
@@ -425,7 +429,6 @@ class kpim {
         let tal = await tbl_tals.findAll({ where: { kpim_score_id: kpimScoreId } })
 
         tal.forEach(async el => {
-          console.log("el", el, "month", kpimScore.month)
           await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month } })
         })
       })
@@ -437,54 +440,102 @@ class kpim {
       res.status(500).json(err)
     }
   }
-}
 
-
-async function cekKPIMTEAM(userId, year, month) {
-  console.log("MASUKKKK")
-  try{
-    let userDetail = await tbl_account_details.findByPk(userId)
-
-    let evaluator1 = await tbl_account_details.findOne({where:{user_id: userDetail.name_evaluator_1}})
-    console.log(evaluator1)
-
-    let KPIM_team = await tbl_kpims.findOne({
-        where: {
-          indicator_kpim: 'KPIM_TEAM', year, user_id: evaluator1.user_id
-        },
-        include: [{ model: tbl_kpim_scores }],
-        order: [
-          [tbl_kpim_scores, 'month', 'ASC']
-        ],
-      })
-
-    if(KPIM_team){
-      console.log("Sudah Ada")
-    }else{
-      let newKPIM = {
-        indicator_kpim: 'KPIM TEAM',
-        unit: 'point',
-        year: year,
-        user_id: userId
-      }
-      let tal = await tbl_kpims.create(newKPIM)
-
-      if (tal) {
-        for (let i = month; i <= 12; i++) {
-          let newData = {
-            kpim_id: tal.null,
-            month: i,
-            target_monthly: 0
-          }
-          await tbl_kpim_scores.create(newData)
-        }
-      }
-      console.log("Belum Ada")
+  static async calculateKPIMTEAM(req, res) {
+    try {
+      await inputNilaiKPIMTeam(req.user.user_id, req.body.year, req.body.month)
+      res.status(200).json({ message: "Success" })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json(err)
     }
-
-  }catch(err){
-    console.log(err)
   }
-
 }
+
+
+async function createKPIMTeam(userIdBawahan, year, month) {
+  let userDetail = await tbl_account_details.findOne({ where: { user_id: userIdBawahan } })
+
+  let evaluator1 = await tbl_account_details.findOne({ where: { user_id: userDetail.name_evaluator_1 } })
+
+  let KPIM_team = await tbl_kpims.findOne({
+    where: {
+      indicator_kpim: 'KPIM TEAM', year, user_id: evaluator1.user_id
+    },
+    include: [{ model: tbl_kpim_scores }],
+    order: [
+      [tbl_kpim_scores, 'month', 'ASC']
+    ],
+  })
+
+  if (KPIM_team) {
+    if (KPIM_team.tbl_kpim_scores[0].month > month) {
+      for (let i = month; i < KPIM_team.tbl_kpim_scores[0].month; i++) {
+        let newData = {
+          kpim_id: KPIM_team.kpim_id,
+          month: i,
+          target_monthly: 0
+        }
+        await tbl_kpim_scores.create(newData)
+      }
+    }
+  } else {
+    let newKPIM = {
+      indicator_kpim: 'KPIM TEAM',
+      unit: 'point',
+      year: year,
+      user_id: evaluator1.user_id
+    }
+    let tal = await tbl_kpims.create(newKPIM)
+
+    if (tal) {
+      for (let i = month; i <= 12; i++) {
+        let newData = {
+          kpim_id: tal.null,
+          month: i,
+          target_monthly: 0
+        }
+        await tbl_kpim_scores.create(newData)
+      }
+    }
+    console.log("Belum Ada KPIM TEAM")
+  }
+}
+
+// async function inputNilaiKPIMTeam(userIdBawahan, year, month, ket) {
+
+//   let counterUserKPIM = 0, tempKPIM = [], tempScoreKPIM = 0
+
+//   let userDetail = await tbl_account_details.findOne({ where: { user_id: userIdBawahan } })
+
+//   let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userDetail.name_evaluator_1 } })
+//   let allKPIM = await tbl_kpims.findAll({ where: { year }, include: [{ model: tbl_kpim_scores, where: { month } }] })
+
+//   bawahan && await bawahan.forEach(async element => { //fetch kpim per user
+//     let newKPIM = []
+
+//     newKPIM = allKPIM.filter(el => el.user_id === element.user_id)
+//     tempKPIM = [...tempKPIM, ...newKPIM]
+//     if (newKPIM.length > 0) counterUserKPIM++
+
+//   });
+
+//   tempKPIM.forEach(kpimMonth => {
+//     tempScoreKPIM += kpimMonth.tbl_kpim_scores[0].score_kpim_monthly * (Number(kpimMonth.tbl_kpim_scores[0].bobot) / 100)
+//   })
+
+//   let scoreKPIMTEAM = Math.ceil(tempScoreKPIM / counterUserKPIM)
+
+//   console.log("score KPIM total", tempScoreKPIM)
+//   console.log("counterUserKPIM", counterUserKPIM)
+//   console.log("score KPIM TEAM", scoreKPIMTEAM)
+
+//   let kpimTEAMmonthselected = await tbl_kpims.findOne({ where: { indicator_kpim: 'KPIM TEAM', year, user_id: userDetail.name_evaluator_1 }, include: [{ model: tbl_kpim_scores, where: { month } }] })
+
+//   kpimTEAMmonthselected && await tbl_kpim_scores.update({ score_kpim_monthly: scoreKPIMTEAM }, { where: { kpim_score_id: kpimTEAMmonthselected.tbl_kpim_scores[0].kpim_score_id } })
+
+//   return tempKPIM
+
+// }
+
 module.exports = kpim

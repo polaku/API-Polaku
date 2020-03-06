@@ -4,7 +4,6 @@ const logError = require('../helpers/logError')
 class announcement {
   static create(req, res) {
     let startDate, endDate, newData, attachment, thumbnail
-    // console.log(req.files)
     if (req.files.length != 0) {
       attachment = req.files.find(el => el.mimetype === 'application/pdf')
       thumbnail = req.files.find(el => el.mimetype != 'application/pdf')
@@ -150,7 +149,6 @@ class announcement {
       }]
     })
       .then(async data => {
-        console.log(data);
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
