@@ -1,4 +1,4 @@
-const { tbl_polanews, tbl_users } = require('../models')
+const { tbl_polanews, tbl_users, tbl_account_details } = require('../models')
 const logError = require('../helpers/logError')
 
 class news {
@@ -24,6 +24,7 @@ class news {
       newData = {
         title: req.body.title,
         description: req.body.description,
+        status: req.body.status,
         user_id: req.user.user_id,
         status: req.body.status
       }
@@ -53,7 +54,7 @@ class news {
 
   static findAll(req, res) {
     tbl_polanews.findAll({
-      include: [{ model: tbl_users }],
+      include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }],
       order: [
         ['created_at', 'DESC']
       ],
@@ -76,7 +77,7 @@ class news {
   }
 
   static findOne(req, res) {
-    tbl_polanews.findByPk(req.params.id, { include: [{ model: tbl_users }] })
+    tbl_polanews.findByPk(req.params.id, { include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }] })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })
@@ -129,7 +130,7 @@ class news {
       status: req.body.status
     }
 
-    if (attachments) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
+    if (attachment) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
     if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
 
     tbl_polanews.update(newData, {
