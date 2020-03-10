@@ -9,7 +9,7 @@ router.post('/', uploadAny.any(), announcementController.create)
 router.get('/', announcementController.findAll)
 router.get('/:id', announcementController.findOne)
 
-router.use('/:id', authorizationAnnouncement)
+// router.use('/:id', authorizationAnnouncement)
 
 router.delete('/:id', announcementController.delete)
 router.put('/:id', uploadAny.any(), announcementController.update)

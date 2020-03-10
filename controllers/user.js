@@ -248,6 +248,9 @@ class user {
   static findOne(req, res) {
     tbl_users.findByPk(req.params.id, {
       where: { activated: 1 },
+      attributes: {
+        exclude: ['password']
+      },
       include: [{
         model: tbl_account_details,
       }]

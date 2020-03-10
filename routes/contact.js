@@ -19,7 +19,7 @@ router.get('/confirmation/:id', contactController.confirmation)
 router.get('/done/:id', contactController.done)
 router.put('/cancel/:id', contactController.cancel)
 
-router.use('/:id', authorizationContact)
+// router.use('/:id', authorizationContact)
 
 router.delete('/:id', contactController.delete)
 router.patch('/:id', contactController.update)

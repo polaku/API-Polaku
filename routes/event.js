@@ -18,7 +18,8 @@ router.delete('/masterCreator/:id', eventController.deleteMasterCreator)
 
 router.get('/:id', eventController.findOne)
 
-router.use('/:id',authorizationEvent)
+// router.use('/:id',authorizationEvent)
+
 router.delete('/:id', eventController.delete)
 router.put('/:id', uploadSingle.single('thumbnail'), eventController.update)
 

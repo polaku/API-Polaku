@@ -4,13 +4,13 @@ const logError = require('../helpers/logError')
 class news {
   static create(req, res) {
     let newData, attachment, thumbnail
-
+console.log("MASUK")
     if (req.files.length != 0) {
       attachment = req.files.find(el => el.mimetype === 'application/pdf')
       thumbnail = req.files.find(el => el.mimetype != 'application/pdf')
     }
 
-    if (!req.body.title || !req.body.description) {
+    if (!req.body.title) {
       let error = {
         uri: `http://api.polagroup.co.id/news`,
         method: 'post',
@@ -38,6 +38,7 @@ class news {
           res.status(201).json({ message: "Success", data: findNew })
         })
         .catch(err => {
+          console.log(err);
           let error = {
             uri: `http://api.polagroup.co.id/news`,
             method: 'post',
@@ -47,7 +48,6 @@ class news {
           }
           logError(error)
           res.status(500).json({ err })
-          console.log(err);
         })
     }
   }
