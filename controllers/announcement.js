@@ -75,8 +75,11 @@ class announcement {
             end_date: req.body.endDate
           }
 
-          if (attachment) newData.attachment = `http://api.polagroup.co.id/${attachment.path}`
-          if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+          // if (attachment) newData.attachment = `http://api.polagroup.co.id/${attachment.path}`
+          // if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+
+          if (attachment) newData.attachment = `http://165.22.110.159/${attachment.path}`
+          if (thumbnail) newData.thumbnail = `http://165.22.110.159/${thumbnail.path}`
 
           tbl_announcements.create(newData)
             .then(async data => {
@@ -259,8 +262,11 @@ class announcement {
             end_date: req.body.endDate
           }
 
-          if (attachment) newData.attachment = `http://api.polagroup.co.id/${attachment.path}`
-          if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+          // if (attachment) newData.attachment = `http://api.polagroup.co.id/${attachment.path}`
+          // if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+          if (attachment) newData.attachment = `http://165.22.110.159/${attachment.path}`
+          if (thumbnail) newData.thumbnail = `http://165.22.110.159/${thumbnail.path}`
+          
 
           tbl_announcements.update(newData, {
             where: { announcements_id: req.params.id }, returning: true

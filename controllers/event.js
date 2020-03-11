@@ -52,7 +52,8 @@ class event {
           user_id: req.user.user_id,
         }
 
-        if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
+        // if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
+        if (req.file) newData.thumbnail = `http://165.22.110.159/${req.file.path}`
 
         tbl_events.create(newData)
           .then(async (data) => {
@@ -328,7 +329,8 @@ class event {
           location: req.body.location,
         }
 
-        if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
+        // if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
+        if (req.file) newData.thumbnail = `http://165.22.110.159/${req.file.path}`
 
         tbl_events.update(newData, {
           where: { event_id: req.params.id }

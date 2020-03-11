@@ -29,8 +29,10 @@ console.log("MASUK")
         status: req.body.status
       }
 
-      if (attachment) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
-      if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+      // if (attachment) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
+      // if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+      if (attachment) newData.attachments = `http://165.22.110.159/${attachment.path}`
+      if (thumbnail) newData.thumbnail = `http://165.22.110.159/${thumbnail.path}`
 
       tbl_polanews.create(newData)
         .then(async data => {
@@ -130,8 +132,10 @@ console.log("MASUK")
       status: req.body.status
     }
 
-    if (attachment) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
-    if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+    // if (attachment) newData.attachments = `http://api.polagroup.co.id/${attachment.path}`
+    // if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
+    if (attachment) newData.attachments = `http://165.22.110.159/${attachment.path}`
+    if (thumbnail) newData.thumbnail = `http://165.22.110.159/${thumbnail.path}`
 
     tbl_polanews.update(newData, {
       where: { polanews_id: req.params.id }

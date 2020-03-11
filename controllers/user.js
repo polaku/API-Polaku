@@ -56,7 +56,8 @@ class user {
         newAccountDetail.nik = tempNIK
 
 
-        if (req.file) newAccountDetail.avatar = `http://api.polagroup.co.id/${req.file.path}`
+        // if (req.file) newAccountDetail.avatar = `http://api.polagroup.co.id/${req.file.path}`
+        if (req.file) newAccountDetail.avatar = `http://165.22.110.159/${req.file.path}`
 
         let createAccountDetail = await tbl_account_details.create(newAccountDetail)
 
@@ -471,7 +472,8 @@ class user {
   }
 
   static changeAvatar(req, res) {
-    tbl_account_details.update({ avatar: `http://api.polagroup.co.id/${req.file.path}` }, {
+    // tbl_account_details.update({ avatar: `http://api.polagroup.co.id/${req.file.path}` }, {
+    tbl_account_details.update({ avatar: `http://165.22.110.159/${req.file.path}` }, {
       where: { user_id: req.user.user_id }
     })
       .then(async () => {
