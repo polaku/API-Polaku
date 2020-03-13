@@ -157,7 +157,7 @@ class bookingRoom {
                     time_out: req.body.time_out,
                     subject: req.body.subject,
                     user_id: req.user.user_id,
-                    count: partisipan.length || countPartisipan
+                    count: partisipan.length > countPartisipan ? partisipan.length : countPartisipan
                   }
 
                   tbl_room_bookings.create(newData)
@@ -503,7 +503,7 @@ class bookingRoom {
   }
 
   static async update(req, res) {
-    let dateIn, timeIn, timeOut, roomId, room, newData, data_bookingRoomSelected, statusInvalid = false
+    let dateIn, timeIn, timeOut, room_booking, room, newData, data_bookingRoomSelected, statusInvalid = false
 
     if (!req.body.date_in || !req.body.time_in || !req.body.time_out || !req.body.subject) {
       let error = {
@@ -538,9 +538,14 @@ class bookingRoom {
         room = await tbl_rooms.findByPk(room_booking.room_id)
         data_bookingRoomSelected = await tbl_room_bookings.findAll()
 
-        data_bookingRoomSelected = data_bookingRoomSelected.filter(el => {
-          return el.date_in === req.body.date_in.slice(0, 10) && el.booking_room_id !== req.params.id
-        })
+        data_bookingRoomSelected = await data_bookingRoomSelected.filter(el => 
+          el.date_in === req.body.date_in.slice(0, 10) && 
+          Number(el.room_booking_id) !== Number(req.params.id) &&
+          Number(el.room_id) === Number(req.body.room_id)
+          )
+
+        console.log(data_bookingRoomSelected)
+        console.log(req.params.id)
 
         data_bookingRoomSelected.forEach(el => {
           let everyTimeIn, everyTimeOut
@@ -636,7 +641,7 @@ class bookingRoom {
                 time_in: req.body.time_in,
                 time_out: req.body.time_out,
                 subject: req.body.subject,
-                // count: countPartisipan
+                count: req.body.count
               }
 
               tbl_room_bookings.update(newData, {
