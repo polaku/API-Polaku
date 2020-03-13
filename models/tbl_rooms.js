@@ -12,6 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     company_id: DataTypes.INTEGER,
     building_id: DataTypes.INTEGER,
     location_id: DataTypes.INTEGER,
+    open_gate: DataTypes.TIME, 
+    close_gate: DataTypes.TIME 
   }, {
       timestamps: false,
     });

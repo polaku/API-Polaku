@@ -82,46 +82,46 @@ class bookingRoom {
         } else {
 
           //Validation Time in and Time Out
-          if (Number(timeIn[0]) < 8) {
+          if (Number(timeIn[0]) < new Date(room.open_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom`,
               method: 'post',
               status: 400,
-              message: 'Time in must higher than 8',
+              message: `Time in must higher than ${new Date(room.open_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: 'Time in must higher than 8' })
-          } else if (Number(timeIn[0]) > 17) {
+            res.status(400).json({ error: `Time in must higher than ${new Date(room.open_gate).getHours()}` })
+          } else if (Number(timeIn[0]) > new Date(room.close_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom`,
               method: 'post',
               status: 400,
-              message: 'Time in must smaller than 17',
+              message: `Time in must smaller than ${new Date(room.close_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: 'Time in must smaller than 17' })
-          } else if (Number(timeOut[0]) < 8) {
+            res.status(400).json({ error: `Time in must smaller than ${new Date(room.close_gate).getHours()}` })
+          } else if (Number(timeOut[0]) < new Date(room.open_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom`,
               method: 'post',
               status: 400,
-              message: `Time out must higher than ${Number(timeIn[0])}`,
+              message: `Time out must higher than ${new Date(room.open_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: `Time out must higher than ${Number(timeIn[0])}` })
-          } else if (Number(timeOut[0]) > 17) {
+            res.status(400).json({ error: `Time out must higher than ${new Date(room.open_gate).getHours()}` })
+          } else if (Number(timeOut[0]) > new Date(room.close_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom`,
               method: 'post',
               status: 400,
-              message: `Limit time out is 17`,
+              message: `Limit time out is ${new Date(room.close_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: 'Limit time out is 17' })
+            res.status(400).json({ error: `Limit time out is ${new Date(room.close_gate).getHours()}` })
           } else if (Number(timeIn[0]) > Number(timeOut[0])) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom`,
@@ -534,10 +534,12 @@ class bookingRoom {
         timeOut = req.body.time_out.split(':')
 
         //Validation time
+        room_booking = await tbl_room_bookings.findByPk(req.params.id)
+        room = await tbl_rooms.findByPk(room_booking.room_id)
         data_bookingRoomSelected = await tbl_room_bookings.findAll()
 
         data_bookingRoomSelected = data_bookingRoomSelected.filter(el => {
-          return el.date_in === req.body.date_in && el.booking_room_id !== req.params.id
+          return el.date_in === req.body.date_in.slice(0, 10) && el.booking_room_id !== req.params.id
         })
 
         data_bookingRoomSelected.forEach(el => {
@@ -566,46 +568,46 @@ class bookingRoom {
           logError(error)
           res.status(400).json({ message: 'Error Time', info: 'Waktu yang pesan sudah terpesan oleh orang lain, harap menentukan waktu yang lain' })
         } else {
-          if (Number(timeIn[0]) < 8) {
+          if (Number(timeIn[0]) < new Date(room.open_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
               method: 'put',
               status: 400,
-              message: 'Time in must higher than 8',
+              message: `Time in must higher than ${new Date(room.open_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: 'Time in must higher than 8' })
-          } else if (Number(timeIn[0]) > 17) {
+            res.status(400).json({ error: `Time in must higher than ${new Date(room.open_gate).getHours()}` })
+          } else if (Number(timeIn[0]) > new Date(room.close_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
               method: 'put',
               status: 400,
-              message: 'Time in must smaller than 17',
+              message: `Time in must smaller than ${new Date(room.close_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: 'Time in must smaller than 17' })
-          } else if (Number(timeOut[0]) < 8) {
+            res.status(400).json({ error: `Time in must smaller than ${new Date(room.close_gate).getHours()}` })
+          } else if (Number(timeOut[0]) < new Date(room.open_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
               method: 'put',
               status: 400,
-              message: `Time out must higher than ${Number(timeIn[0])}`,
+              message: `Time out must higher than ${new Date(room.open_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: `Time out must higher than ${Number(timeIn[0])}` })
-          } else if (Number(timeOut[0]) > 17) {
+            res.status(400).json({ error: `Time out must higher than ${new Date(room.open_gate).getHours()}` })
+          } else if (Number(timeOut[0]) > new Date(room.close_gate).getHours()) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
               method: 'put',
               status: 400,
-              message: `Limit time out is 17`,
+              message: `Limit time out is ${new Date(room.close_gate).getHours()}`,
               user_id: req.user.user_id
             }
             logError(error)
-            res.status(400).json({ error: 'Limit time out is 17' })
+            res.status(400).json({ error: `Limit time out is ${new Date(room.close_gate).getHours()}` })
           } else if (Number(timeIn[0]) > Number(timeOut[0])) {
             let error = {
               uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
@@ -628,8 +630,8 @@ class bookingRoom {
             res.status(400).json({ error: `Time in must higher than ${new Date().getHours()}` })
           } else {
             try {
-
               newData = {
+                room_id: req.body.room_id,
                 date_in: req.body.date_in,
                 time_in: req.body.time_in,
                 time_out: req.body.time_out,
