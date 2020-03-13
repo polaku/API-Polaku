@@ -544,9 +544,6 @@ class bookingRoom {
           Number(el.room_id) === Number(req.body.room_id)
           )
 
-        console.log(data_bookingRoomSelected)
-        console.log(req.params.id)
-
         data_bookingRoomSelected.forEach(el => {
           let everyTimeIn, everyTimeOut
           everyTimeIn = el.time_in.split(':')
