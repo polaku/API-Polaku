@@ -538,11 +538,11 @@ class bookingRoom {
         room = await tbl_rooms.findByPk(room_booking.room_id)
         data_bookingRoomSelected = await tbl_room_bookings.findAll()
 
-        data_bookingRoomSelected = await data_bookingRoomSelected.filter(el => 
-          el.date_in === req.body.date_in.slice(0, 10) && 
+        data_bookingRoomSelected = await data_bookingRoomSelected.filter(el =>
+          el.date_in === req.body.date_in.slice(0, 10) &&
           Number(el.room_booking_id) !== Number(req.params.id) &&
           Number(el.room_id) === Number(req.body.room_id)
-          )
+        )
 
         data_bookingRoomSelected.forEach(el => {
           let everyTimeIn, everyTimeOut
@@ -879,38 +879,46 @@ class bookingRoom {
 
     if (userAccountDetail.company_id === 2) {                   // Khusus Artistika
       dinamicCondition = { building_id: 1 }
-    }
-    else if (userAccountDetail.company_id === 5) {            // Khusus BPW
-      if (userAccountDetail.building_id) {
-        dinamicCondition = {
-          [Op.or]: [
-            { building_id: 1 },
-            { building_id: userAccountDetail.building_id }
-          ]
-        }
-      } else if (userAccountDetail.location_id) {
-        dinamicCondition = {
-          [Op.or]: [
-            { building_id: 1 },
-            { location_id: userAccountDetail.location_id }
-          ]
-        }
-      } else {
-        dinamicCondition = {
-          [Op.or]: [
-            { building_id: 1 },
-            { company_id: userAccountDetail.company_id }
-          ]
-        }
+    } else {            // KECUALI ARTISTIKA
+      dinamicCondition = {
+        [Op.or]: [
+          { building_id: userAccountDetail.building_id },
+          { location_id: userAccountDetail.location_id },
+          { company_id: userAccountDetail.company_id }
+        ]
       }
     }
-    else if (userAccountDetail.building_id) {                 // Bila ada building_id di tbl_account_details
-      dinamicCondition = { building_id: userAccountDetail.building_id }
-    } else if (userAccountDetail.location_id) {                 // Bila ada location_id di tbl_account_details
-      dinamicCondition = { location_id: userAccountDetail.location_id }
-    } else {                                                    // Berdasarkan company //
-      dinamicCondition = { company_id: userAccountDetail.company_id }
-    }
+    // else if (userAccountDetail.company_id === 5) {            // Khusus BPW
+    //   if (userAccountDetail.building_id) {
+    //     dinamicCondition = {
+    //       [Op.or]: [
+    //         { building_id: 1 },
+    //         { building_id: userAccountDetail.building_id }
+    //       ]
+    //     }
+    //   } else if (userAccountDetail.location_id) {
+    //     dinamicCondition = {
+    //       [Op.or]: [
+    //         { building_id: 1 },
+    //         { location_id: userAccountDetail.location_id }
+    //       ]
+    //     }
+    //   } else {
+    //     dinamicCondition = {
+    //       [Op.or]: [
+    //         { building_id: 1 },
+    //         { company_id: userAccountDetail.company_id }
+    //       ]
+    //     }
+    //   }
+    // }
+    // else if (userAccountDetail.building_id) {                 // Bila ada building_id di tbl_account_details
+    //   dinamicCondition = { building_id: userAccountDetail.building_id }
+    // } else if (userAccountDetail.location_id) {                 // Bila ada location_id di tbl_account_details
+    //   dinamicCondition = { location_id: userAccountDetail.location_id }
+    // } else {                                                    // Berdasarkan company //
+    //   dinamicCondition = { company_id: userAccountDetail.company_id }
+    // }
 
     tbl_buildings.findAll({
       where: dinamicCondition,
@@ -1008,36 +1016,45 @@ class bookingRoom {
     if (userAccountDetail.company_id === 2) {                   // Khusus Artistika
       dinamicCondition = { building_id: 1 }
       // dinamicCondition = { building_id: 1, company_id: 2 }
-    } else if (userAccountDetail.company_id === 5) {            // Khusus BPW
-      if (userAccountDetail.building_id) {
-        dinamicCondition = {
-          [Op.or]: [
-            { building_id: 1, room_id: { [Op.ne]: 12 } },
-            { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } }
-          ]
-        }
-      } else if (userAccountDetail.location_id) {
-        dinamicCondition = {
-          [Op.or]: [
-            { building_id: 1, room_id: { [Op.ne]: 12 } },
-            { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } }
-          ]
-        }
-      } else {
-        dinamicCondition = {
-          [Op.or]: [
-            { building_id: 1, room_id: { [Op.ne]: 12 } },
-            { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } }
-          ]
-        }
+    } else {      //KECUALI ARTISTIKA
+      dinamicCondition = {
+        [Op.or]: [
+          { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } },
+          { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } },
+          { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } }
+        ]
       }
-    } else if (userAccountDetail.building_id) {                 // Bila ada building_id di tbl_account_details
-      dinamicCondition = { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } }
-    } else if (userAccountDetail.location_id) {                  // Bila ada location_id di tbl_account_details
-      dinamicCondition = { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } }
-    } else {                                                    // Berdasarkan company
-      dinamicCondition = { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } }
     }
+    // else if (userAccountDetail.company_id === 5) {            // Khusus BPW
+    //   if (userAccountDetail.building_id) {
+    //     dinamicCondition = {
+    //       [Op.or]: [
+    //         { building_id: 1, room_id: { [Op.ne]: 12 } },
+    //         { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } }
+    //       ]
+    //     }
+    //   } else if (userAccountDetail.location_id) {
+    //     dinamicCondition = {
+    //       [Op.or]: [
+    //         { building_id: 1, room_id: { [Op.ne]: 12 } },
+    //         { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } }
+    //       ]
+    //     }
+    //   } else {
+    //     dinamicCondition = {
+    //       [Op.or]: [
+    //         { building_id: 1, room_id: { [Op.ne]: 12 } },
+    //         { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } }
+    //       ]
+    //     }
+    //   }
+    // } else if (userAccountDetail.building_id) {                 // Bila ada building_id di tbl_account_details
+    //   dinamicCondition = { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } }
+    // } else if (userAccountDetail.location_id) {                  // Bila ada location_id di tbl_account_details
+    //   dinamicCondition = { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } }
+    // } else {                                                    // Berdasarkan company
+    //   dinamicCondition = { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } }
+    // }
 
     tbl_rooms.findAll({
       where: dinamicCondition,
