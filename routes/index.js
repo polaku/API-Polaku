@@ -16,7 +16,7 @@ const rewardKPIM = require('./rewardKPIM')
 const position = require('./position')
 
 router.get('/', (req, res)=>{
-    res.send('Welcome to server polaku')
+    res.send('Welcome to server polaku-react')
 })
 router.use('/announcement', announcement)
 router.use('/news', news)
