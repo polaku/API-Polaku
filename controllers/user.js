@@ -142,8 +142,8 @@ class user {
               message: 'Username/password invalid',
             }
             logError(error)
-            console.log("ERROR SIGNIN")
-        console.log(err)
+            console.log("ERROR SIGNIN", req.body.username)
+            console.log(err)
             res.status(400).json({ msg: "Username/password invalid" })
           }
         } else {
@@ -155,7 +155,7 @@ class user {
           }
           logError(error)
           console.log("ERROR SIGNIN")
-        console.log(err)
+          console.log(err)
           res.status(400).json({ msg: "Username/password invalid" })
         }
       })
@@ -612,11 +612,11 @@ class user {
         result.Sheet1.forEach(async el => {
 
           if (el.action === "CREATE") {
-            let gedung = building.find(building => building.building === el.gedung)
+            let gedung = await building.find(building => building.building === el.gedung)
             let evaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el.nik_evaluator_1))
             let evaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el.nik_evaluator_2))
-            let perusahaan = company.find(pt => pt.company_name === el.perusahaan)
-            let posisi = position.find(pos => pos.position === el.posisi)
+            let perusahaan = await company.find(pt => pt.company_name === el.perusahaan)
+            let posisi = await position.find(pos => pos.position === el.posisi)
 
             let dateBirth = new Date(el.birth_date).getDate()
             let monthBirth = new Date(el.birth_date).getMonth() + 1
