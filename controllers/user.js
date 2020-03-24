@@ -111,7 +111,7 @@ class user {
             detailUser.idEvaluator1 ? evaluator1 = { idEvaluator1: detailUser.idEvaluator1.user_id, name: detailUser.idEvaluator1.tbl_account_detail.fullname } : null
             detailUser.idEvaluator2 ? evaluator2 = { idEvaluator2: detailUser.idEvaluator2.user_id, name: detailUser.idEvaluator2.tbl_account_detail.fullname } : null
 
-            let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userFound.user_id }, include: [{ model: tbl_companys }] })
+            let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userFound.user_id, }, include: [{ model: tbl_companys }, { model: tbl_users, where: { activated: 1 } }] })
 
             res.status(200).json({
               message: "Success",
@@ -315,7 +315,7 @@ class user {
           detailUser.idEvaluator1 ? evaluator1 = { idEvaluator1: detailUser.idEvaluator1.user_id, name: detailUser.idEvaluator1.tbl_account_detail.fullname } : null
           detailUser.idEvaluator2 ? evaluator2 = { idEvaluator2: detailUser.idEvaluator2.user_id, name: detailUser.idEvaluator2.tbl_account_detail.fullname } : null
 
-          let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userFound.user_id }, include: [{ model: tbl_companys }] })
+          let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userFound.user_id }, include: [{ model: tbl_companys }, { model: tbl_users, where: { activated: 1 } }] })
 
           res.status(200).json({
             message: 'Oke',
