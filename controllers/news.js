@@ -4,7 +4,7 @@ const logError = require('../helpers/logError')
 class news {
   static create(req, res) {
     let newData, attachment, thumbnail
-console.log("MASUK")
+
     if (req.files.length != 0) {
       attachment = req.files.find(el => el.mimetype === 'application/pdf')
       thumbnail = req.files.find(el => el.mimetype != 'application/pdf')

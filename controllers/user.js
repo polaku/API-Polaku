@@ -73,6 +73,8 @@ class user {
           message: err,
         }
         logError(error)
+        console.log("ERROR SIGNUP")
+        console.log(err)
         res.status(500).json({ err })
       })
   }
@@ -140,6 +142,8 @@ class user {
               message: 'Username/password invalid',
             }
             logError(error)
+            console.log("ERROR SIGNIN")
+        console.log(err)
             res.status(400).json({ msg: "Username/password invalid" })
           }
         } else {
@@ -150,6 +154,8 @@ class user {
             message: 'Username/password invalid',
           }
           logError(error)
+          console.log("ERROR SIGNIN")
+        console.log(err)
           res.status(400).json({ msg: "Username/password invalid" })
         }
       })
@@ -162,6 +168,8 @@ class user {
           message: err,
         }
         logError(error)
+        console.log("ERROR SIGNIN")
+        console.log(err)
         res.status(500).json(err)
       })
   }
@@ -196,6 +204,8 @@ class user {
           user_id: req.user.user_id,
         }
         logError(error)
+        console.log("ERROR FINDALL_USER")
+        console.log(err)
         res.status(500).json({ err })
         console.log(err);
       })
