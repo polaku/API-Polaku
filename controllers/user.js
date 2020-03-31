@@ -263,6 +263,7 @@ class user {
   }
 
   static findOne(req, res) {
+    console.log(req.params.id)
     tbl_users.findByPk(req.params.id, {
       where: { activated: 1 },
       attributes: {
@@ -273,6 +274,7 @@ class user {
       }]
     })
       .then(data => {
+        console.log(data)
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
