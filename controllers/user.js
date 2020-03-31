@@ -253,11 +253,11 @@ class user {
         uri: 'http://api.polagroup.co.id/users/changePassword',
         method: 'put',
         status: 400,
-        message: err,
+        message: 'Password invalid',
         user_id: req.user.user_id,
       }
       logError(error)
-      res.status(400).json({ msg: "Username/password invalid" })
+      res.status(400).json({ msg: "Password invalid" })
     }
 
   }
