@@ -248,6 +248,14 @@ class tal {
             score_tal: newScore
           }
 
+          if (Number(req.body.forDay) === 1) {
+            newData.when_day = req.body.time
+            newData.when_date = ''
+          } else {
+            newData.when_day = ''
+            newData.when_date = req.body.time
+          }
+
           let updateTAL = await tbl_tal_scores.update(newData, { where: { tal_score_id: req.params.id } })
 
           if (updateTAL && (req.body.achievement || req.body.weight)) {
