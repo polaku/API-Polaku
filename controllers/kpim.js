@@ -195,13 +195,19 @@ class kpim {
   }
 
   static findAll(req, res) {
-    let situationKPIM, situationKPIMScore = {}
+    let situationKPIM
 
     if (req.query.year) {
       situationKPIM = {
         where: { year: req.query.year },
         include: [
-          { model: tbl_users, include: [{ model: tbl_account_details }] }
+          {
+            model: tbl_users, include: [{
+              model: tbl_account_details, include: [{
+                model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
+              }]
+            }]
+          }
         ],
         order: [
           ['created_at', 'DESC'],
@@ -211,7 +217,13 @@ class kpim {
       }
     } else {
       situationKPIM = {
-        include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }],
+        include: [{
+          model: tbl_users, include: [{
+            model: tbl_account_details, include: [{
+              model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
+            }]
+          }]
+        }],
         order: [
           ['created_at', 'DESC'],
           ['user_id', 'ASC'],
