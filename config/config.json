@@ -5,6 +5,7 @@
     "database": "polaadmin_polaku",
     "host": "127.0.0.1",
     "dialect": "mysql",
+    "logging": false,
     "operatorsAliases": "Op",
     "pool": {
       "max": 5,
@@ -14,11 +15,17 @@
   },
   "test": {
     "username": "root",
-    "password": "Testing123",
-    "database": "database_test",
+    "password": "polaku2019",
+    "database": "polaadmin_polaku",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "logging": false,
+    "operatorsAliases": "Op",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    }
   },
   "production": {
     "username": "root",
@@ -26,6 +33,12 @@
     "database": "polaadmin_polaku",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "logging": false,
+    "operatorsAliases": "Op",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "idle": 10000
+    }
   }
 }
