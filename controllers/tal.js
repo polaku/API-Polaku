@@ -116,39 +116,48 @@ class tal {
       }
       let dataReturn = []
       try {
-        let theDate = new Date(`${req.body.year}-${req.body.month}-${req.body.firstDateInWeek}`)
-        let counterDate = req.body.firstDateInWeek, i = req.body.week, tempMonth = req.body.month - 1, batasLooping = 52
+        let counterDate, i = req.body.week, tempMonth = req.body.month - 1
 
-        if (req.body.week)
 
-          for (; i <= 53; i++) {
-            let date = new Date(new Date(theDate).getFullYear(), new Date(theDate).getMonth(), counterDate)
-            let month = date.getMonth() + 1
+        if (Number(req.body.forDay) === 1) {
+          let listDay = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
 
-            newData.month = month
+          counterDate = req.body.firstDateInWeek + listDay.indexOf(req.body.time.toLowerCase())
+        } else {
+          counterDate = req.body.firstDateInWeek
+        }
 
-            if (date.getFullYear() === new Date(theDate).getFullYear()) { //tidak lebih dari tahun tersebut
-              if (Number(req.body.forDay) === 1) {
-                newData.week = i
-                newData.when_day = req.body.time
+        let theDate = new Date(req.body.year, Number(req.body.month) - 1, counterDate)
 
+        for (; i <= 53; i++) {
+          let date = new Date(theDate.getFullYear(), theDate.getMonth(), counterDate)
+          let month = date.getMonth() + 1
+
+          newData.month = month
+          console.log(i, date.getFullYear(), new Date(theDate).getFullYear(), date.getFullYear() === new Date(theDate).getFullYear())
+          if (date.getFullYear() === new Date(theDate).getFullYear()) { //tidak lebih dari tahun tersebut
+            console.log(date)
+            if (Number(req.body.forDay) === 1) {
+              newData.week = i
+              newData.when_day = req.body.time
+
+              let createTAL = await tbl_tal_scores.create(newData)
+              createTAL.tal_id = createTAL.null
+              dataReturn.push(createTAL)
+            } else {
+              if (month !== tempMonth) {
+                newData.week = getNumberOfWeek(new Date(new Date(theDate).getFullYear(), month - 1, req.body.time))
+                newData.when_date = req.body.time
                 let createTAL = await tbl_tal_scores.create(newData)
                 createTAL.tal_id = createTAL.null
                 dataReturn.push(createTAL)
-              } else {
-                if (month !== tempMonth) {
-                  newData.week = getNumberOfWeek(new Date(new Date(theDate).getFullYear(), month - 1, req.body.time))
-                  newData.when_date = req.body.time
-                  let createTAL = await tbl_tal_scores.create(newData)
-                  createTAL.tal_id = createTAL.null
-                  dataReturn.push(createTAL)
-                  tempMonth = month
-                }
+                tempMonth = month
               }
             }
-
-            counterDate += 7 //loop hari
           }
+
+          counterDate += 7 //loop hari
+        }
 
         res.status(201).json({ message: 'Success', data: dataReturn })
       } catch (err) {
