@@ -323,11 +323,11 @@ class user {
           detailUser.idEvaluator1 ? evaluator1 = { idEvaluator1: detailUser.idEvaluator1.user_id, name: detailUser.idEvaluator1.tbl_account_detail.fullname } : null
           detailUser.idEvaluator2 ? evaluator2 = { idEvaluator2: detailUser.idEvaluator2.user_id, name: detailUser.idEvaluator2.tbl_account_detail.fullname } : null
 
-          let bawahan = await tbl_account_details.findAll({ 
-            where: { name_evaluator_1: userFound.user_id }, 
+          let bawahan = await tbl_account_details.findAll({
+            where: { name_evaluator_1: userFound.user_id },
             include: [
               { model: tbl_companys }, { model: tbl_users, as: "userId", where: { activated: 1 } }
-            ] 
+            ]
           })
 
           res.status(200).json({
@@ -404,7 +404,7 @@ class user {
     }
   }
 
-  static async editProfil(req, res) {
+  static async editProfil(req, res) { //edit diri sendiri
     let newData1, newData2
 
     newData1 = {
@@ -446,13 +446,17 @@ class user {
     }
   }
 
-  static async editUser(req, res) {
+  static async editUser(req, res) { //edit orang lain (admin)
     let newData1, newData2
 
     newData1 = {
       username: req.body.username,
       email: req.body.email,
       activated: req.body.isActive
+    }
+
+    if (req.body.password) {
+      newData1.password = hash(req.body.password)
     }
 
     newData2 = {
@@ -481,6 +485,23 @@ class user {
 
       res.status(200).json({ message: "Success", data: dataReturning })
 
+      if (req.body.password) {
+        mailOptions.subject = "Your password has been changed!"
+        mailOptions.to = dataReturning.email
+        mailOptions.html = `Dear , <br/><br/>Password anda sudah diganti oleh admin menjadi <b>${req.body.password}</b>.<br />Terimakasih`
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            let error = {
+              uri: `http://api.polagroup.co.id/editUser/${req.params.id}`,
+              method: 'post',
+              status: 0,
+              message: `Send email to ${dataValues.email} is error`,
+              user_id: req.user.user_id
+            }
+            logError(error)
+          }
+        })
+      }
     } catch (err) {
       let error = {
         uri: 'http://api.polagroup.co.id/users/editProfil',
