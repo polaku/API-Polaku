@@ -316,11 +316,13 @@ class kpim {
           let newScore
 
           if (kpimSelected.unit.toLowerCase() === "keluhan" || kpimSelected.unit.toLowerCase() === "komplen" || kpimSelected.unit.toLowerCase() === "complain" || kpimSelected.unit.toLowerCase() === "reject") {
+            console.log("MASUK 1")
             newScore = (((Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)) - (Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly))) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
           } else {
+            console.log("MASUK 2")
             newScore = ((Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly)) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
           }
-
+          console.log("req.body", req.body)
           let newData = {
             target_monthly: req.body.target_monthly,
             bobot: req.body.bobot,
@@ -329,6 +331,7 @@ class kpim {
 
           if (kpimSelected.indicator_kpim.toLowerCase() !== "tal") newData.score_kpim_monthly = newScore
 
+          console.log("newData", newData)
           let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: req.params.id } })
 
           if (updateKPIMScore) {
@@ -338,6 +341,9 @@ class kpim {
               kpimOneYear.forEach(kpimScore => {
                 tempScore += kpimScore.pencapaian_monthly
               })
+
+              console.log("tempScore", tempScore)
+              console.log("kpimMonth.kpim_id", kpimMonth.kpim_id)
               await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: kpimMonth.kpim_id } })
             }
 
