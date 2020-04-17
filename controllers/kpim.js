@@ -345,8 +345,6 @@ class kpim {
             res.status(200).json({ message: "Success", data: updateKPIMScore })
           }
         } else {
-          console.log(req.params.id)
-          console.log(totalBobotAfter)
           throw { Error: "Total bobot lebih dari 100%" }
         }
 
