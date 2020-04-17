@@ -291,7 +291,7 @@ class kpim {
   }
 
   static async update(req, res) {
-    let targetPerbulan
+    let targetPerbulan, statusKhusus = false//khusus nilai invert
     try {
 
       if (req.query.update === "month") { // khusus KPIM Month
@@ -315,13 +315,11 @@ class kpim {
           let newScore
 
           if (kpimSelected.unit.toLowerCase() === "keluhan" || kpimSelected.unit.toLowerCase() === "komplen" || kpimSelected.unit.toLowerCase() === "complain" || kpimSelected.unit.toLowerCase() === "reject") {
-            console.log("MASUK 1")
+            statusKhusus = true
             newScore = (((Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)) - (Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly))) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
           } else {
-            console.log("MASUK 2")
             newScore = ((Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly)) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
           }
-          console.log("req.body", req.body)
           let newData = {
             target_monthly: req.body.target_monthly,
             bobot: req.body.bobot,
@@ -330,22 +328,16 @@ class kpim {
 
           if (kpimSelected.indicator_kpim.toLowerCase() !== "tal") newData.score_kpim_monthly = newScore
 
-          console.log("newData", newData)
-          console.log("kpim_score_id", req.params.id)
           let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: req.params.id } })
 
           if (updateKPIMScore) {
-            console.log("MASUK 3")
-            if (req.body.pencapaian_monthly) { //for update pencapaian kpim tahunan
-            console.log("MASUK 4")
+            if (req.body.pencapaian_monthly || statusKhusus) { //for update pencapaian kpim tahunan
               let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: kpimMonth.kpim_id } })
               let tempScore = 0
               kpimOneYear.forEach(kpimScore => {
                 tempScore += kpimScore.pencapaian_monthly
               })
 
-              console.log("tempScore", tempScore)
-              console.log("kpimMonth.kpim_id", kpimMonth.kpim_id)
               await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: kpimMonth.kpim_id } })
             }
 
