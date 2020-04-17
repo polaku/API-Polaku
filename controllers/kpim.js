@@ -306,7 +306,6 @@ class kpim {
             if (Number(kpim.tbl_kpim_scores[0].kpim_score_id) === Number(req.params.id)) {
               kpim.tbl_kpim_scores[0].bobot = req.body.bobot
             }
-            console.log(kpim.tbl_kpim_scores[0])
             totalBobotAfter += Number(kpim.tbl_kpim_scores[0].bobot)
           })
         }
@@ -332,10 +331,13 @@ class kpim {
           if (kpimSelected.indicator_kpim.toLowerCase() !== "tal") newData.score_kpim_monthly = newScore
 
           console.log("newData", newData)
+          console.log("kpim_score_id", req.params.id)
           let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: req.params.id } })
 
           if (updateKPIMScore) {
+            console.log("MASUK 3")
             if (req.body.pencapaian_monthly) { //for update pencapaian kpim tahunan
+            console.log("MASUK 4")
               let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: kpimMonth.kpim_id } })
               let tempScore = 0
               kpimOneYear.forEach(kpimScore => {
