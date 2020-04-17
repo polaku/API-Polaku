@@ -306,6 +306,7 @@ class kpim {
             if (Number(kpim.tbl_kpim_scores[0].kpim_score_id) === Number(req.params.id)) {
               kpim.tbl_kpim_scores[0].bobot = req.body.bobot
             }
+            console.log(kpim.tbl_kpim_scores[0])
             totalBobotAfter += Number(kpim.tbl_kpim_scores[0].bobot)
           })
         }
