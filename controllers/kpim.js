@@ -317,6 +317,9 @@ class kpim {
           if (kpimSelected.unit.toLowerCase() === "keluhan" || kpimSelected.unit.toLowerCase() === "komplen" || kpimSelected.unit.toLowerCase() === "complain" || kpimSelected.unit.toLowerCase() === "reject") {
             statusKhusus = true
             newScore = (((Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)) - (Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly))) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
+            if ((Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)) < (Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly))) {
+              newScore = Math.abs(newScore) + 100
+            }
           } else {
             newScore = ((Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly)) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
           }

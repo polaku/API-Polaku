@@ -1,7 +1,6 @@
 const { tbl_kpims, tbl_kpim_scores, tbl_account_details } = require('../models')
 
 module.exports = async function inputNilaiKPIMTeam(userId, year, month, isAtasan) {
-  console.log("MASUK")
   let counterUserKPIM = 0, tempKPIM = [], tempScoreKPIM = 0, idAtasan
 
   if (isAtasan) {
