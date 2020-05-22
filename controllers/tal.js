@@ -266,47 +266,14 @@ class tal {
               newData.when_date = req.body.time
             }
           }
-          console.log(newData)
+
           let updateTAL = await tbl_tal_scores.update(newData, { where: { tal_score_id: req.params.id } })
 
           if (updateTAL && (req.body.achievement || req.body.weight)) {
 
-            // ========== UPDATE KPIM SCORE (START)  ========== 
-            let KPIMScoreSelected = await tbl_kpim_scores.findByPk(talSelected.kpim_score_id)
+            let updateScoreTAL = await updateScoreTALMonth(talSelected.kpim_score_id, talScore.month, talSelected.user_id)
 
-            let KPIMScoreUpdate = await tbl_kpim_scores.findOne({ where: { kpim_id: KPIMScoreSelected.kpim_id, month: talScore.month } })
-
-            let KPIMSelected = await tbl_kpims.findByPk(KPIMScoreSelected.kpim_id)
-
-            let allTALUser = await tbl_tals.findAll({
-              where: { user_id: talSelected.user_id },
-              include: [{ model: tbl_tal_scores, where: { month: talScore.month, year: KPIMSelected.year } }]
-            })
-
-            let tempScore = []
-
-            allTALUser.forEach(tal => {
-              tempScore = [...tempScore, ...tal.tbl_tal_scores]
-            })
-
-            await tempScore.sort(compare)
-
-            let tempScoreTALweek = 0, tempWeekSelected = null, counterWeek = 0
-
-            await tempScore.forEach((tal_score) => {
-
-              if (tempWeekSelected !== tal_score.week) {
-                tempWeekSelected = tal_score.week
-                counterWeek++
-              }
-
-              tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
-            })
-
-            await tbl_kpim_scores.update({ score_kpim_monthly: (tempScoreTALweek / counterWeek) }, { where: { kpim_score_id: KPIMScoreUpdate.kpim_score_id } })
-            // ========== UPDATE KPIM SCORE (END)  ========== 
-
-            await inputNilaiKPIMTeam(KPIMSelected.user_id, KPIMSelected.year, talScore.month)
+            await inputNilaiKPIMTeam(updateScoreTAL.user_id, updateScoreTAL.year, talScore.month)
           }
 
           if (updateTAL) res.status(200).json({ message: "Success", data: updateTAL })
@@ -364,8 +331,8 @@ function getNumberOfWeek(date) {
 
   target.setDate(target.getDate() - dayNr + 3);
 
-  var jan4 = new Date(target.getFullYear(), 0, 4);
-  var dayDiff = (target - jan4) / 86400000;
+  var reference = new Date(target.getFullYear(), 0, 4);
+  var dayDiff = (target - reference) / 86400000;
   var weekNr = 1 + Math.ceil(dayDiff / 7);
 
   return weekNr;
@@ -379,6 +346,48 @@ function compare(a, b) {
     return 1;
   }
   return 0;
+}
+
+async function updateScoreTALMonth(kpimScoreId, month, userId) {
+  let day = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+  let KPIMScoreSelected = await tbl_kpim_scores.findByPk(kpimScoreId)
+
+  let KPIMScoreUpdate = await tbl_kpim_scores.findOne({ where: { kpim_id: KPIMScoreSelected.kpim_id, month } })
+
+  let KPIMSelected = await tbl_kpims.findByPk(KPIMScoreSelected.kpim_id)
+
+  let weekDate20 = await getNumberOfWeek(`${KPIMSelected.year}-${month}-20`)
+
+  let allTALUser = await tbl_tals.findAll({
+    where: { user_id: userId },
+    include: [{ model: tbl_tal_scores, where: { month, year: KPIMSelected.year } }]
+  })
+
+  let tempScore = []
+
+  allTALUser.forEach(tal => {
+    tempScore = [...tempScore, ...tal.tbl_tal_scores]
+  })
+
+  await tempScore.sort(compare)
+
+  let tempScoreTALweek = 0, tempWeekSelected = null, counterWeek = 0
+
+  await tempScore.forEach((tal_score) => {
+
+    if (tempWeekSelected !== tal_score.week && tal_score.week <= weekDate20) {
+      tempWeekSelected = tal_score.week
+      counterWeek++
+    }
+    if ((tal_score.month === month && tal_score.week < weekDate20) || (tal_score.month === month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20)))) {
+    tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
+    }
+  })
+
+  await tbl_kpim_scores.update({ score_kpim_monthly: (tempScoreTALweek / counterWeek) }, { where: { kpim_score_id: KPIMScoreUpdate.kpim_score_id } })
+  // ========== UPDATE KPIM SCORE (END)  ========== 
+
+  return { user_id: KPIMSelected.user_id, year: KPIMSelected.year }
 }
 
 module.exports = tal

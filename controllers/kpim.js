@@ -428,25 +428,35 @@ class kpim {
   }
 
   static async sendGrade(req, res) {
-    let arrayKPIMScoreId = null
+    let arrayKPIMScoreId = null, tal, day = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     try {
       if (typeof req.body.arrayKPIMScoreId === 'object') arrayKPIMScoreId = req.body.arrayKPIMScoreId
       else arrayKPIMScoreId = JSON.parse(req.body.arrayKPIMScoreId)
 
-      arrayKPIMScoreId.forEach(async kpimScoreId => {
+      await arrayKPIMScoreId.forEach(async kpimScoreId => {
 
         await tbl_kpim_scores.update({ hasConfirm: 1 }, { where: { kpim_score_id: kpimScoreId } })
 
         let kpimScore = await tbl_kpim_scores.findByPk(kpimScoreId)
+        let kpim = await tbl_kpims.findByPk(kpimScore.kpim_id)
+        let weekDate20 = await getNumberOfWeek(`${kpim.year}-${kpimScore.month}-20`)
+        console.log(weekDate20)
 
-        let tal = await tbl_tals.findAll({ where: { kpim_score_id: kpimScoreId } })
+        tal = await tbl_tals.findAll({
+          where: { kpim_score_id: kpimScoreId },
+          include: [{ model: tbl_tal_scores, where: { week: { [Op.lte]: weekDate20 } } }]
+        })
 
         tal.forEach(async el => {
-          await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month } })
+          await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month, week: { [Op.lt]: weekDate20 } } })
+          el.tbl_tal_scores.forEach(async tal_score => {
+            if (tal_score.month === kpimScore.month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${kpimScore.month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20))) {
+              // console.log("tanggal", tal_score.when_date, "when_day", tal_score.when_day && day.indexOf(tal_score.when_day), new Date(`${kpim.year}-${kpimScore.month}-20`).getDay(), "when_date", (tal_score.when_date && Number(tal_score.when_date) <= 20))
+              await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_score_id: tal_score.tal_score_id } })
+            }
+          })
         })
       })
-
-
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -515,40 +525,18 @@ async function createKPIMTeam(userIdBawahan, year, month) {
   }
 }
 
-// async function inputNilaiKPIMTeam(userIdBawahan, year, month, ket) {
+function getNumberOfWeek(date) {
+  let theDay = date
+  var target = new Date(theDay);
+  var dayNr = (new Date(theDay).getDay() + 6) % 7;
 
-//   let counterUserKPIM = 0, tempKPIM = [], tempScoreKPIM = 0
+  target.setDate(target.getDate() - dayNr + 3);
 
-//   let userDetail = await tbl_account_details.findOne({ where: { user_id: userIdBawahan } })
+  var reference = new Date(target.getFullYear(), 0, 4);
+  var dayDiff = (target - reference) / 86400000;
+  var weekNr = 1 + Math.ceil(dayDiff / 7);
 
-//   let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: userDetail.name_evaluator_1 } })
-//   let allKPIM = await tbl_kpims.findAll({ where: { year }, include: [{ model: tbl_kpim_scores, where: { month } }] })
-
-//   bawahan && await bawahan.forEach(async element => { //fetch kpim per user
-//     let newKPIM = []
-
-//     newKPIM = allKPIM.filter(el => el.user_id === element.user_id)
-//     tempKPIM = [...tempKPIM, ...newKPIM]
-//     if (newKPIM.length > 0) counterUserKPIM++
-
-//   });
-
-//   tempKPIM.forEach(kpimMonth => {
-//     tempScoreKPIM += kpimMonth.tbl_kpim_scores[0].score_kpim_monthly * (Number(kpimMonth.tbl_kpim_scores[0].bobot) / 100)
-//   })
-
-//   let scoreKPIMTEAM = Math.ceil(tempScoreKPIM / counterUserKPIM)
-
-//   console.log("score KPIM total", tempScoreKPIM)
-//   console.log("counterUserKPIM", counterUserKPIM)
-//   console.log("score KPIM TEAM", scoreKPIMTEAM)
-
-//   let kpimTEAMmonthselected = await tbl_kpims.findOne({ where: { indicator_kpim: 'KPIM TEAM', year, user_id: userDetail.name_evaluator_1 }, include: [{ model: tbl_kpim_scores, where: { month } }] })
-
-//   kpimTEAMmonthselected && await tbl_kpim_scores.update({ score_kpim_monthly: scoreKPIMTEAM }, { where: { kpim_score_id: kpimTEAMmonthselected.tbl_kpim_scores[0].kpim_score_id } })
-
-//   return tempKPIM
-
-// }
+  return weekNr;
+}
 
 module.exports = kpim
