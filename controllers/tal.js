@@ -379,7 +379,7 @@ async function updateScoreTALMonth(kpimScoreId, month, userId) {
       tempWeekSelected = tal_score.week
       counterWeek++
     }
-    if ((tal_score.month === month && tal_score.week < weekDate20) || (tal_score.month === month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20)))) {
+    if ((tal_score.month === month && tal_score.week < weekDate20) || (tal_score.month === month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${KPIMSelected.year}-${month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20)))) {
     tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
     }
   })
