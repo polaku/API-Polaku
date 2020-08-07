@@ -149,7 +149,6 @@ class user {
             }
             logError(error)
             console.log("ERROR SIGNIN", req.body.username)
-            console.log(err)
             res.status(400).json({ msg: "Username/password invalid" })
           }
         } else {
@@ -161,7 +160,6 @@ class user {
           }
           logError(error)
           console.log("ERROR SIGNIN")
-          console.log(err)
           res.status(400).json({ msg: "Username/password invalid" })
         }
       })
@@ -263,7 +261,6 @@ class user {
   }
 
   static findOne(req, res) {
-    console.log(req.params.id)
     tbl_users.findByPk(req.params.id, {
       where: { activated: 1 },
       attributes: {
@@ -273,9 +270,16 @@ class user {
         model: tbl_account_details,
       }]
     })
-      .then(data => {
-        console.log(data)
-        res.status(200).json({ message: "Success", data })
+      .then(async (data) => {
+        let bawahan = await tbl_account_details.findAll({
+          where: { name_evaluator_1: req.params.id, },
+          include: [
+            { model: tbl_companys },
+            { model: tbl_users, as: "userId", where: { activated: 1 } }
+          ]
+        })
+
+        res.status(200).json({ message: "Success", data, bawahan })
       })
       .catch(err => {
         let error = {

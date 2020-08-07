@@ -95,13 +95,13 @@ class kpim {
 
           if (createKPIM) {
             await targetPerbulan.forEach(async (element, index) => {
-              if (element !== 0 || element) {
+              if (element.target_monthly !== 0 || element.target_monthly) {
                 let newData = {
                   kpim_id: createKPIM.null,
                   month: index + 1,
-                  target_monthly: element || 0
+                  target_monthly: +element.target_monthly || 0
                 }
-                await tbl_kpim_scores.create(newData)
+                let check = await tbl_kpim_scores.create(newData)
               }
             });
 
@@ -137,27 +137,6 @@ class kpim {
           res.status(201).json({ message: "Success", data: tal })
 
         } else {
-          let newKPIM = {
-            indicator_kpim: 'TAL',
-            unit: 'point',
-            year: req.body.year,
-            user_id: req.body.user_id
-          }
-          let tal = await tbl_kpims.create(newKPIM)
-
-          if (tal) {
-            await targetPerbulan.forEach(async (element, index) => {
-              if (Number(element) !== 0) {
-                let newData = {
-                  kpim_id: tal.null,
-                  month: index + 1,
-                  target_monthly: 0
-                }
-                await tbl_kpim_scores.create(newData)
-              }
-            });
-          }
-
           let newKPIMScore = {
             indicator_kpim: req.body.indicator_kpim,
             target: req.body.target,
@@ -170,11 +149,11 @@ class kpim {
 
           if (createKPIM) {
             await targetPerbulan.forEach(async (element, index) => {
-              if (element !== 0 || element) {
+              if (element.target_monthly !== 0 || element.target_monthly) {
                 let newData = {
                   kpim_id: createKPIM.null,
                   month: index + 1,
-                  target_monthly: element || 0
+                  target_monthly: +element.target_monthly || 0
                 }
                 await tbl_kpim_scores.create(newData)
               }
@@ -194,10 +173,175 @@ class kpim {
     }
   }
 
-  static findAll(req, res) {
-    let situationKPIM
+  static async findAll(req, res) {
+    let situationKPIM, listBawahan, situationBawahanId = []
 
-    if (req.query.year) {
+    if (req.query["for-setting"] === "true") {
+      listBawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: req.user.user_id } })
+
+      await listBawahan.forEach(el => {
+        situationBawahanId.push({ user_id: el.user_id })
+      })
+
+      situationKPIM = {
+        where: {
+          [Op.and]: [
+            { year: req.query.year },
+            {
+              [Op.or]: situationBawahanId
+            }
+          ]
+        },
+        attributes: {
+          exclude: ['created_at']
+        },
+        include: [
+          {
+            model: tbl_users,
+            attributes: {
+              exclude: ['user_id', 'password', 'flag_password']
+            },
+            include: [{
+              model: tbl_account_details,
+              attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial'],
+              include: [{
+                model: tbl_users,
+                as: "idEvaluator1",
+                attributes: ['user_id', 'username'],
+                include: [{
+                  model: tbl_account_details,
+                  attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial']
+                }]
+              }]
+            }]
+          },
+          {
+            model: tbl_kpim_scores,
+            where: {
+              [Op.or]: [
+                { month: Number(req.query.month) },
+                { month: Number(req.query.month) - 1 }
+              ]
+            },
+            order: [
+              ['month', 'ASC']
+            ]
+          }
+        ],
+        order: [
+          ['created_at', 'DESC'],
+          ['user_id', 'ASC'],
+          ['year', 'ASC'],
+        ],
+      }
+    } else if (req.query["for-dashboard"] === "true") {
+      listBawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: req.query['user-id'] } })
+
+      situationBawahanId.push({ user_id: req.query['user-id'] })
+      await listBawahan.forEach(el => {
+        situationBawahanId.push({ user_id: el.user_id })
+      })
+
+      situationKPIM = {
+        where: {
+          [Op.and]: [
+            { year: req.query.year },
+            // {
+            //   [Op.or]: situationBawahanId
+            // },
+            { user_id: req.query['user-id'] }
+          ]
+        },
+        attributes: {
+          exclude: ['created_at']
+        },
+        include: [
+          {
+            model: tbl_users,
+            attributes: {
+              exclude: ['user_id', 'password', 'flag_password']
+            },
+            include: [{
+              model: tbl_account_details,
+              attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial'],
+              include: [{
+                model: tbl_users,
+                as: "idEvaluator1",
+                attributes: ['user_id', 'username'],
+                include: [{
+                  model: tbl_account_details,
+                  attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial']
+                }]
+              }]
+            }]
+          },
+          {
+            model: tbl_kpim_scores,
+            where: {
+              [Op.or]: [
+                { month: Number(req.query.month) - 1 },
+                { month: Number(req.query.month) }
+
+              ]
+            },
+            order: [
+              ['month', 'ASC']
+            ]
+          }
+        ],
+        order: [
+          ['created_at', 'DESC'],
+          ['user_id', 'ASC'],
+          ['year', 'ASC'],
+        ],
+      }
+    } else if (req.query["for-report"] === "true") {
+      situationKPIM = {
+        where: {
+          year: req.query.year
+        },
+        attributes: {
+          exclude: ['created_at']
+        },
+        include: [
+          {
+            model: tbl_users,
+            attributes: {
+              exclude: ['user_id', 'password', 'flag_password']
+            },
+            include: [{
+              model: tbl_account_details,
+              attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial'],
+              include: [{
+                model: tbl_users,
+                as: "idEvaluator1",
+                attributes: ['user_id', 'username'],
+                include: [{
+                  model: tbl_account_details,
+                  attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial']
+                }]
+              }]
+            }]
+          },
+          {
+            required: true,
+            model: tbl_kpim_scores,
+            where: {
+              month: Number(req.query.month),
+              hasConfirm: 1
+            },
+            order: [
+              ['month', 'ASC']
+            ]
+          }
+        ],
+        order: [
+          ['created_at', 'DESC'],
+          ['user_id', 'ASC'],
+          ['year', 'ASC'],
+        ],
+      }
+    } else if (req.query.year) {
       situationKPIM = {
         where: { year: req.query.year },
         include: [
@@ -231,19 +375,70 @@ class kpim {
         ],
       }
     }
-
     tbl_kpims.findAll(situationKPIM)
       .then(async data => {
-        let kpimScore = await tbl_kpim_scores.findAll({
-          include: [
-            { model: tbl_tals, include: [{ model: tbl_tal_scores }] }
-          ]
-        })
+        let allTAL
+        if (req.query["for-setting"] === "true") {
+          allTAL = await tbl_tals.findAll({
+            where: { [Op.or]: situationBawahanId },
+            include: [{
+              model: tbl_tal_scores,
+              where: {
+                month: req.query.month,
+                week: req.query.week,
+                year: req.query.year,
+              },
+              order: [
+                ['week', 'ASC']
+              ]
+            }]
+          })
+        } else if (req.query["for-report"] === "true") {
+          allTAL = await tbl_tals.findAll({
+            include: [{
+              required: true,
+              model: tbl_tal_scores,
+              where: {
+                month: req.query.month,
+                year: req.query.year,
+                hasConfirm: 1
+              }
+            }]
+          })
+        } else {
+          allTAL = await tbl_tals.findAll({
+            where: { user_id: req.query['user-id'] },
+            include: [{
+              model: tbl_tal_scores,
+              where: {
+                month: req.query.month,
+                week: req.query.week,
+                year: req.query.year,
+              },
+              order: [
+                ['week', 'ASC']
+              ]
+            }]
+          })
+        }
 
-        await data.forEach(async element => {
-          let KPIMScore = await kpimScore.filter(el => (el.kpim_id === element.kpim_id))
-          element.dataValues.kpimScore = KPIMScore
-        });
+        if (req.query["for-report"] === "true") {
+          await data.forEach(async element => {
+            if (element.indicator_kpim.toLowerCase() === 'tal') {
+              element.tbl_kpim_scores[0].dataValues.tbl_tals = await allTAL.filter(tal => tal.user_id === element.user_id)
+            }
+          });
+        } else {
+          await data.forEach(async el => {
+            el.tbl_kpim_scores.sort(compareMonth)
+          })
+
+          await data.forEach(async element => {
+            if (element.indicator_kpim.toLowerCase() === 'tal') {
+              element.tbl_kpim_scores[1].dataValues.tbl_tals = await allTAL.filter(tal => tal.user_id === element.user_id)
+            }
+          });
+        }
 
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
@@ -253,7 +448,7 @@ class kpim {
           method: 'get',
           status: 500,
           message: err,
-          user_id: req.user.user_id
+          user_id: req.query['user-id']
         }
         logError(error)
         res.status(500).json({ err });
@@ -360,12 +555,12 @@ class kpim {
 
         let updateKPIM = await tbl_kpims.update(newKPIM, { where: { kpim_id: req.params.id } })
 
-        if (updateKPIM) {
+        if (updateKPIM && req.body.monthly) {
           await targetPerbulan.forEach(async (element, index) => {
 
             let newData = {
               bobot: element.bobot,
-              target_monthly: element.target_monthly,
+              target_monthly: +element.target_monthly,
               pencapaian_monthly: element.pencapaian_monthly,
               score_kpim_monthly: ((Number(element.pencapaian_monthly) / Number(element.target_monthly)) * 100)
             }
@@ -384,9 +579,8 @@ class kpim {
           let kpimSelected = await tbl_kpims.findByPk(req.params.id)
 
           await inputNilaiKPIMTeam(kpimSelected.user_id, kpimSelected.year, req.body.month)
-
-          res.status(200).json({ message: "Success", data: updateKPIM })
         }
+        res.status(200).json({ message: "Success", data: updateKPIM })
       }
     } catch (err) {
       console.log(err)
@@ -440,7 +634,6 @@ class kpim {
         let kpimScore = await tbl_kpim_scores.findByPk(kpimScoreId)
         let kpim = await tbl_kpims.findByPk(kpimScore.kpim_id)
         let weekDate20 = await getNumberOfWeek(`${kpim.year}-${kpimScore.month}-20`)
-        console.log(weekDate20)
 
         tal = await tbl_tals.findAll({
           where: { kpim_score_id: kpimScoreId },
@@ -537,6 +730,16 @@ function getNumberOfWeek(date) {
   var weekNr = 1 + Math.ceil(dayDiff / 7);
 
   return weekNr;
+}
+
+function compareMonth(a, b) {
+  if (Number(a.month) < Number(b.month)) {
+    return -1;
+  }
+  if (Number(a.month) > Number(b.month)) {
+    return 1;
+  }
+  return 0;
 }
 
 module.exports = kpim

@@ -134,9 +134,7 @@ class tal {
           let month = date.getMonth() + 1
 
           newData.month = month
-          console.log(i, date.getFullYear(), new Date(theDate).getFullYear(), date.getFullYear() === new Date(theDate).getFullYear())
           if (date.getFullYear() === new Date(theDate).getFullYear()) { //tidak lebih dari tahun tersebut
-            console.log(date)
             if (Number(req.body.forDay) === 1) {
               newData.week = i
               newData.when_day = req.body.time
@@ -167,11 +165,61 @@ class tal {
     }
   }
 
-  static findAll(req, res) {
-    let situation
+  static async findAll(req, res) {
+    let condition, listBawahan, conditionBawahanId = [], conditionBawahan
 
-    if (req.query.year) {
-      situation = {
+    if (req.query["for-setting"] === "true") {
+      listBawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: req.user.user_id } })
+      await listBawahan.forEach(el => {
+        conditionBawahanId.push({ user_id: el.user_id })
+      })
+      conditionBawahan = { [Op.or]: conditionBawahanId }
+
+      condition = {
+        where: {
+          month: req.query.month,
+          week: req.query.week,
+          year: req.query.year,
+        },
+        order: [
+          ['created_at', 'ASC'],
+          ['year', 'ASC'],
+        ],
+      }
+    } else if (req.query["for-dashboard"] === "true") {
+      // listBawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: req.user.user_id } })
+      // await listBawahan.forEach(el => {
+      //   conditionBawahanId.push({ user_id: el.user_id })
+      // })
+      conditionBawahan = { user_id: req.user.user_id }
+      condition = {
+        where: {
+          month: req.query.month,
+          year: req.query.year
+        },
+        order: [
+          ['created_at', 'ASC'],
+          ['year', 'ASC'],
+        ],
+      }
+    } else if (req.query["for-tal-team"] === "true") {
+      listBawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: req.query['user-id'] } })
+      await listBawahan.forEach(el => {
+        conditionBawahanId.push({ user_id: el.user_id })
+      })
+      conditionBawahan = { [Op.or]: conditionBawahanId }
+      condition = {
+        where: {
+          month: req.query.month,
+          year: req.query.year,
+        },
+        order: [
+          ['created_at', 'ASC'],
+          ['year', 'ASC'],
+        ],
+      }
+    } else if (req.query.year) {
+      condition = {
         where: { year: req.query.year },
         order: [
           ['created_at', 'ASC'],
@@ -179,7 +227,7 @@ class tal {
         ],
       }
     } else {
-      situation = {
+      condition = {
         order: [
           ['created_at', 'ASC'],
           ['year', 'ASC'],
@@ -191,19 +239,23 @@ class tal {
       order: [
         ['tal_id', 'ASC'],
         ['user_id', 'ASC']
+      ],
+      where: conditionBawahan,
+      include: [
+        {
+          required: true,
+          model: tbl_tal_scores,
+          ...condition
+        }
       ]
     })
       .then(async data => {
-        let talScore = await tbl_tal_scores.findAll(situation)
-
-        await data.forEach(async element => {
-          let TALScore = await talScore.filter(el => (el.tal_id === element.tal_id))
-          element.dataValues.talScore = TALScore
+        await data.forEach(el => {
+          el.tbl_tal_scores.sort(compare)
         })
+        await data.sort(sortByUserId)
 
-        let dataReturn = await data.filter(el => el.dataValues.talScore.length > 0)
-
-        res.status(200).json({ message: "Success", total_record: dataReturn.length, data: dataReturn })
+        res.status(200).json({ message: "Success", total_record: data.length, data: data })
       })
       .catch(err => {
         let error = {
@@ -270,7 +322,7 @@ class tal {
           let updateTAL = await tbl_tal_scores.update(newData, { where: { tal_score_id: req.params.id } })
 
           if (updateTAL && (req.body.achievement || req.body.weight)) {
-
+            console.log(talSelected)
             let updateScoreTAL = await updateScoreTALMonth(talSelected.kpim_score_id, talScore.month, talSelected.user_id)
 
             await inputNilaiKPIMTeam(updateScoreTAL.user_id, updateScoreTAL.year, talScore.month)
@@ -348,6 +400,26 @@ function compare(a, b) {
   return 0;
 }
 
+function sortByUserId(a, b) {
+  if (Number(a.user_id) < Number(b.user_id)) {
+    return -1;
+  }
+  if (Number(a.user_id) > Number(b.user_id)) {
+    return 1;
+  }
+  return 0;
+}
+
+function sortByWeek(a, b) {
+  if (Number(a.tbl_tal_scores.week) < Number(b.tbl_tal_scores.week)) {
+    return -1;
+  }
+  if (Number(a.tbl_tal_scores.week) > Number(b.tbl_tal_scores.week)) {
+    return 1;
+  }
+  return 0;
+}
+
 async function updateScoreTALMonth(kpimScoreId, month, userId) {
   let day = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
   let KPIMScoreSelected = await tbl_kpim_scores.findByPk(kpimScoreId)
@@ -380,7 +452,7 @@ async function updateScoreTALMonth(kpimScoreId, month, userId) {
       counterWeek++
     }
     if ((tal_score.month === month && tal_score.week < weekDate20) || (tal_score.month === month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${KPIMSelected.year}-${month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20)))) {
-    tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
+      tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
     }
   })
 
