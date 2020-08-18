@@ -2,6 +2,7 @@ const { tbl_contacts, tbl_account_details, tbl_users, tbl_contact_categories, tb
 const logError = require('../helpers/logError')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
+const { createDateAsUTC } = require('../helpers/convertDate');
 
 class contact {
   static async create(req, res) {
@@ -11,7 +12,7 @@ class contact {
 
     if (Number(userAccountDetail.name_evaluator_1) !== NaN) evalutor1 = Number(userAccountDetail.name_evaluator_1)
     if (Number(userAccountDetail.name_evaluator_2) !== NaN) evalutor2 = Number(userAccountDetail.name_evaluator_2)
-
+    console.log(req.body)
     newData = {
       name: userAccountDetail.fullname,
       email: req.user.email,
@@ -20,7 +21,7 @@ class contact {
       categori_id: req.body.categoriId,
       company_id: userAccountDetail.company_id,
       user_id: req.user.user_id,
-      created_expired_date: new Date().setDate(new Date().getDate() + 1),
+      created_expired_date: createDateAsUTC(new Date(new Date().setDate(new Date().getDate() + 1))),
       subject: req.body.subject,
       type: req.body.type,
       design_style: req.body.designStyle,
@@ -30,12 +31,12 @@ class contact {
       design_other_specs: req.body.otherSpecs,
       design_deadline: req.body.deadline,
       review: req.body.review,
-      date_ijin_absen_start: req.body.date_ijin_absen_start,
-      date_ijin_absen_end: req.body.date_ijin_absen_end,
+      date_ijin_absen_start: req.body.date_ijin_absen_start && createDateAsUTC(req.body.date_ijin_absen_start),
+      date_ijin_absen_end: req.body.date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end),
       leave_request: req.body.leave_request,
-      leave_date: req.body.leave_date,
-      leave_date_in: req.body.leave_date_in,
-      date_imp: req.body.date_imp,
+      leave_date: req.body.leave_date && createDateAsUTC(req.body.leave_date),
+      leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date_in),
+      date_imp: req.body.date_imp && createDateAsUTC(req.body.date_imp),
       start_time_imp: req.body.start_time_imp,
       end_time_imp: req.body.end_time_imp,
       evaluator_1: evalutor1,
@@ -130,7 +131,7 @@ class contact {
   static findOne(req, res) {
     tbl_contacts.findByPk(req.params.id, {
       include: [
-        { model: tbl_users},
+        { model: tbl_users },
         { model: tbl_contact_categories },
         { model: tbl_categoris },
         { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
@@ -191,11 +192,11 @@ class contact {
         design_other_specs: req.body.otherSpecs,
         design_deadline: req.body.deadline,
         review: req.body.review,
-        date_ijin_absen_start: req.body.date_ijin_absen_start,
-        date_ijin_absen_end: req.body.date_ijin_absen_end,
+        date_ijin_absen_start: req.body.date_ijin_absen_start && createDateAsUTC(req.body.date_ijin_absen_start),
+        date_ijin_absen_end: date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end),
         leave_request: req.body.leave_request,
-        leave_date: req.body.leave_date,
-        date_imp: req.body.date_imp,
+        leave_date: req.body.leave_date && createDateAsUTC(req.body.leave_date),
+        date_imp: req.body.date_imp && createDateAsUTC(req.body.date_imp),
         start_time_imp: req.body.start_time_imp,
         end_time_imp: req.body.end_time_imp,
         status: req.body.status
