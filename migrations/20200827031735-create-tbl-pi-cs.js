@@ -9,20 +9,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       company_id: {
-        type: Sequelize.INTEGER(11),
-        references: {
-          model: 'tbl_companys',
-          foreignKey: 'company_id'
-        },
-        onDelete: 'CASCADE'
+        type: Sequelize.INTEGER(11)
       },
       user_id: {
-        type: Sequelize.INTEGER(11),
-        references: {
-          model: 'tbl_users',
-          foreignKey: 'user_id'
-        },
-        onDelete: 'CASCADE'
+        type: Sequelize.INTEGER(11)
       },
       createdAt: {
         allowNull: false,

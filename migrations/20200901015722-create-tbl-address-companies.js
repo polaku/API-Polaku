@@ -24,12 +24,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       company_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'tbl_companys',
-          foreignKey: 'company_id'
-        },
-        onDelete: 'CASCADE'
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

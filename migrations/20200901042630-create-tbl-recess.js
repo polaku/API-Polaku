@@ -18,12 +18,7 @@ module.exports = {
         type: Sequelize.TIME
       },
       address_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'tbl_address_companies',
-          foreignKey: 'address_id'
-        },
-        onDelete: 'CASCADE'
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
