@@ -14,8 +14,10 @@ const kpim = require('./kpim')
 const tal = require('./tal')
 const rewardKPIM = require('./rewardKPIM')
 const position = require('./position')
+const pic = require('./pic')
+const address = require('./address')
 
-router.get('/', (req, res)=>{
+router.get('/', (req, res) => {
     res.send('Welcome to server polaku-react')
 })
 router.use('/announcement', announcement)
@@ -32,5 +34,7 @@ router.use('/kpim', kpim)
 router.use('/tal', tal)
 router.use('/rewardKPIM', rewardKPIM)
 router.use('/position', position)
+router.use('/pic', pic)
+router.use('/address', address)
 
 module.exports = router

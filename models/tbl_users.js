@@ -37,9 +37,9 @@ module.exports = (sequelize, DataTypes) => {
     media_path_slug: DataTypes.STRING,
     */
   }, {
-      timestamps: false,
-    });
-  tbl_users.removeAttribute('id'); 
+    timestamps: false,
+  });
+  tbl_users.removeAttribute('id');
 
   tbl_users.associate = function (models) {
     // associations can be defined here
@@ -63,6 +63,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_users.hasMany(models.tbl_kritik_sarans, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_kpims, { foreignKey: "user_id" })
     tbl_users.hasMany(models.tbl_reward_kpims, { foreignKey: "user_id" })
+    tbl_users.hasMany(models.tbl_PICs, { foreignKey: 'user_id' })
   };
 
   return tbl_users;

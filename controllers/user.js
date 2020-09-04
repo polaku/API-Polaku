@@ -653,7 +653,7 @@ class user {
             let gedung = await building.find(building => building.building === el.gedung)
             let evaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el.nik_evaluator_1))
             let evaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el.nik_evaluator_2))
-            let perusahaan = await company.find(pt => pt.company_name === el.perusahaan)
+            let perusahaan = await company.find(pt => pt.acronym === el.perusahaan)
             let posisi = await position.find(pos => pos.position === el.posisi)
 
             let dateBirth = new Date(el.birth_date).getDate()

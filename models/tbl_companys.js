@@ -7,9 +7,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     company_name: DataTypes.STRING,
     company_logo: DataTypes.STRING,
+    acronym: DataTypes.STRING
   }, {
-      timestamps: false,
-    });
+    timestamps: false,
+  });
   tbl_companys.removeAttribute('id');
 
   tbl_companys.associate = function (models) {
@@ -17,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
     tbl_companys.hasMany(models.tbl_account_details, { foreignKey: "company_id" })
     tbl_companys.hasMany(models.tbl_buildings, { foreignKey: "company_id" })
     tbl_companys.hasMany(models.tbl_contacts, { foreignKey: "company_id" })
+    tbl_companys.hasMany(models.tbl_PICs, { foreignKey: "company_id" })
+    tbl_companys.hasMany(models.tbl_address_companies, { foreignKey: 'company_id' })
   };
 
   return tbl_companys;
