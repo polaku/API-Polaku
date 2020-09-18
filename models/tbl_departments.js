@@ -25,6 +25,8 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     // tbl_departments.hasMany(models.tbl_account_details, { foreignKey: "company_id" })
     // tbl_departments.hasMany(models.tbl_buildings, { foreignKey: "company_id" })
+    tbl_departments.hasMany(models.tbl_structure_departments, { as: "department", foreignKey: 'departments_id' })
+    tbl_departments.hasMany(models.tbl_structure_departments, { as: "section", foreignKey: 'department_section' })
   };
 
   return tbl_departments;

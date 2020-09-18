@@ -14,6 +14,8 @@ module.exports = (sequelize, DataTypes) => {
   tbl_positions.associate = function (models) {
     // associations can be defined here
     tbl_positions.hasMany(models.tbl_account_details, { foreignKey: "position_id" })
+    tbl_positions.hasMany(models.tbl_department_positions, { foreignKey: 'position_id' })
+    tbl_positions.hasMany(models.tbl_team_positions, { foreignKey: 'position_id' })
   };
 
   return tbl_positions;

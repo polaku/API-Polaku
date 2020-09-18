@@ -6,6 +6,7 @@ const Op = require('sequelize').Op
 class address {
   static async create(req, res) {
     try {
+      console.log(req.body)
       if (req.body.isMainAddress) {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
       }

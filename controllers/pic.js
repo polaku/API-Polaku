@@ -4,21 +4,30 @@ const logError = require('../helpers/logError')
 class pic {
   static async create(req, res) {
     try {
-      let listPIC = req.body.pic || []
+      let listPIC = req.body.pic || [], companyId, data
 
-      let newData = {
-        company_name: req.body.companyName,
-        company_logo: 'http://api.polagroup.co.id/uploads/logo.png',
-        acronym: req.body.akronim
+      let checkAvailableCompany = await tbl_companys.findOne({ where: { company_name: req.body.companyName } })
+      if (!checkAvailableCompany) {
+        let newData = {
+          company_name: req.body.companyName,
+          company_logo: 'http://api.polagroup.co.id/uploads/logo.png',
+          acronym: req.body.akronim
+        }
+        let createCompany = await tbl_companys.create(newData)
+        companyId = createCompany.null
+
+        data = createCompany
+        data.company_id = createCompany.null
+      } else {
+        companyId = checkAvailableCompany.company_id
+        data = checkAvailableCompany
       }
-      let createCompany = await tbl_companys.create(newData)
 
       listPIC.length > 0 && listPIC.forEach(async el => {
-        await tbl_PICs.create({ company_id: createCompany.null, user_id: el.user_id })
+        await tbl_PICs.create({ company_id: companyId, user_id: el.user_id })
       })
 
-      createCompany.company_id = createCompany.null
-      res.status(201).json({ message: "Success", data: createCompany })
+      res.status(201).json({ message: "Success", data })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/pic`,
@@ -36,7 +45,7 @@ class pic {
   static async findAll(req, res) {
     try {
       let data = await tbl_companys.findAll({ include: [{ required: true, model: tbl_PICs, include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }] }] })
-      res.status(201).json({ message: "Success", data })
+      res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/pic`,
