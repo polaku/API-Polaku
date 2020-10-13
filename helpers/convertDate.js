@@ -6,7 +6,7 @@ module.exports = {
 				date.getFullYear(),
 				date.getMonth(),
 				date.getDate(),
-				date.getHours(),
+				date.getHours()+ 7,
 				date.getMinutes(),
 				date.getSeconds()
 			)
