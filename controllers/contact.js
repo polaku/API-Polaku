@@ -35,7 +35,7 @@ console.log(req.body)
       date_ijin_absen_end: req.body.date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end),
       leave_request: req.body.leave_request,
       leave_date: req.body.leave_date && req.body.leave_date,
-      leave_date_in: req.body.leave_date_in && req.body.leave_date_in,
+      leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date),
       date_imp: req.body.date_imp && createDateAsUTC(req.body.date_imp),
       start_time_imp: req.body.start_time_imp,
       end_time_imp: req.body.end_time_imp,
