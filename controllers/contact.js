@@ -13,9 +13,6 @@ class contact {
     if (Number(userAccountDetail.name_evaluator_1) !== NaN) evalutor1 = Number(userAccountDetail.name_evaluator_1)
     if (Number(userAccountDetail.name_evaluator_2) !== NaN) evalutor2 = Number(userAccountDetail.name_evaluator_2)
 
-    console.log(createDateAsUTC(new Date(req.body.leave_date)))
-    console.log(createDateAsUTC(req.body.leave_date))
-    console.log(req.body.leave_date)
     newData = {
       name: userAccountDetail.fullname,
       email: req.user.email,
@@ -24,6 +21,7 @@ class contact {
       categori_id: req.body.categoriId,
       company_id: userAccountDetail.company_id,
       user_id: req.user.user_id,
+      created_at: createDateAsUTC(new Date()),
       created_expired_date: createDateAsUTC(new Date(new Date().setDate(new Date().getDate() + 1))),
       subject: req.body.subject,
       type: req.body.type,
@@ -197,8 +195,8 @@ class contact {
         date_ijin_absen_start: req.body.date_ijin_absen_start && createDateAsUTC(req.body.date_ijin_absen_start),
         date_ijin_absen_end: req.body.date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end),
         leave_request: req.body.leave_request,
-        leave_date: req.body.leave_date && req.body.leave_date,
-        leave_date_in: req.body.leave_date_in && req.body.leave_date_in,
+        leave_date: req.body.leave_date && createDateAsUTC(req.body.leave_date),
+        leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date_in),
         date_imp: req.body.date_imp && createDateAsUTC(req.body.date_imp),
         start_time_imp: req.body.start_time_imp,
         end_time_imp: req.body.end_time_imp,
