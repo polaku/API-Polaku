@@ -12,7 +12,7 @@ class contact {
 
     if (Number(userAccountDetail.name_evaluator_1) !== NaN) evalutor1 = Number(userAccountDetail.name_evaluator_1)
     if (Number(userAccountDetail.name_evaluator_2) !== NaN) evalutor2 = Number(userAccountDetail.name_evaluator_2)
-    console.log(req.body)
+
     newData = {
       name: userAccountDetail.fullname,
       email: req.user.email,
@@ -387,6 +387,13 @@ class contact {
 
   static findAllContactUs(req, res) {
     tbl_contacts.findAll({
+      where: {
+        [Op.or]: [
+          { user_id: req.user.user_id },
+          { evaluator_1: req.user.user_id },
+          { evaluator_2: req.user.user_id },
+        ]
+      },
       include: [
         { model: tbl_users, include: [{ model: tbl_account_details }] },
         { model: tbl_companys },
