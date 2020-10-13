@@ -12,7 +12,10 @@ class contact {
 
     if (Number(userAccountDetail.name_evaluator_1) !== NaN) evalutor1 = Number(userAccountDetail.name_evaluator_1)
     if (Number(userAccountDetail.name_evaluator_2) !== NaN) evalutor2 = Number(userAccountDetail.name_evaluator_2)
-console.log(req.body)
+
+    console.log(createDateAsUTC(new Date(req.body.leave_date)))
+    console.log(createDateAsUTC(req.body.leave_date))
+    console.log(req.body.leave_date)
     newData = {
       name: userAccountDetail.fullname,
       email: req.user.email,

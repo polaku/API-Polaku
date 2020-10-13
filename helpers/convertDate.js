@@ -1,6 +1,5 @@
 module.exports = {
 	createDateAsUTC(date) {
-		date = new Date(date)
 		return new Date(
 			Date.UTC(
 				date.getFullYear(),
