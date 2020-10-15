@@ -36,7 +36,7 @@ class contact {
       date_ijin_absen_end: req.body.date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end),
       leave_request: req.body.leave_request,
       leave_date: req.body.leave_date && createDateAsUTC(req.body.leave_date),
-      leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date),
+      leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date_in),
       date_imp: req.body.date_imp && createDateAsUTC(req.body.date_imp),
       start_time_imp: req.body.start_time_imp,
       end_time_imp: req.body.end_time_imp,
@@ -346,8 +346,7 @@ class contact {
         cancel_reason: req.body.reason
       }, {
       where: { contact_id: req.params.id }
-    }
-    )
+    })
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
@@ -387,14 +386,25 @@ class contact {
   }
 
   static findAllContactUs(req, res) {
-    tbl_contacts.findAll({
-      where: {
+    let condition = {}
+    if (req.query["for-hr"] === "true") {
+      condition = {
         [Op.or]: [
           { user_id: req.user.user_id },
           { evaluator_1: req.user.user_id },
           { evaluator_2: req.user.user_id },
+        ],
+        [Op.or]: [
+          { cancel_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+          { date_ijin_absen_end: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+          { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+          { leave_date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
         ]
-      },
+      }
+    }
+
+    tbl_contacts.findAll({
+      where: condition,
       include: [
         { model: tbl_users, include: [{ model: tbl_account_details }] },
         { model: tbl_companys },

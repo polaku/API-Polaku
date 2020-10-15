@@ -435,7 +435,7 @@ class kpim {
 
           await data.forEach(async element => {
             if (element.indicator_kpim.toLowerCase() === 'tal') {
-              element.tbl_kpim_scores[1].dataValues.tbl_tals = await allTAL.filter(tal => tal.user_id === element.user_id)
+              element.tbl_kpim_scores[element.tbl_kpim_scores.length - 1].dataValues.tbl_tals = await allTAL.filter(tal => tal.user_id === element.user_id)
             }
           });
         }

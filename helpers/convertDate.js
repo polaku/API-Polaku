@@ -2,14 +2,12 @@ module.exports = {
 	createDateAsUTC(date) {
 		date = new Date(date)
 		return new Date(
-			Date.UTC(
-				date.getFullYear(),
-				date.getMonth(),
-				date.getDate(),
-				date.getHours()+ 7,
-				date.getMinutes(),
-				date.getSeconds()
-			)
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate(),
+			date.getHours() + 7,
+			date.getMinutes(),
+			date.getSeconds()
 		);
 	}
 };
