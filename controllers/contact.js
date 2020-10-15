@@ -395,10 +395,32 @@ class contact {
           { evaluator_2: req.user.user_id },
         ],
         [Op.or]: [
-          { cancel_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
           { date_ijin_absen_end: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
           { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
           { leave_date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+        ]
+      }
+    } else if (req.query["for-report-hr"] === "true") {
+      condition = {
+        [Op.or]: [
+          {
+            [Op.and]: [
+              { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
+              { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
+            ]
+          },
+          {
+            [Op.and]: [
+              { date_imp: { [Op.gte]: new Date(req.query["after-date"]) } },
+              { date_imp: { [Op.lte]: new Date(req.query["before-date"]) } },
+            ]
+          },
+          {
+            [Op.and]: [
+              { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
+              { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
+            ]
+          }
         ]
       }
     }
@@ -411,7 +433,8 @@ class contact {
         { model: tbl_contact_categories },
         { model: tbl_categoris },
         { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
-        { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] },],
+        { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] }
+      ],
       order: [
         ['created_at', 'DESC'],
         ['assigned_date', 'DESC'],
