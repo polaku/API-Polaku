@@ -8,6 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     building: DataTypes.STRING,
     company_id: DataTypes.INTEGER,
     location_id: DataTypes.INTEGER,
+    address: DataTypes.STRING,
+    acronym: DataTypes.STRING
   }, {
       timestamps: false,
     });
@@ -16,8 +18,9 @@ module.exports = (sequelize, DataTypes) => {
   tbl_buildings.associate = function (models) {
     // associations can be defined here
     tbl_buildings.belongsTo(models.tbl_companys, { foreignKey: "company_id" })
-    tbl_buildings.hasMany(models.tbl_rooms, { foreignKey: "building_id" })
     tbl_buildings.belongsTo(models.tbl_locations, { foreignKey: "location_id" })
+    tbl_buildings.hasMany(models.tbl_rooms, { foreignKey: "building_id" })
+    tbl_buildings.hasMany(models.tbl_address_companies, { foreignKey: "building_id" })
   };
 
   return tbl_buildings;
