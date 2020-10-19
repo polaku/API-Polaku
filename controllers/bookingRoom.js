@@ -947,7 +947,7 @@ class bookingRoom {
     let newData = {
       building: req.body.building,
       company_id: req.body.company_id,
-      location_id: req.body.location_id
+      location_id: req.body.location_id || 0
     }
     tbl_buildings.create(newData)
       .then(async data => {
@@ -955,6 +955,7 @@ class bookingRoom {
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
+        console.log(err)
         let error = {
           uri: `http://api.polagroup.co.id/bookingRoom/building`,
           method: 'post',

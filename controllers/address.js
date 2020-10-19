@@ -1,4 +1,4 @@
-const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details } = require('../models')
+const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details, tbl_buildings } = require('../models')
 const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
 const Op = require('sequelize').Op
@@ -6,16 +6,30 @@ const Op = require('sequelize').Op
 class address {
   static async create(req, res) {
     try {
-      console.log(req.body)
+      let building_id
       if (req.body.isMainAddress) {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
       }
 
+      if (!req.body.building_id) {
+        let newBuilding = {
+          building: req.body.building,
+          location_id: req.body.location_id,
+          company_id: req.body.companyId,
+          address: req.body.address,
+          acronym: req.body.initial,
+          phone: req.body.phone,
+          fax: req.body.fax,
+        }
+        let building = await tbl_buildings.create(newBuilding)
+
+        building_id = building.building_id || building.null
+      } else {
+        building_id = req.body.building_id
+      }
+
       let newAddress = {
-        address: req.body.address,
-        acronym: req.body.initial,
-        phone: req.body.phone,
-        fax: req.body.fax,
+        building_id,
         operationDay: req.body.operationalDay,
         company_id: req.body.companyId,
         is_main_address: req.body.isMainAddress,
@@ -162,11 +176,19 @@ class address {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
       }
 
-      let newAddress = {
+      let newBuilding = {
+        building: req.body.building,
+        location_id: req.body.location_id,
+        company_id: req.body.companyId,
         address: req.body.address,
         acronym: req.body.initial,
         phone: req.body.phone,
         fax: req.body.fax,
+      }
+      await tbl_buildings.update(newBuilding, { where: { building_id: req.body.building_id } })
+
+      let newAddress = {
+        building_id: req.body.building_id,
         operationDay: req.body.operationalDay,
         company_id: req.body.companyId,
         is_main_address: req.body.isMainAddress,

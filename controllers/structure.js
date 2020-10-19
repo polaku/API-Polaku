@@ -4,7 +4,6 @@ const logError = require('../helpers/logError')
 class department {
   static async create(req, res) {
     try {
-      console.log(req.body)
       let newStructureDepartment = {
         hierarchy: req.body.levelHirarki,
         company_id: req.body.companyId
@@ -39,14 +38,16 @@ class department {
       }
 
       await req.body.team.forEach(async (team) => {
+        console.log("MASUK 7")
+
         let newTeam = {
           name: team.nameTeam,
           structure_department_id: createStructure.id,
-          report_to: team.reportTo
+          report_to: team.reportTo || 0
         }
         let createTeam = await tbl_department_teams.create(newTeam)
         await team.teamPosition.forEach(async (element, index) => {
-          let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null}
+          let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null }
 
           if (typeof (element) !== 'number') {
             let createPosition = await tbl_positions.create({ position: element })
@@ -103,6 +104,7 @@ class department {
 
   static async update(req, res) {
     try {
+      console.log(req.body.team)
       let newStructureDepartment = {
         hierarchy: req.body.levelHirarki,
         company_id: req.body.companyId
@@ -139,12 +141,12 @@ class department {
       }
 
       await tbl_department_teams.destroy({ where: { structure_department_id: req.params.id } })
-      console.log(req.body.team)
+
       await req.body.team.forEach(async (team) => {
         let newTeam = {
           name: team.nameTeam,
           structure_department_id: req.params.id,
-          report_to: team.reportTo
+          report_to: team.reportTo || 0
         }
         let createTeam = await tbl_department_teams.create(newTeam)
 
