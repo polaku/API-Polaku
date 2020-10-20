@@ -17,6 +17,7 @@ const position = require('./position')
 const pic = require('./pic')
 const address = require('./address')
 const structure = require('./structure')
+const building = require('./building')
 
 router.get('/', (req, res) => {
     res.send('Welcome to server polaku-react')
@@ -38,5 +39,6 @@ router.use('/position', position)
 router.use('/pic', pic)
 router.use('/address', address)
 router.use('/structure', structure)
+router.use('/building', building)
 
 module.exports = router

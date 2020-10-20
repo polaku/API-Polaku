@@ -38,7 +38,6 @@ class department {
       }
 
       await req.body.team.forEach(async (team) => {
-        console.log("MASUK 7")
 
         let newTeam = {
           name: team.nameTeam,

@@ -322,7 +322,6 @@ class tal {
           let updateTAL = await tbl_tal_scores.update(newData, { where: { tal_score_id: req.params.id } })
 
           if (updateTAL && (req.body.achievement || req.body.weight)) {
-            console.log(talSelected)
             let updateScoreTAL = await updateScoreTALMonth(talSelected.kpim_score_id, talScore.month, talSelected.user_id)
 
             await inputNilaiKPIMTeam(updateScoreTAL.user_id, updateScoreTAL.year, talScore.month)

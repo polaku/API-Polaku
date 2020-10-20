@@ -11,15 +11,13 @@ class address {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
       }
 
-      if (!req.body.building_id) {
+      if (!req.body.building_id || req.body.building_id === 'null') {
         let newBuilding = {
           building: req.body.building,
-          location_id: req.body.location_id,
+          location_id: req.body.location_id || null,
           company_id: req.body.companyId,
           address: req.body.address,
-          acronym: req.body.initial,
-          phone: req.body.phone,
-          fax: req.body.fax,
+          acronym: req.body.building,
         }
         let building = await tbl_buildings.create(newBuilding)
 
@@ -32,6 +30,8 @@ class address {
         building_id,
         operationDay: req.body.operationalDay,
         company_id: req.body.companyId,
+        phone: req.body.phone,
+        fax: req.body.fax,
         is_main_address: req.body.isMainAddress,
         createdAt: createDateAsUTC(new Date()),
         updatedAt: createDateAsUTC(new Date())
@@ -131,6 +131,9 @@ class address {
         include: [
           {
             model: tbl_companys
+          },
+          {
+            model: tbl_buildings,
           },
           {
             model: tbl_photo_address,
@@ -326,8 +329,7 @@ class address {
         if (nextMonth < 10) {
           nextMonth = `0${nextMonth}`
         }
-        console.log(`${year}-${month}-01 00:00:00`)
-        console.log(`${year}-${nextMonth}-01 00:00:00`)
+
         data = await tbl_log_addresses.findAll({
           where: {
             // [Op.and]: {
