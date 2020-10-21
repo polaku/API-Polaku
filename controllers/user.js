@@ -20,7 +20,7 @@ class user {
       email: req.body.email,
       permission: "all",
       role_id: req.body.role || 3,
-      activated: req.body.role || 1,
+      activated: 1,
     }
 
     tbl_users.create(newUser)
