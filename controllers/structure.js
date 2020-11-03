@@ -103,7 +103,6 @@ class department {
 
   static async update(req, res) {
     try {
-      console.log(req.body.team)
       let newStructureDepartment = {
         hierarchy: req.body.levelHirarki,
         company_id: req.body.companyId
@@ -127,7 +126,6 @@ class department {
 
       await tbl_department_positions.destroy({ where: { structure_department_id: req.params.id } })
       for (let i = 0; i < req.body.position.length; i++) {
-        console.log(req.body.position)
         let newData = { structure_department_id: req.params.id, user_id: req.body.position[i].user  || null}
 
         if (typeof (req.body.position[i].position) !== 'number') {
@@ -151,7 +149,7 @@ class department {
 
         await team.teamPosition.forEach(async (element, index) => {
           let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null}
-          console.log(newData)
+
           if (typeof (element) !== 'number') {
             let createPosition = await tbl_positions.create({ position: element })
             newData.position_id = createPosition.id || createPosition.null

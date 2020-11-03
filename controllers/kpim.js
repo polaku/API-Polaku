@@ -714,7 +714,6 @@ async function createKPIMTeam(userIdBawahan, year, month) {
         await tbl_kpim_scores.create(newData)
       }
     }
-    console.log("Belum Ada KPIM TEAM")
   }
 }
 

@@ -65,7 +65,6 @@ class pic {
       let listPIC = req.body.pic || []
       let picCompany = await tbl_PICs.findAll({ where: { company_id: req.params.id } })
 
-      console.log(picCompany)
       picCompany.forEach(async pic => {
         let check = listPIC.find(el => el.user_id === pic.user_id)
         if (!check) {

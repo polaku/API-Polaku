@@ -14,8 +14,10 @@ router.put('/editProfil', authentication, userController.editProfil) //authoriza
 router.put('/editUser/:id', authentication, userController.editUser)
 router.put('/changeAvatar', authentication, uploadSingle.single('avatar'), userController.changeAvatar)
 router.post('/importUser', authentication, uploadSingle.single('file'), userController.importUser)
+router.post('/settingImportUser', authentication, uploadSingle.single('file'), userController.settingImportUser)
 router.get('/normalitationNIK', authentication, userController.normalitationNIK)
 
+router.put('/:id', uploadSingle.single('avatar'), userController.update)
 router.get('/:id', userController.findOne)
 
 module.exports = router

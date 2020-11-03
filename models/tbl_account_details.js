@@ -20,15 +20,17 @@ module.exports = (sequelize, DataTypes) => {
     name_evaluator_1: DataTypes.INTEGER,
     name_evaluator_2: DataTypes.INTEGER,
     leave: DataTypes.INTEGER,
-    /*
-    locale: DataTypes.STRING,
-    address: DataTypes.STRING,
-    language: DataTypes.STRING,
     date_of_birth: DataTypes.DATE,
-    direction: DataTypes.STRING,
-    dinas: DataTypes.STRING,
-    ext: DataTypes.INTEGER,
-    */
+    address: DataTypes.STRING,
+    nickname: DataTypes.STRING,
+    departments_id: DataTypes.INTEGER,
+    status_employee: DataTypes.STRING,
+    join_date: DataTypes.DATE,
+    start_leave_big: DataTypes.DATE,
+    leave_big: DataTypes.INTEGER,
+    next_frame_date: DataTypes.DATE,
+    next_lensa_date: DataTypes.DATE,
+    office_email: DataTypes.STRING,
   }, {
     timestamps: false,
   });
@@ -42,6 +44,8 @@ module.exports = (sequelize, DataTypes) => {
     tbl_account_details.belongsTo(models.tbl_companys, { foreignKey: "company_id" })
     tbl_account_details.belongsTo(models.tbl_designations, { foreignKey: "designations_id" })
     tbl_account_details.belongsTo(models.tbl_positions, { foreignKey: "position_id" })
+    tbl_account_details.belongsTo(models.tbl_departments, { foreignKey: "departments_id" })
+    tbl_account_details.belongsTo(models.tbl_buildings, { foreignKey: "building_id" })
   };
 
   return tbl_account_details;

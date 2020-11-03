@@ -1,4 +1,4 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions } = require('../models')
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments } = require('../models')
 const { compare, hash } = require('../helpers/bcrypt')
 const { sign, verify } = require('../helpers/jwt')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
@@ -25,11 +25,20 @@ class user {
 
     tbl_users.create(newUser)
       .then(async data => {
-
         let building = await tbl_buildings.findByPk(req.body.building_id)
+        let userId = data.null
+
+        if (req.body.dinasId) {
+          let newDinas = {
+            company_id: req.body.dinasId,
+            building_id: req.body.dinasBuildingId,
+            user_id: userId
+          }
+          await tbl_dinas.create(newDinas)
+        }
 
         let newAccountDetail = {
-          user_id: data.null,
+          user_id: userId,
           fullname: req.body.fullname,
           initial: req.body.initial,
           nik: req.body.nik,
@@ -37,13 +46,22 @@ class user {
           date_of_birth: req.body.dateOfBirth,
           leave: req.body.leave || 0,
           building_id: req.body.building_id,
-          location_id: building.location_id,
+          location_id: building.location_id || null,
           company_id: req.body.company_id,
           position_id: req.body.position_id,
-          designations_id: req.body.designations_id,
+          designations_id: req.body.designations_id || null,
           phone: req.body.phone,
           name_evaluator_1: req.body.name_evaluator_1,
           name_evaluator_2: req.body.name_evaluator_2,
+          nickname: req.body.nickname,
+          departments_id: req.body.departments_id,
+          status_employee: req.body.statusEmployee,
+          join_date: req.body.joinDate,
+          start_leave_big: req.body.startLeaveBig,
+          leave_big: req.body.leaveBig,
+          next_frame_date: req.body.nextFrameDate,
+          next_lensa_date: req.body.nextLensaDate,
+          office_email: req.body.officeEmail,
         }
 
         if (String(req.body.nik).length < 5) {
@@ -175,27 +193,59 @@ class user {
   }
 
   static async findAll(req, res) {
-    let detailAccount = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+    let query = {}, condition = {}, conditionSearch = {}
+    if (req.query.page) {
+      let offset = +req.query.page, limit = +req.query.limit
+      if (offset > 0) offset = offset * limit
+      query = { offset, limit }
+    }
+    if (req.query.company && req.query.company !== '0') condition = { company_id: +req.query.company }
+
+    if (req.query.search) {
+      conditionSearch = {
+        [Op.or]: [
+          { fullname: { [Op.substring]: req.query.search } },
+          { nik: { [Op.substring]: req.query.search } },
+        ]
+      }
+    }
+
     tbl_users.findAll({
       // where: { activated: 1, user_id: { [Op.ne]: 1 } },
       where: { user_id: { [Op.ne]: 1 } },
       order: [['user_id', 'ASC']],
+      ...query,
       include: [{
         model: tbl_account_details,
-        // where: { company_id: detailAccount.company_id },
+        where: { ...condition, ...conditionSearch },
         include: [{
           model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
         }, {
           model: tbl_users, as: "idEvaluator2", include: [{ model: tbl_account_details }]
         }, {
           model: tbl_companys
+        }, {
+          model: tbl_departments
+        }, {
+          model: tbl_positions
         }]
+      }, {
+        as: 'dinas',
+        model: tbl_dinas
       }]
     })
-      .then(data => {
-        res.status(200).json({ message: "Success", totalRecord: data.length, data })
+      .then(async (data) => {
+        let allData = await tbl_users.findAll({
+          where: { user_id: { [Op.ne]: 1 } },
+          include: [{
+            model: tbl_account_details,
+            where: { ...condition, ...conditionSearch },
+          }]
+        })
+        res.status(200).json({ message: "Success", totalRecord: allData.length, data })
       })
       .catch(err => {
+        console.log(err);
         let error = {
           uri: 'http://api.polagroup.co.id/users',
           method: 'get',
@@ -204,9 +254,7 @@ class user {
           user_id: req.user.user_id,
         }
         logError(error)
-        console.log(err)
         res.status(500).json({ err })
-        console.log(err);
       })
   }
 
@@ -751,6 +799,338 @@ class user {
       res.status(500).json({ err })
     }
   }
+
+  static async update(req, res) {
+    let newData1, newData2
+
+    newData1 = {
+      username: req.body.username,
+      email: req.body.email,
+      activated: req.body.isActive
+    }
+
+    if (req.body.password) {
+      newData1.password = hash(req.body.password)
+    }
+
+    newData2 = {
+      fullname: req.body.fullname,
+      initial: req.body.initial,
+      nik: req.body.nik,
+      address: req.body.address,
+      leave: req.body.leave || 0,
+      building_id: req.body.building_id,
+      company_id: req.body.company_id,
+      position_id: req.body.position_id,
+      phone: req.body.phone,
+      name_evaluator_1: req.body.evaluator1,
+      name_evaluator_2: req.body.evaluator2,
+      nickname: req.body.nickname,
+      departments_id: req.body.departments_id,
+      status_employee: req.body.statusEmployee,
+      leave_big: req.body.leaveBig,
+      office_email: req.body.officeEmail,
+    }
+
+
+    if (req.body.dateOfBirth !== '' || req.body.dateOfBirth !== 'null' || req.body.dateOfBirth !== null) newData2.date_of_birth = req.body.dateOfBirth
+
+    if (req.body.joinDate !== '' || req.body.joinDate !== 'null' || req.body.joinDate !== null) newData2.join_date = req.body.joinDate
+
+    if (req.body.startLeaveBig !== '' || req.body.startLeaveBig !== 'null' || req.body.startLeaveBig !== null) newData2.start_leave_big = req.body.startLeaveBig
+
+    if (req.body.nextFrameDate !== '' || req.body.nextFrameDate !== 'null' || req.body.nextFrameDate !== null) newData2.next_frame_date = req.body.nextFrameDate
+
+    if (req.body.nextLensaDate !== '' || req.body.nextLensaDate !== 'null' || req.body.nextLensaDate !== null) newData2.next_lensa_date = req.body.nextLensaDate
+
+
+    try {
+      await tbl_users.update(newData1, {
+        where: { user_id: req.params.id }
+      })
+      await tbl_account_details.update(newData2, {
+        where: { user_id: req.params.id }
+      })
+
+      let dataReturning = await tbl_users.findByPk(req.params.id, {
+        include: [{
+          model: tbl_account_details,
+        }]
+      })
+
+      res.status(200).json({ message: "Success", data: dataReturning })
+
+    } catch (err) {
+      let error = {
+        uri: 'http://api.polagroup.co.id/users/editProfil',
+        method: 'put',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id,
+      }
+      logError(error)
+      res.status(500).json({ err })
+    }
+  }
+
+  static async settingImportUser(req, res) {
+    let result
+
+    try {
+      if (req.body.jenisImport === "add") {
+        result = excelToJson({
+          sourceFile: req.file.path,
+          sheets: [{
+            name: 'Sheet1',
+            header: {
+              rows: 1
+            },
+            columnToKey: {
+              A: 'nik',
+              B: 'fullname',//-
+              C: 'nickname',//-
+              D: 'initial',//-
+              E: 'birth_date',//-
+              F: 'address',//-
+              G: 'phone',//
+              H: 'selfEmail',//
+              I: 'officeEmail',//
+              J: 'username',//
+              K: 'building',//        // id
+              L: 'company',//         // id
+              M: 'evaluator1',//      // id
+              N: 'evaluator2',//      // id
+              O: 'department',//      // id
+              P: 'position',//        // id
+              Q: 'leave',//
+              R: 'statusEmpolyee',//
+              S: 'joinDate',//
+              T: 'startBigLeave',//
+              U: 'bigLeave',//
+              V: 'nextFrameDate',//
+              W: 'nextLensaDate'//
+            }
+          }]
+        })
+
+        let building = await tbl_buildings.findAll()
+        let accountDetail = await tbl_account_details.findAll()
+        let company = await tbl_companys.findAll()
+        let position = await tbl_positions.findAll()
+        let department = await tbl_departments.findAll()
+
+        await result.Sheet1.forEach(async el => {
+
+          let gedung = await building.find(building => building.building === el.building)
+          let evaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1))
+          let evaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2))
+          let perusahaan = await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase())
+          let posisi = await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase())
+          let divisi = await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase())
+
+          let dateBirth = new Date(el.birth_date).getDate()
+          let monthBirth = new Date(el.birth_date).getMonth() + 1
+
+          if (dateBirth < 10) dateBirth = `0${dateBirth}`
+          if (monthBirth < 10) monthBirth = `0${monthBirth}`
+
+          let newUser = {
+            username: el.username,
+            password: hash(`${dateBirth}${monthBirth}${new Date(el.birth_date).getFullYear()}`),
+            email: el.selfEmail,
+            permission: "all",
+            role_id: 3,
+            activated: 1,
+          }
+
+          tbl_users.create(newUser)
+            .then(async data => {
+              let newAccountDetail = {
+                user_id: data.null,
+                fullname: el.fullname,
+                nickname: el.nickname,
+                initial: el.initial,
+                address: el.address,
+                date_of_birth: el.birth_date,
+                leave: el.leave || 0,
+                phone: el.phone,
+                status_employee: el.statusEmpolyee,
+                join_date: el.joinDate,
+                start_leave_big: el.startBigLeave,
+                leave_big: el.bigLeave,
+                next_frame_date: el.nextFrameDate,
+                next_lensa_date: el.nextLensaDate,
+                office_email: el.officeEmail,
+              }
+
+
+              if (perusahaan) newAccountDetail.company_id = perusahaan.company_id
+
+              if (posisi) newAccountDetail.position_id = posisi.position_id
+
+              if (gedung) {
+                newAccountDetail.building_id = gedung.building_id
+                newAccountDetail.location_id = gedung.location_id
+              }
+
+              if (evaluator1) newAccountDetail.name_evaluator_1 = evaluator1.user_id
+              if (evaluator2) newAccountDetail.name_evaluator_2 = evaluator2.user_id
+
+              let tempNIK
+              if (String(el.nik).length < 5) {
+                tempNIK = el.nik
+                for (let i = String(el.nik).length; i < 5; i++) {
+                  tempNIK = `0${tempNIK}`
+                }
+              } else {
+                tempNIK = el.nik
+              }
+              newAccountDetail.nik = tempNIK
+
+              let createAccountDetail = await tbl_account_details.create(newAccountDetail)
+            })
+
+        })
+      } else {
+        result = excelToJson({
+          sourceFile: req.file.path,
+          sheets: [{
+            name: 'Sheet1',
+            header: {
+              rows: 1
+            },
+            columnToKey: {
+              A: 'nik',
+              B: 'fullname',//-
+              C: 'nickname',//-
+              D: 'initial',//-
+              E: 'birth_date',//-
+              F: 'address',//-
+              G: 'phone',//
+              H: 'selfEmail',//
+              I: 'officeEmail',//
+              J: 'username',//
+              K: 'building',//        // id
+              L: 'company',//         // id
+              M: 'evaluator1',//      // id
+              N: 'evaluator2',//      // id
+              O: 'department',//      // id
+              P: 'position',//        // id
+              Q: 'leave',//
+              R: 'statusEmpolyee',//
+              S: 'joinDate',//
+              T: 'startBigLeave',//
+              U: 'bigLeave',//
+              V: 'nextFrameDate',//
+              W: 'nextLensaDate'//
+            }
+          }]
+        })
+
+        let building = await tbl_buildings.findAll()
+        let accountDetail = await tbl_account_details.findAll()
+        let company = await tbl_companys.findAll()
+        let position = await tbl_positions.findAll()
+        let department = await tbl_departments.findAll()
+
+        await result.Sheet1.forEach(async el => {
+
+          let tempNIK
+          if (String(el.nik).length < 5) {
+            tempNIK = el.nik
+            for (let i = String(el.nik).length; i < 5; i++) {
+              tempNIK = `0${tempNIK}`
+            }
+          } else {
+            tempNIK = el.nik
+          }
+
+          let account = await accountDetail.find(user => user.nik === tempNIK)
+
+
+          if (account) {
+            let newData1 = {}
+            if (req.body.username) newData1.username = el.username
+            if (req.body.email) newData1.email = el.selfEmail
+            tbl_users.update(newData1, { where: { user_id: account.user_id } })
+              .then(() => { })
+              .catch(() => { })
+
+
+            let newData2 = {}
+            if (req.body.fullname) newData2.fullname = el.fullname
+            if (req.body.nickname) newData2.nickname = el.nickname
+            if (req.body.initial) newData2.initial = el.initial
+            if (req.body.birth_date) newData2.date_of_birth = el.birth_date
+            if (req.body.address) newData2.address = el.address
+            if (req.body.phone) newData2.phone = el.phone
+            if (req.body.officeEmail) newData2.office_email = el.officeEmail
+            if (req.body.leave) newData2.leave = el.leave
+            if (req.body.statusEmpolyee) newData2.status_employee = el.statusEmpolyee
+            if (req.body.joinDate) newData2.join_date = el.joinDate
+            if (req.body.startBigLeave) newData2.start_leave_big = el.startBigLeave
+            if (req.body.bigLeave) newData2.leave_big = el.bigLeave
+            if (req.body.nextFrameDate) newData2.next_frame_date = el.nextFrameDate
+            if (req.body.nextLensaDate) newData2.next_lensa_date = el.nextLensaDate
+
+            if (req.body.building) {
+              let gedung = await building.find(building => building.building === el.building)
+
+              if (gedung) {
+                newData2.building_id = gedung.building_id
+                newData2.location_id = gedung.location_id
+              }
+            }
+
+            if (req.body.company) {
+              let perusahaan = await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase())
+
+              if (perusahaan) newData2.company_id = perusahaan.company_id
+            }
+
+            if (req.body.evaluator1) {
+              let evaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1))
+
+              if (evaluator1) newAccountDetail.name_evaluator_1 = evaluator1.user_id
+            }
+
+            if (req.body.evaluator2) {
+              let evaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2))
+
+              if (evaluator2) newAccountDetail.name_evaluator_2 = evaluator2.user_id
+            }
+
+            if (req.body.department) {
+              let divisi = await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase())
+
+              if (divisi) newAccountDetail.departments_id = divisi.departments_id
+            }
+
+            if (req.body.position) {
+              let posisi = await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase())
+
+              if (posisi) newAccountDetail.position_id = posisi.position_id
+            }
+
+            await tbl_account_details.update(newData2, { where: { user_id: account.user_id } })
+          }
+        })
+      }
+      res.status(200).json({ message: "Success" })
+    } catch (err) {
+      console.log(err)
+      let error = {
+        uri: 'http://api.polagroup.co.id/users/changeAvatar',
+        method: 'put',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id,
+      }
+      logError(error)
+      res.status(500).json({ err })
+    }
+  }
+
 }
 
 // queue.process('email', function (job, done) {
