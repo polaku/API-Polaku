@@ -72,7 +72,7 @@ class designation {
         }
 
         data = await tbl_account_details.findAll({
-          // ...query,
+          ...query,
           where: { ...condition, ...conditionSearch },
           include: [
             {
