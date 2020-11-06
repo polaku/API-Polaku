@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   tbl_designations.associate = function (models) {
     // associations can be defined here
     tbl_designations.belongsTo(models.tbl_departments, { foreignKey: "departments_id" })
+    tbl_designations.hasMany(models.tbl_user_roles, { foreignKey: "designations_id" })
   };
 
   return tbl_designations;

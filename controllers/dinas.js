@@ -3,7 +3,7 @@ const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
 const Op = require('sequelize').Op
 
-class address {
+class dinas {
   static async create(req, res) {
     try {
       let newDinas = {
@@ -19,7 +19,7 @@ class address {
       res.status(201).json({ message: "Success" })
     } catch (err) {
       let error = {
-        uri: `http://api.polagroup.co.id/address`,
+        uri: `http://api.polagroup.co.id/dinas`,
         method: 'post',
         status: 500,
         message: err,
@@ -113,7 +113,7 @@ class address {
     } catch (err) {
       console.log(err);
       let error = {
-        uri: `http://api.polagroup.co.id/address`,
+        uri: `http://api.polagroup.co.id/dinas`,
         method: 'get',
         status: 500,
         message: err,
@@ -137,7 +137,7 @@ class address {
       res.status(201).json({ message: "Success" })
     } catch (err) {
       let error = {
-        uri: `http://api.polagroup.co.id/address/${req.params.id}`,
+        uri: `http://api.polagroup.co.id/dinas/${req.params.id}`,
         method: 'post',
         status: 500,
         message: err,
@@ -154,7 +154,7 @@ class address {
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
     } catch (err) {
       let error = {
-        uri: `http://api.polagroup.co.id/address/${req.params.id}`,
+        uri: `http://api.polagroup.co.id/dinas/${req.params.id}`,
         method: 'delete',
         status: 500,
         message: err,
@@ -171,7 +171,7 @@ class address {
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
     } catch (err) {
       let error = {
-        uri: `http://api.polagroup.co.id/address/${req.params.id}`,
+        uri: `http://api.polagroup.co.id/dinas/user/${req.params.id}`,
         method: 'delete',
         status: 500,
         message: err,
@@ -219,7 +219,7 @@ class address {
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
-        uri: `http://api.polagroup.co.id/address/log`,
+        uri: `http://api.polagroup.co.id/dinas/log`,
         method: 'delete',
         status: 500,
         message: err,
@@ -231,4 +231,4 @@ class address {
   }
 }
 
-module.exports = address
+module.exports = dinas
