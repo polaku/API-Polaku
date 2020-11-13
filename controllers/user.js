@@ -1023,7 +1023,6 @@ class user {
 
       res.status(200).json({ message: "Success", data: dataReturning })
 
-console.log(req.user)
       let company = await tbl_companys.findByPk(req.body.company_id)
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 

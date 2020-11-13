@@ -216,7 +216,7 @@ class department {
       })
 
       res.status(201).json({ message: 'Success' })
-console.log(req.body)
+
       let company = await tbl_companys.findByPk(req.body.companyId)
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
       await tbl_log_structures.create({

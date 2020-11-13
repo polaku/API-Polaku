@@ -1,4 +1,4 @@
-const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_details, tbl_master_rooms, tbl_companys, tbl_buildings, tbl_events, tbl_event_responses, tbl_notifications, tbl_event_invites, tbl_departments } = require('../models')
+const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_details, tbl_master_rooms, tbl_companys, tbl_buildings, tbl_events, tbl_event_responses, tbl_notifications, tbl_event_invites, tbl_departments, tbl_dinas } = require('../models')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
@@ -77,6 +77,7 @@ class bookingRoom {
             message: 'Time has booked',
             user_id: req.user.user_id
           }
+          console.log(error)
           logError(error)
           res.status(400).json({ message: 'Error Time', info: 'Waktu yang pesan sudah terpesan oleh orang lain, harap menentukan waktu yang lain' })
         } else {
@@ -876,15 +877,22 @@ class bookingRoom {
   static async findAllBuilding(req, res) {
     let userAccountDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
     let dinamicCondition = {}
+    let userDinas = await tbl_dinas.findAll({ where: { user_id: req.user.user_id } })
 
     if (userAccountDetail.company_id === 2) {                   // Khusus Artistika
       dinamicCondition = { building_id: 1 }
     } else {            // KECUALI ARTISTIKA
+      let dinas = []
+      userDinas.length > 0 && userDinas.forEach(el => {
+        dinas.push({ company_id: el.company_id})
+      })
+
       dinamicCondition = {
         [Op.or]: [
           { building_id: userAccountDetail.building_id },
           { location_id: userAccountDetail.location_id },
-          { company_id: userAccountDetail.company_id }
+          { company_id: userAccountDetail.company_id },
+          ...dinas
         ]
       }
     }
@@ -1013,16 +1021,24 @@ class bookingRoom {
   static async findAllRoom(req, res) {
     let userAccountDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
     let dinamicCondition = {}
+    let userDinas = await tbl_dinas.findAll({ where: { user_id: req.user.user_id } })
 
     if (userAccountDetail.company_id === 2) {                   // Khusus Artistika
       dinamicCondition = { building_id: 1 }
       // dinamicCondition = { building_id: 1, company_id: 2 }
     } else {      //KECUALI ARTISTIKA
+
+      let dinas = []
+      userDinas.length > 0 && userDinas.forEach(el => {
+        dinas.push({ company_id: el.company_id, room_id: { [Op.ne]: 12 } })
+      })
+
       dinamicCondition = {
         [Op.or]: [
           { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } },
           { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } },
-          { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } }
+          { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } },
+          ...dinas
         ]
       }
     }

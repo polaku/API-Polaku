@@ -6,7 +6,6 @@ const Op = require('sequelize').Op
 class designation {
   static async create(req, res) {
     try {
-      console.log(req.body)
       let designation
       if (isNaN(req.body.name)) {
         let createDesignation = await tbl_designations.create({ departments_id: req.body.departments_id || null, designations: req.body.name })
@@ -211,7 +210,6 @@ class designation {
       let checkUser = await tbl_account_details.findOne({ where: { user_id: req.params.userId } })
       let checkDesignation = await tbl_designations.findOne({ where: { designations_id: checkUser.designations_id } })
 
-      console.log(req.params.userId)
       await tbl_account_details.update({ designations_id: null }, { where: { user_id: req.params.userId } })
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
 
