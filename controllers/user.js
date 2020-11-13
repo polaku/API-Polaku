@@ -1,9 +1,10 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments } = require('../models')
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees } = require('../models')
 const { compare, hash } = require('../helpers/bcrypt')
 const { sign, verify } = require('../helpers/jwt')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
 const logError = require('../helpers/logError')
 const excelToJson = require('convert-excel-to-json');
+const { createDateAsUTC } = require('../helpers/convertDate');
 
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
@@ -96,9 +97,109 @@ class user {
       })
   }
 
+  static async register(req, res) {
+    var tempNIK
+    if (req.body.nik) tempNIK = req.body.nik
+
+    // //nik, address, initial, date_of_birth
+    let newUser = {
+      username: req.body.username,
+      password: hash(req.body.password),
+      email: req.body.email,
+      permission: "all",
+      role_id: req.body.role || 3,
+      activated: 1,
+    }
+
+    tbl_users.create(newUser)
+      .then(async data => {
+        let building = await tbl_buildings.findByPk(req.body.building_id)
+        let userId = data.null
+
+        if (req.body.dinasId) {
+          let newDinas = {
+            company_id: req.body.dinasId,
+            building_id: req.body.dinasBuildingId,
+            user_id: userId
+          }
+          await tbl_dinas.create(newDinas)
+        }
+
+        let newAccountDetail = {
+          user_id: userId,
+          fullname: req.body.fullname,
+          initial: req.body.initial,
+          nik: req.body.nik,
+          address: req.body.address,
+          date_of_birth: req.body.dateOfBirth,
+          leave: req.body.leave || 0,
+          building_id: req.body.building_id,
+          location_id: building.location_id || null,
+          company_id: req.body.company_id,
+          position_id: req.body.position_id,
+          designations_id: req.body.designations_id || null,
+          phone: req.body.phone,
+          name_evaluator_1: req.body.name_evaluator_1,
+          name_evaluator_2: req.body.name_evaluator_2,
+          nickname: req.body.nickname,
+          departments_id: req.body.departments_id,
+          status_employee: req.body.statusEmployee,
+          join_date: req.body.joinDate,
+          start_leave_big: req.body.startLeaveBig,
+          leave_big: req.body.leaveBig,
+          next_frame_date: req.body.nextFrameDate,
+          next_lensa_date: req.body.nextLensaDate,
+          office_email: req.body.officeEmail,
+        }
+
+        if (String(req.body.nik).length < 5) {
+          tempNIK = req.body.nik
+
+          for (let i = String(req.body.nik).length; i < 5; i++) {
+            tempNIK = `0${tempNIK}`
+          }
+        }
+        newAccountDetail.nik = tempNIK
+
+
+        // if (req.file) newAccountDetail.avatar = `http://api.polagroup.co.id/${req.file.path}`
+        if (req.file) newAccountDetail.avatar = `http://165.22.110.159/${req.file.path}`
+
+        let createAccountDetail = await tbl_account_details.create(newAccountDetail)
+
+        let findNew = await tbl_users.findByPk(createAccountDetail.user_id, { include: [{ model: tbl_account_details }] })
+
+        res.status(201).json({ message: "Success", data: findNew })
+
+        let company = await tbl_companys.findByPk(req.body.company_id)
+        let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+
+        await tbl_log_employees.create({
+          employee: req.body.fullname,
+          company: company.company_name,
+          action: "CREATE",
+          action_by: req.user.user_id + '-' + userDetail.fullname,
+          createdAt: createDateAsUTC(new Date()),
+          updatedAt: createDateAsUTC(new Date())
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        let error = {
+          uri: 'http://api.polagroup.co.id/users/register',
+          method: 'post',
+          status: 500,
+          message: err,
+        }
+        logError(error)
+        console.log(err)
+        res.status(500).json({ err })
+      })
+  }
+
   static signin(req, res) {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1, evaluator2
-    tbl_users.findOne({ where: { activated: 1, username: req.body.username } })
+    tbl_users.findOne({ where: { activated: 1, username: req.body.username }, include: [{ as: 'dinas', model: tbl_dinas }] })
       .then(async userFound => {
         if (userFound) {
           if (compare(req.body.password, userFound.password)) {
@@ -109,7 +210,8 @@ class user {
               include:
                 [
                   { as: "idEvaluator1", model: tbl_users, include: [{ model: tbl_account_details }] },
-                  { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] }
+                  { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] },
+                  { model: tbl_designations, include: [{ model: tbl_user_roles }] }
                 ]
             })
             roomMaster = await tbl_master_rooms.findOne({ where: { user_id: userFound.user_id, chief: 1 } })
@@ -136,6 +238,20 @@ class user {
               ]
             })
 
+            let dinas = [{
+              company_id: detailUser.company_id,
+              building_id: detailUser.building_id,
+              evaluator: detailUser.name_evaluator_1
+            }]
+
+            userFound.dinas.length > 0 && userFound.dinas.forEach(el => {
+              dinas.push({
+                company_id: el.company_id,
+                building_id: el.building_id,
+                evaluator: el.evaluator_id
+              })
+            })
+
             res.status(200).json({
               message: "Success",
               token,
@@ -151,7 +267,9 @@ class user {
               adminContactCategori: detailUser.admin_contact_categori,
               evaluator1,
               evaluator2,
-              bawahan
+              bawahan,
+              designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
+              dinas
             })
 
             MyContactUs && MyContactUs.forEach(async element => {
@@ -199,7 +317,22 @@ class user {
       if (offset > 0) offset = offset * limit
       query = { offset, limit }
     }
+
     if (req.query.company && req.query.company !== '0') condition = { company_id: +req.query.company }
+    else if (req.user.user_id !== 1) {
+      let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
+
+      let tempCondition = []
+      tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
+
+      userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
+        tempCondition.push({
+          company_id: el.company_id,
+        })
+      })
+
+      condition = { [Op.or]: tempCondition }
+    }
 
     if (req.query.search) {
       conditionSearch = {
@@ -341,7 +474,7 @@ class user {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1 = null, evaluator2 = null
     let decoded = verify(req.headers.token);
 
-    tbl_users.findByPk(Number(decoded.user_id), { where: { activated: 1 } })
+    tbl_users.findByPk(Number(decoded.user_id), { where: { activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }] })
       .then(async userFound => {
         if (userFound) {
           req.user = userFound
@@ -350,7 +483,8 @@ class user {
             include:
               [
                 { as: "idEvaluator1", model: tbl_users, include: [{ model: tbl_account_details }] },
-                { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] }
+                { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] },
+                { model: tbl_designations, include: [{ model: tbl_user_roles }] }
               ]
           })
           roomMaster = await tbl_master_rooms.findOne({ where: { user_id: decoded.user_id, chief: 1 } })
@@ -377,6 +511,20 @@ class user {
             ]
           })
 
+          let dinas = [{
+            company_id: detailUser.company_id,
+            building_id: detailUser.building_id,
+            evaluator: detailUser.name_evaluator_1
+          }]
+
+          userFound.dinas.length > 0 && userFound.dinas.forEach(el => {
+            dinas.push({
+              company_id: el.company_id,
+              building_id: el.building_id,
+              evaluator: el.evaluator_id
+            })
+          })
+
           res.status(200).json({
             message: 'Oke',
             username: userFound.username,
@@ -391,7 +539,9 @@ class user {
             adminContactCategori: detailUser.admin_contact_categori,
             evaluator1,
             evaluator2,
-            bawahan
+            bawahan,
+            designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
+            dinas
           })
 
           MyContactUs && MyContactUs.forEach(async element => {
@@ -549,6 +699,19 @@ class user {
           }
         })
       }
+
+
+      let company = await tbl_companys.findByPk(req.body.company_id)
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+
+      await tbl_log_employees.create({
+        employee: req.body.fullname,
+        company: company.company_name,
+        action: "UPDATE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
       let error = {
         uri: 'http://api.polagroup.co.id/users/editProfil',
@@ -860,7 +1023,20 @@ class user {
 
       res.status(200).json({ message: "Success", data: dataReturning })
 
+console.log(req.user)
+      let company = await tbl_companys.findByPk(req.body.company_id)
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+
+      await tbl_log_employees.create({
+        employee: req.body.fullname,
+        company: company.company_name,
+        action: "UPDATE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
+      console.log(err)
       let error = {
         uri: 'http://api.polagroup.co.id/users/editProfil',
         method: 'put',
@@ -1131,6 +1307,44 @@ class user {
     }
   }
 
+  static async findAllLog(req, res) {
+    try {
+      let data
+      if (req.query.date) {
+        let year = new Date(req.query.date).getFullYear()
+        let month = new Date(req.query.date).getMonth() + 1, nextMonth = month + 1
+
+        if (month < 10) {
+          month = `0${month}`
+        }
+        if (nextMonth < 10) {
+          nextMonth = `0${nextMonth}`
+        }
+
+        data = await tbl_log_employees.findAll({
+          where: {
+            createdAt: {
+              [Op.between]: [`${year}-${month}-01 00:00:00`, `${year}-${nextMonth}-01 00:00:00`]
+            }
+          },
+          order: [['createdAt', 'DESC']]
+        })
+      } else {
+        data = await tbl_log_employees.findAll({ order: [['createdAt', 'DESC']] })
+      }
+      res.status(200).json({ message: "Success", data })
+    } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/address/log`,
+        method: 'delete',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
+      res.status(500).json({ err })
+    }
+  }
 }
 
 // queue.process('email', function (job, done) {

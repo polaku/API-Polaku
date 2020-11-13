@@ -5,6 +5,7 @@ const { uploadSingle } = require('../middleware/multer')
 
 router.get('/', authentication, userController.findAll)
 router.post('/signup', uploadSingle.single('avatar'), userController.signup)
+router.post('/register', authentication, uploadSingle.single('avatar'), userController.register)
 router.post('/signin', userController.signin)
 router.put('/forgetPassword', userController.forgetPassword)
 router.get('/checktoken', userController.checktoken)
@@ -16,8 +17,9 @@ router.put('/changeAvatar', authentication, uploadSingle.single('avatar'), userC
 router.post('/importUser', authentication, uploadSingle.single('file'), userController.importUser)
 router.post('/settingImportUser', authentication, uploadSingle.single('file'), userController.settingImportUser)
 router.get('/normalitationNIK', authentication, userController.normalitationNIK)
+router.get('/log', authentication, userController.findAllLog)
 
-router.put('/:id', uploadSingle.single('avatar'), userController.update)
+router.put('/:id', authentication, uploadSingle.single('avatar'), userController.update)
 router.get('/:id', userController.findOne)
 
 module.exports = router

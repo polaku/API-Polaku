@@ -1,4 +1,4 @@
-const { tbl_dinas, tbl_companys, tbl_account_details, tbl_buildings, tbl_users } = require('../models')
+const { tbl_dinas, tbl_companys, tbl_account_details, tbl_buildings, tbl_users, tbl_log_dinas } = require('../models')
 const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
 const Op = require('sequelize').Op
@@ -17,6 +17,19 @@ class dinas {
       await tbl_dinas.create(newDinas)
 
       res.status(201).json({ message: "Success" })
+
+      let company = await tbl_companys.findByPk(req.body.companyId)
+      let userCreate = await tbl_account_details.findOne({ where: { user_id: req.body.userId } })
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+
+      await tbl_log_dinas.create({
+        employee: userCreate.fullname,
+        company: company.company_name,
+        action: "CREATE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/dinas`,
@@ -135,6 +148,20 @@ class dinas {
       await tbl_dinas.update(newDinas, { where: { id: req.params.id } })
 
       res.status(201).json({ message: "Success" })
+
+
+      let company = await tbl_companys.findByPk(req.body.companyId)
+      let userCreate = await tbl_account_details.findOne({ where: { user_id: req.body.userId } })
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+
+      await tbl_log_dinas.create({
+        employee: userCreate.fullname,
+        company: company.company_name,
+        action: "UPDATE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/dinas/${req.params.id}`,
@@ -150,8 +177,24 @@ class dinas {
 
   static async delete(req, res) {
     try {
+      let checkDinas = await tbl_dinas.findOne({
+        where: { id: req.params.id }
+      })
       await tbl_dinas.destroy({ where: { id: req.params.id } })
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
+
+      let company = await tbl_companys.findByPk(checkDinas.company_id)
+      let userDeleted = await tbl_account_details.findOne({ where: { user_id: checkDinas.user_id } })
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+
+      await tbl_log_dinas.create({
+        employee: userDeleted.fullname,
+        company: company.company_name,
+        action: "DELETE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/dinas/${req.params.id}`,
@@ -167,8 +210,24 @@ class dinas {
 
   static async deleteUser(req, res) {
     try {
+      let arrayDinas = await tbl_dinas.findAll({ where: { user_id: req.params.userId } })
       await tbl_dinas.destroy({ where: { user_id: req.params.userId } })
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
+
+      arrayDinas.forEach(async (el) => {
+        let company = await tbl_companys.findByPk(el.company_id)
+        let userCreate = await tbl_account_details.findOne({ where: { user_id: req.params.userId } })
+        let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+
+        await tbl_log_dinas.create({
+          employee: userCreate.fullname,
+          company: company.company_name,
+          action: "DELETE",
+          action_by: req.user.user_id + '-' + userDetail.fullname,
+          createdAt: createDateAsUTC(new Date()),
+          updatedAt: createDateAsUTC(new Date())
+        })
+      })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/dinas/user/${req.params.id}`,
@@ -196,30 +255,21 @@ class dinas {
           nextMonth = `0${nextMonth}`
         }
 
-        data = await tbl_log_addresses.findAll({
+        data = await tbl_log_dinas.findAll({
           where: {
-            // [Op.and]: {
-            //   createdAt: {
-            //     [Op.gte]: `${year}-${month}-01 00:00:00`
-            //   },
-            //   createdAt: {
-            //     [Op.lte]: `${year}-${nextMonth}-01 00:00:00`
-            //   },
-            // }
             createdAt: {
               [Op.between]: [`${year}-${month}-01 00:00:00`, `${year}-${nextMonth}-01 00:00:00`]
             }
           },
           order: [['createdAt', 'DESC']]
         })
-        // where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
       } else {
-        data = await tbl_log_addresses.findAll({ order: [['createdAt', 'DESC']] })
+        data = await tbl_log_dinas.findAll({ order: [['createdAt', 'DESC']] })
       }
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
-        uri: `http://api.polagroup.co.id/dinas/log`,
+        uri: `http://api.polagroup.co.id/address/log`,
         method: 'delete',
         status: 500,
         message: err,

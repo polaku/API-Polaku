@@ -1,19 +1,26 @@
-const { tbl_departments, tbl_structure_departments, tbl_positions, tbl_department_positions, tbl_department_teams, tbl_team_positions, tbl_companys, tbl_users } = require('../models')
+const { tbl_departments, tbl_structure_departments, tbl_positions, tbl_department_positions, tbl_department_teams, tbl_team_positions, tbl_companys, tbl_dinas, tbl_users, tbl_account_details, tbl_log_structures } = require('../models')
 const logError = require('../helpers/logError')
+const Op = require('sequelize').Op
+const { createDateAsUTC } = require('../helpers/convertDate');
 
 class department {
   static async create(req, res) {
     try {
+      let deptname
       let newStructureDepartment = {
         hierarchy: req.body.levelHirarki,
         company_id: req.body.companyId
       }
 
       if (typeof (req.body.nameDepartment) !== 'number') {
+        deptname = req.body.nameDepartment
         let createDepartment1 = await tbl_departments.create({ deptname: req.body.nameDepartment })
         newStructureDepartment.departments_id = createDepartment1.id || createDepartment1.null
       } else {
         newStructureDepartment.departments_id = req.body.nameDepartment
+
+        let search = await tbl_departments.findOne({ where: { departments_id: req.body.nameDepartment } })
+        deptname = search.deptname
       }
 
       if (typeof (req.body.partOfDepartment) !== 'number') {
@@ -59,6 +66,17 @@ class department {
       })
 
       res.status(201).json({ message: 'Success' })
+
+      let company = await tbl_companys.findByPk(req.body.companyId)
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+      await tbl_log_structures.create({
+        department: deptname,
+        company: company.company_name,
+        action: "CREATE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
       console.log(err)
       res.status(500).json({ message: 'Error', err })
@@ -67,7 +85,33 @@ class department {
 
   static async findAll(req, res) {
     try {
+      let condition = {}, query, conditionCompany = {}, conditionSearch = {}
+
+      if (req.query.page) {
+        let offset = +req.query.page, limit = +req.query.limit
+        if (offset > 0) offset = offset * limit
+        query = { offset, limit }
+      }
+      if (req.query.company) conditionCompany = { company_id: req.query.company }
+
+      if (req.user.user_id !== 1) {
+        let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
+
+        let tempCondition = []
+        tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
+
+        userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
+          tempCondition.push({
+            company_id: el.company_id,
+          })
+        })
+
+        condition = { [Op.or]: tempCondition }
+      }
+
       let data = await tbl_structure_departments.findAll({
+        ...query,
+        where: { ...condition, ...conditionCompany },
         include: [
           { model: tbl_companys },
           { as: "department", model: tbl_departments },
@@ -94,7 +138,12 @@ class department {
           },
         ]
       })
-      res.status(200).json({ message: 'Success', data })
+
+      let allData = await tbl_structure_departments.findAll({
+        where: { ...condition, ...conditionCompany }
+      })
+
+      res.status(200).json({ message: 'Success', totalData: allData.length, data })
     } catch (err) {
       console.log(err)
       res.status(500).json({ message: 'Error', err })
@@ -103,16 +152,22 @@ class department {
 
   static async update(req, res) {
     try {
+      let deptname
       let newStructureDepartment = {
         hierarchy: req.body.levelHirarki,
         company_id: req.body.companyId
       }
 
       if (typeof (req.body.nameDepartment) !== 'number') {
+        deptname = req.body.nameDepartment
+
         let createDepartment1 = await tbl_departments.create({ deptname: req.body.nameDepartment })
         newStructureDepartment.departments_id = createDepartment1.id || createDepartment1.null
       } else {
         newStructureDepartment.departments_id = req.body.nameDepartment
+
+        let search = await tbl_departments.findOne({ where: { departments_id: req.body.nameDepartment } })
+        deptname = search.deptname
       }
 
       if (typeof (req.body.partOfDepartment) !== 'number') {
@@ -126,7 +181,7 @@ class department {
 
       await tbl_department_positions.destroy({ where: { structure_department_id: req.params.id } })
       for (let i = 0; i < req.body.position.length; i++) {
-        let newData = { structure_department_id: req.params.id, user_id: req.body.position[i].user  || null}
+        let newData = { structure_department_id: req.params.id, user_id: req.body.position[i].user || null }
 
         if (typeof (req.body.position[i].position) !== 'number') {
           let createPosition = await tbl_positions.create({ position: req.body.position[i].position })
@@ -148,7 +203,7 @@ class department {
         let createTeam = await tbl_department_teams.create(newTeam)
 
         await team.teamPosition.forEach(async (element, index) => {
-          let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null}
+          let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null }
 
           if (typeof (element) !== 'number') {
             let createPosition = await tbl_positions.create({ position: element })
@@ -161,6 +216,17 @@ class department {
       })
 
       res.status(201).json({ message: 'Success' })
+console.log(req.body)
+      let company = await tbl_companys.findByPk(req.body.companyId)
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+      await tbl_log_structures.create({
+        department: deptname,
+        company: company.company_name,
+        action: "UPDATE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
       console.log(err)
       res.status(500).json({ message: 'Error', err })
@@ -169,13 +235,66 @@ class department {
 
   static async delete(req, res) {
     try {
+      let data = await tbl_structure_departments.findOne({
+        where: { id: req.params.id }, include: [{ model: tbl_companys }, { as: "department", model: tbl_departments }]
+      })
+
       await tbl_structure_departments.destroy({ where: { id: req.params.id } })
       await tbl_department_positions.destroy({ where: { structure_department_id: req.params.id } })
       await tbl_department_teams.destroy({ where: { structure_department_id: req.params.id } })
       res.status(200).json({ message: 'Success', id_deleted: req.params.id })
+
+      let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+      await tbl_log_structures.create({
+        department: data.department.deptname,
+        company: data.tbl_company.company_name,
+        action: "DELETE",
+        action_by: req.user.user_id + '-' + userDetail.fullname,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
+      })
     } catch (err) {
       console.log(err)
       res.status(500).json({ message: 'Error', err })
+    }
+  }
+
+  static async findAllLog(req, res) {
+    try {
+      let data
+      if (req.query.date) {
+        let year = new Date(req.query.date).getFullYear()
+        let month = new Date(req.query.date).getMonth() + 1, nextMonth = month + 1
+
+        if (month < 10) {
+          month = `0${month}`
+        }
+        if (nextMonth < 10) {
+          nextMonth = `0${nextMonth}`
+        }
+
+        data = await tbl_log_structures.findAll({
+          where: {
+            createdAt: {
+              [Op.between]: [`${year}-${month}-01 00:00:00`, `${year}-${nextMonth}-01 00:00:00`]
+            }
+          },
+          order: [['createdAt', 'DESC']]
+        })
+      } else {
+        data = await tbl_log_structures.findAll({ order: [['createdAt', 'DESC']] })
+      }
+      res.status(200).json({ message: "Success", data })
+    } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/address/log`,
+        method: 'delete',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
+      res.status(500).json({ err })
     }
   }
 }

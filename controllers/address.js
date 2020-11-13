@@ -1,4 +1,4 @@
-const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details, tbl_buildings } = require('../models')
+const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details, tbl_buildings, tbl_dinas, tbl_users } = require('../models')
 const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
 const Op = require('sequelize').Op
@@ -127,13 +127,41 @@ class address {
 
   static async findAll(req, res) {
     try {
+      let condition = {}, query, conditionCompany = {}, conditionSearch = {}
+
+      if (req.query.page) {
+        let offset = +req.query.page, limit = +req.query.limit
+        if (offset > 0) offset = offset * limit
+        query = { offset, limit }
+      }
+      if (req.query.company) conditionCompany = { company_id: req.query.company }
+      if (req.query.search) conditionSearch = { address: { [Op.substring]: req.query.search } }
+
+      if (req.user.user_id !== 1) {
+        let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
+
+        let tempCondition = []
+        tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
+
+        userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
+          tempCondition.push({
+            company_id: el.company_id,
+          })
+        })
+
+        condition = { [Op.or]: tempCondition }
+      }
+
       let data = await tbl_address_companies.findAll({
+        ...query,
+        where: { ...conditionCompany, ...condition },
         include: [
           {
             model: tbl_companys
           },
           {
             model: tbl_buildings,
+            where: conditionSearch
           },
           {
             model: tbl_photo_address,
@@ -158,8 +186,20 @@ class address {
           ['updatedAt', 'DESC']
         ]
       })
-      res.status(200).json({ message: "Success", data })
+
+      let allData = await tbl_address_companies.findAll({
+        where: { ...conditionCompany, ...condition },
+        include: [
+          {
+            model: tbl_buildings,
+            where: conditionSearch
+          },
+        ]
+      })
+
+      res.status(200).json({ message: "Success", totalData: allData.length, data })
     } catch (err) {
+      console.log(err)
       let error = {
         uri: `http://api.polagroup.co.id/address`,
         method: 'get',
@@ -180,7 +220,6 @@ class address {
       }
 
       let newBuilding = {
-        building: req.body.building,
         location_id: req.body.location_id,
         company_id: req.body.companyId,
         address: req.body.address,
@@ -188,6 +227,8 @@ class address {
         phone: req.body.phone,
         fax: req.body.fax,
       }
+      if (+req.body.building === 'NaN') newBuilding.building = req.body.building
+
       await tbl_buildings.update(newBuilding, { where: { building_id: req.body.building_id } })
 
       let newAddress = {
@@ -332,21 +373,12 @@ class address {
 
         data = await tbl_log_addresses.findAll({
           where: {
-            // [Op.and]: {
-            //   createdAt: {
-            //     [Op.gte]: `${year}-${month}-01 00:00:00`
-            //   },
-            //   createdAt: {
-            //     [Op.lte]: `${year}-${nextMonth}-01 00:00:00`
-            //   },
-            // }
             createdAt: {
               [Op.between]: [`${year}-${month}-01 00:00:00`, `${year}-${nextMonth}-01 00:00:00`]
             }
           },
           order: [['createdAt', 'DESC']]
         })
-        // where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
       } else {
         data = await tbl_log_addresses.findAll({ order: [['createdAt', 'DESC']] })
       }
