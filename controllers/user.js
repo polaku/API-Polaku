@@ -1,4 +1,4 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees } = require('../models')
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs } = require('../models')
 const { compare, hash } = require('../helpers/bcrypt')
 const { sign, verify } = require('../helpers/jwt')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
@@ -252,6 +252,8 @@ class user {
               })
             })
 
+            let checkPIC = await tbl_PICs.findOne({ where: { user_id: userFound.user_id } })
+
             res.status(200).json({
               message: "Success",
               token,
@@ -269,7 +271,8 @@ class user {
               evaluator2,
               bawahan,
               designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
-              dinas
+              dinas,
+              isPIC: checkPIC ? true : false
             })
 
             MyContactUs && MyContactUs.forEach(async element => {
@@ -525,6 +528,8 @@ class user {
             })
           })
 
+          let checkPIC = await tbl_PICs.findOne({ where: { user_id: userFound.user_id } })
+
           res.status(200).json({
             message: 'Oke',
             username: userFound.username,
@@ -541,7 +546,8 @@ class user {
             evaluator2,
             bawahan,
             designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
-            dinas
+            dinas,
+            isPIC: checkPIC ? true : false
           })
 
           MyContactUs && MyContactUs.forEach(async element => {

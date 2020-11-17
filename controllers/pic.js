@@ -78,11 +78,29 @@ class pic {
           await tbl_PICs.create({ company_id: req.params.id, user_id: el.user_id })
         }
       })
-      res.status(201).json({ message: "Success" })
+      res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/pic`,
-        method: 'create',
+        method: 'update',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
+      res.status(500).json({ err });
+      console.log(err);
+    }
+  }
+
+  static async delete(req, res) {
+    try {
+      await tbl_PICs.destroy({ where: { id: req.params.id } })
+      res.status(200).json({ message: "Success" })
+    } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/pic`,
+        method: 'delete',
         status: 500,
         message: err,
         user_id: req.user.user_id
