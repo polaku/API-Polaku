@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     next_frame_date: DataTypes.DATE,
     next_lensa_date: DataTypes.DATE,
     office_email: DataTypes.STRING,
+    updatedAt: DataTypes.DATE
   }, {
     timestamps: false,
   });

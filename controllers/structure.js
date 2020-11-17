@@ -9,7 +9,9 @@ class department {
       let deptname
       let newStructureDepartment = {
         hierarchy: req.body.levelHirarki,
-        company_id: req.body.companyId
+        company_id: req.body.companyId,
+        createdAt: createDateAsUTC(new Date()),
+        updatedAt: createDateAsUTC(new Date())
       }
 
       if (typeof (req.body.nameDepartment) !== 'number') {
@@ -155,7 +157,8 @@ class department {
       let deptname
       let newStructureDepartment = {
         hierarchy: req.body.levelHirarki,
-        company_id: req.body.companyId
+        company_id: req.body.companyId,
+        updatedAt: createDateAsUTC(new Date())
       }
 
       if (typeof (req.body.nameDepartment) !== 'number') {

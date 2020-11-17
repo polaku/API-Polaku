@@ -406,7 +406,7 @@ class user {
         await tbl_users.update(newData, {
           where: { user_id: req.user.user_id, activated: 1 }
         })
-        await tbl_account_details.update({ phone: req.body.noHP }, {
+        await tbl_account_details.update({ phone: req.body.noHP, updatedAt: createDateAsUTC(new Date()) }, {
           where: { user_id: req.user.user_id }
         })
 
@@ -576,7 +576,7 @@ class user {
         await tbl_users.update(newData, {
           where: { user_id: req.user.user_id, activated: 1 }
         })
-        await tbl_account_details.update({ phone: req.body.noHP }, {
+        await tbl_account_details.update({ phone: req.body.noHP, updatedAt: createDateAsUTC(new Date()) }, {
           where: { user_id: req.user.user_id }
         })
 
@@ -618,6 +618,7 @@ class user {
     newData2 = {
       fullname: req.body.fullname,
       phone: req.body.phone,
+      updatedAt: createDateAsUTC(new Date())
     }
 
     try {
@@ -670,6 +671,7 @@ class user {
       nik: req.body.nik,
       name_evaluator_1: req.body.evaluator1,
       name_evaluator_2: req.body.evaluator2,
+      updatedAt: createDateAsUTC(new Date())
     }
 
     try {
@@ -733,7 +735,7 @@ class user {
 
   static changeAvatar(req, res) {
     // tbl_account_details.update({ avatar: `http://api.polagroup.co.id/${req.file.path}` }, {
-    tbl_account_details.update({ avatar: `http://165.22.110.159/${req.file.path}` }, {
+    tbl_account_details.update({ avatar: `http://165.22.110.159/${req.file.path}`, updatedAt: createDateAsUTC(new Date()) }, {
       where: { user_id: req.user.user_id }
     })
       .then(async () => {
@@ -798,7 +800,7 @@ class user {
         })
 
         result.Sheet1.forEach(async el => {
-          await tbl_account_details.update({ leave: el.leave }, { where: { nik: el.nik } })
+          await tbl_account_details.update({ leave: el.leave, updatedAt: createDateAsUTC(new Date()) }, { where: { nik: el.nik } })
         })
       } else if (req.body.jenisImport === "evaluator") {
         result = excelToJson({
@@ -821,6 +823,7 @@ class user {
 
           let newData = {
             name_evaluator_1: evaluator1.user_id,
+            updatedAt: createDateAsUTC(new Date())
           }
           if (evaluator2) newData.name_evaluator_2 = evaluator2.user_id
 
@@ -952,7 +955,7 @@ class user {
           for (let i = String(user.nik).length; i < 5; i++) {
             tempNIK = `0${tempNIK}`
           }
-          await tbl_account_details.update({ nik: tempNIK }, { where: { user_id: user.user_id } })
+          await tbl_account_details.update({ nik: tempNIK, updatedAt: createDateAsUTC(new Date()) }, { where: { user_id: user.user_id } })
         }
       })
       res.status(200).json({ message: "Success" })
@@ -999,6 +1002,7 @@ class user {
       status_employee: req.body.statusEmployee,
       leave_big: req.body.leaveBig,
       office_email: req.body.officeEmail,
+      updatedAt: createDateAsUTC(new Date())
     }
 
 
@@ -1238,7 +1242,7 @@ class user {
               .catch(() => { })
 
 
-            let newData2 = {}
+            let newData2 = { updatedAt: createDateAsUTC(new Date()) }
             if (req.body.fullname) newData2.fullname = el.fullname
             if (req.body.nickname) newData2.nickname = el.nickname
             if (req.body.initial) newData2.initial = el.initial
