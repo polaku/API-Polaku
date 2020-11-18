@@ -14,7 +14,7 @@ class department {
         updatedAt: createDateAsUTC(new Date())
       }
 
-      if (typeof (req.body.nameDepartment) !== 'number') {
+      if (typeof (req.body.nameDepartment) !== 'number' && req.body.nameDepartment !== '' && !req.body.nameDepartment) {
         deptname = req.body.nameDepartment
         let createDepartment1 = await tbl_departments.create({ deptname: req.body.nameDepartment })
         newStructureDepartment.departments_id = createDepartment1.id || createDepartment1.null
@@ -25,7 +25,7 @@ class department {
         deptname = search.deptname
       }
 
-      if (typeof (req.body.partOfDepartment) !== 'number') {
+      if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && !req.body.partOfDepartment) {
         let createDepartment2 = await tbl_departments.create({ deptname: req.body.partOfDepartment })
         newStructureDepartment.department_section = createDepartment2.id || createDepartment2.null
       } else {
@@ -37,7 +37,7 @@ class department {
       for (let i = 0; i < req.body.position.length; i++) {
         let newData = { structure_department_id: createStructure.id, user_id: req.body.position[i].user || null }
 
-        if (typeof (req.body.position[i].position) !== 'number') {
+        if (typeof (req.body.position[i].position) !== 'number' && req.body.position[i].position !== '' && !req.body.position[i].position) {
           let createPosition = await tbl_positions.create({ position: req.body.position[i].position })
           newData.position_id = createPosition.id || createPosition.null
         } else {
@@ -57,7 +57,7 @@ class department {
         await team.teamPosition.forEach(async (element, index) => {
           let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null }
 
-          if (typeof (element) !== 'number') {
+          if (typeof (element) !== 'number' && element !== '' && !element) {
             let createPosition = await tbl_positions.create({ position: element })
             newData.position_id = createPosition.id || createPosition.null
           } else {
@@ -161,7 +161,7 @@ class department {
         updatedAt: createDateAsUTC(new Date())
       }
 
-      if (typeof (req.body.nameDepartment) !== 'number') {
+      if (typeof (req.body.nameDepartment) !== 'number' && req.body.nameDepartment !== '' && !req.body.nameDepartment) {
         deptname = req.body.nameDepartment
 
         let createDepartment1 = await tbl_departments.create({ deptname: req.body.nameDepartment })
@@ -173,7 +173,7 @@ class department {
         deptname = search.deptname
       }
 
-      if (typeof (req.body.partOfDepartment) !== 'number') {
+      if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && !req.body.partOfDepartment) {
         let createDepartment2 = await tbl_departments.create({ deptname: req.body.partOfDepartment })
         newStructureDepartment.department_section = createDepartment2.id || createDepartment2.null
       } else {
@@ -186,7 +186,7 @@ class department {
       for (let i = 0; i < req.body.position.length; i++) {
         let newData = { structure_department_id: req.params.id, user_id: req.body.position[i].user || null }
 
-        if (typeof (req.body.position[i].position) !== 'number') {
+        if (typeof (req.body.position[i].position) !== 'number' && req.body.position[i].position !== '' && !req.body.position[i].position) {
           let createPosition = await tbl_positions.create({ position: req.body.position[i].position })
           newData.position_id = createPosition.id || createPosition.null
         } else {
@@ -208,7 +208,7 @@ class department {
         await team.teamPosition.forEach(async (element, index) => {
           let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null }
 
-          if (typeof (element) !== 'number') {
+          if (typeof (element) !== 'number' && element !== '' && !element) {
             let createPosition = await tbl_positions.create({ position: element })
             newData.position_id = createPosition.id || createPosition.null
           } else {
