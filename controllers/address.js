@@ -137,7 +137,7 @@ class address {
       if (req.query.company) conditionCompany = { company_id: req.query.company }
       if (req.query.search) conditionSearch = { address: { [Op.substring]: req.query.search } }
 
-      if (req.user.user_id !== 1) {
+      if (req.user.user_id !== 1 && !req.query.forOption) {
         let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
 
         let tempCondition = []

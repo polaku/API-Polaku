@@ -1,4 +1,4 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs } = require('../models')
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions } = require('../models')
 const { compare, hash } = require('../helpers/bcrypt')
 const { sign, verify } = require('../helpers/jwt')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
@@ -136,13 +136,11 @@ class user {
           building_id: req.body.building_id,
           location_id: building.location_id || null,
           company_id: req.body.company_id,
-          position_id: req.body.position_id,
           designations_id: req.body.designations_id || null,
           phone: req.body.phone,
           name_evaluator_1: req.body.name_evaluator_1,
           name_evaluator_2: req.body.name_evaluator_2,
           nickname: req.body.nickname,
-          departments_id: req.body.departments_id,
           status_employee: req.body.statusEmployee,
           join_date: req.body.joinDate,
           start_leave_big: req.body.startLeaveBig,
@@ -161,6 +159,42 @@ class user {
         }
         newAccountDetail.nik = tempNIK
 
+        let listDivisi = JSON.parse(req.body.list_divisi)
+        listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
+          if (divisi.divisi && divisi.peran) {
+            let checkDepartment = await tbl_structure_departments.findOne({
+              where: { company_id: req.body.company_id, departments_id: divisi.divisi }
+            })
+
+            if (checkDepartment) {
+              let newPosition = {
+                position_id: divisi.peran,
+                structure_department_id: checkDepartment.id,
+                user_id: userId
+              }
+              await tbl_department_positions.create(newPosition)
+            }
+          }
+        })
+
+        if (req.body.list_divisi_dinas) {
+          let listDivisiDinas = JSON.parse(req.body.list_divisi_dinas)
+          listDivisiDinas && listDivisiDinas.length > 0 && await listDivisiDinas.forEach(async (divisi) => {
+            let checkDepartment = await tbl_structure_departments.findOne({
+              where: { company_id: req.body.dinasId, departments_id: divisi.divisi }
+            })
+
+            if (checkDepartment) {
+              let newPosition = {
+                position_id: divisi.peran,
+                structure_department_id: checkDepartment.id,
+                user_id: userId
+              }
+              await tbl_department_positions.create(newPosition)
+            }
+
+          })
+        }
 
         // if (req.file) newAccountDetail.avatar = `http://api.polagroup.co.id/${req.file.path}`
         if (req.file) newAccountDetail.avatar = `http://165.22.110.159/${req.file.path}`
@@ -368,6 +402,14 @@ class user {
       }, {
         as: 'dinas',
         model: tbl_dinas
+      }, {
+        model: tbl_department_positions,
+        include: [{
+          model: tbl_structure_departments,
+          include: [{ model: tbl_companys, attributes: ['company_id', 'company_name', 'acronym'] }, { model: tbl_departments, as: "department", attributes: ['deptname'] }]
+        }, {
+          model: tbl_positions
+        }]
       }]
     })
       .then(async (data) => {
@@ -1023,6 +1065,52 @@ class user {
       })
       await tbl_account_details.update(newData2, {
         where: { user_id: req.params.id }
+      })
+
+
+      let dataPosition = await tbl_department_positions.findAll({
+        where: { user_id: req.params.id },
+        include: [{ model: tbl_structure_departments, where: { company_id: req.body.company_id } }]
+      })
+
+      let listDivisi = JSON.parse(req.body.list_divisi)
+
+      dataPosition.forEach(async (el) => {
+        let checkAvailable = listDivisi.find(element => el.id === element.id)
+        if (!checkAvailable) await tbl_department_positions.destroy({ where: { id: el.id } })
+      })
+
+
+      listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
+        if (divisi.divisi && divisi.peran) {
+          if (divisi.id) {
+            let checkDepartment = await tbl_structure_departments.findOne({
+              where: { company_id: req.body.company_id, departments_id: divisi.divisi }
+            })
+
+            if (checkDepartment) {
+              let newPosition = {
+                position_id: divisi.peran,
+                structure_department_id: checkDepartment.id,
+                user_id: req.params.id
+              }
+              await tbl_department_positions.update(newPosition, { where: { id: divisi.id } })
+            }
+          } else {
+            let checkDepartment = await tbl_structure_departments.findOne({
+              where: { company_id: req.body.company_id, departments_id: divisi.divisi }
+            })
+
+            if (checkDepartment) {
+              let newPosition = {
+                position_id: divisi.peran,
+                structure_department_id: checkDepartment.id,
+                user_id: req.params.id
+              }
+              await tbl_department_positions.create(newPosition)
+            }
+          }
+        }
       })
 
       let dataReturning = await tbl_users.findByPk(req.params.id, {
