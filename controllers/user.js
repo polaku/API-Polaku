@@ -1269,120 +1269,92 @@ class user {
           sourceFile: req.file.path,
           sheets: [{
             name: 'Sheet1',
-            header: {
-              rows: 1
-            },
-            columnToKey: {
-              A: 'nik',
-              B: 'fullname',//-
-              C: 'nickname',//-
-              D: 'initial',//-
-              E: 'birth_date',//-
-              F: 'address',//-
-              G: 'phone',//
-              H: 'selfEmail',//
-              I: 'officeEmail',//
-              J: 'username',//
-              K: 'building',//        // id
-              L: 'company',//         // id
-              M: 'evaluator1',//      // id
-              N: 'evaluator2',//      // id
-              O: 'department',//      // id
-              P: 'position',//        // id
-              Q: 'leave',//
-              R: 'statusEmpolyee',//
-              S: 'joinDate',//
-              T: 'startBigLeave',//
-              U: 'bigLeave',//
-              V: 'nextFrameDate',//
-              W: 'nextLensaDate'//
-            }
           }]
         })
 
-        let building = await tbl_buildings.findAll()
+        let nik, fullname, nickname, initial, birth_date, address, phone, selfEmail, officeEmail, username, evaluator1, evaluator2, company, leave, statusEmpolyee, joinDate, startBigLeave, bigLeave, nextFrameDate, nextLensaDate
+
+        let header = result.Sheet1[0]
+
+        for (let key in header) {
+          if (header[key].indexOf('nik') != -1) nik = key
+          else if (header[key].indexOf('fullname') != -1) fullname = key
+          else if (header[key].indexOf('nickname') != -1) nickname = key
+          else if (header[key].indexOf('initial') != -1) initial = key
+          else if (header[key].indexOf('birth_date') != -1) birth_date = key
+          else if (header[key].indexOf('address') != -1) address = key
+          else if (header[key].indexOf('phone') != -1) phone = key
+          else if (header[key].indexOf('selfEmail') != -1) selfEmail = key
+          else if (header[key].indexOf('officeEmail') != -1) officeEmail = key
+          else if (header[key].indexOf('username') != -1) username = key
+          else if (header[key].indexOf('evaluator1') != -1) evaluator1 = key
+          else if (header[key].indexOf('evaluator2') != -1) evaluator2 = key
+          else if (header[key].indexOf('company') != -1) company = key
+          else if (header[key].indexOf('leave') != -1) leave = key
+          else if (header[key].indexOf('statusEmpolyee') != -1) statusEmpolyee = key
+          else if (header[key].indexOf('joinDate') != -1) joinDate = key
+          else if (header[key].indexOf('startBigLeave') != -1) startBigLeave = key
+          else if (header[key].indexOf('bigLeave') != -1) bigLeave = key
+          else if (header[key].indexOf('nextFrameDate') != -1) nextFrameDate = key
+          else if (header[key].indexOf('nextLensaDate') != -1) nextLensaDate = key
+        }
+
+        let listData = result.Sheet1.slice(1, result.Sheet1.length)
+
         let accountDetail = await tbl_account_details.findAll()
-        let company = await tbl_companys.findAll()
-        let position = await tbl_positions.findAll()
-        let department = await tbl_departments.findAll()
+        let listCompany = await tbl_companys.findAll()
 
-        await result.Sheet1.forEach(async el => {
-
+        await listData.forEach(async el => {
           let tempNIK
-          if (String(el.nik).length < 5) {
-            tempNIK = el.nik
-            for (let i = String(el.nik).length; i < 5; i++) {
+          if (String(el[nik]).length < 5) {
+            tempNIK = el[nik]
+            for (let i = String(el[nik]).length; i < 5; i++) {
               tempNIK = `0${tempNIK}`
             }
           } else {
-            tempNIK = el.nik
+            tempNIK = el[nik]
           }
-
           let account = await accountDetail.find(user => user.nik === tempNIK)
-
 
           if (account) {
             let newData1 = {}
-            if (req.body.username) newData1.username = el.username
-            if (req.body.email) newData1.email = el.selfEmail
+            if (username) newData1.username = el[username]
+            if (selfEmail) newData1.email = el[selfEmail]
             tbl_users.update(newData1, { where: { user_id: account.user_id } })
               .then(() => { })
               .catch(() => { })
 
 
-            let newData2 = { updatedAt: createDateAsUTC(new Date()) }
-            if (req.body.fullname) newData2.fullname = el.fullname
-            if (req.body.nickname) newData2.nickname = el.nickname
-            if (req.body.initial) newData2.initial = el.initial
-            if (req.body.birth_date) newData2.date_of_birth = el.birth_date
-            if (req.body.address) newData2.address = el.address
-            if (req.body.phone) newData2.phone = el.phone
-            if (req.body.officeEmail) newData2.office_email = el.officeEmail
-            if (req.body.leave) newData2.leave = el.leave
-            if (req.body.statusEmpolyee) newData2.status_employee = el.statusEmpolyee
-            if (req.body.joinDate) newData2.join_date = el.joinDate
-            if (req.body.startBigLeave) newData2.start_leave_big = el.startBigLeave
-            if (req.body.bigLeave) newData2.leave_big = el.bigLeave
-            if (req.body.nextFrameDate) newData2.next_frame_date = el.nextFrameDate
-            if (req.body.nextLensaDate) newData2.next_lensa_date = el.nextLensaDate
+            let newData2 = {}
+            if (fullname) newData2.fullname = el[fullname]
+            if (nickname) newData2.nickname = el[nickname]
+            if (initial) newData2.initial = el[initial]
+            if (birth_date) newData2.date_of_birth = el[birth_date]
+            if (address) newData2.address = el[address]
+            if (phone) newData2.phone = el[phone]
+            if (officeEmail) newData2.office_email = el[officeEmail]
+            if (leave) newData2.leave = el[leave]
+            if (statusEmpolyee) newData2.status_employee = el[statusEmpolyee]
+            if (joinDate) newData2.join_date = el[joinDate]
+            if (startBigLeave) newData2.start_leave_big = el[startBigLeave]
+            if (bigLeave) newData2.leave_big = el[bigLeave]
+            if (nextFrameDate) newData2.next_frame_date = el[nextFrameDate]
+            if (nextLensaDate) newData2.next_lensa_date = el[nextLensaDate]
+            newData2.updatedAt = createDateAsUTC(new Date())
 
-            if (req.body.building) {
-              let gedung = await building.find(building => building.building === el.building)
-
-              if (gedung) {
-                newData2.building_id = gedung.building_id
-                newData2.location_id = gedung.location_id
-              }
-            }
-
-            if (req.body.company) {
-              let perusahaan = await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase())
-
+            if (company) {
+              let perusahaan = await listCompany.find(pt => pt.acronym.toLowerCase() === el[company].toLowerCase())
               if (perusahaan) newData2.company_id = perusahaan.company_id
             }
 
-            if (req.body.evaluator1) {
-              let evaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1))
-
-              if (evaluator1) newAccountDetail.name_evaluator_1 = evaluator1.user_id
+            if (evaluator1) {
+              let selectEvaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el[evaluator1]))
+              if (selectEvaluator1) newData2.name_evaluator_1 = selectEvaluator1.user_id
             }
 
-            if (req.body.evaluator2) {
-              let evaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2))
-
-              if (evaluator2) newAccountDetail.name_evaluator_2 = evaluator2.user_id
-            }
-
-            if (req.body.department) {
-              let divisi = await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase())
-
-              if (divisi) newAccountDetail.departments_id = divisi.departments_id
-            }
-
-            if (req.body.position) {
-              let posisi = await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase())
-
-              if (posisi) newAccountDetail.position_id = posisi.position_id
+            if (evaluator2) {
+              let selectEvaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el[evaluator2]))
+              if (selectEvaluator2) newData2.name_evaluator_2 = selectEvaluator2.user_id
             }
 
             await tbl_account_details.update(newData2, { where: { user_id: account.user_id } })
