@@ -459,7 +459,7 @@ class bookingRoom {
     )
       .then(async () => {
 
-        if (dataWillDelete.user_id !== req.user.user_id) {
+        if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
           let accountCreator = await tbl_account_details.findOne({ where: { user_id: dataWillDelete.user_id } })
           let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 
@@ -884,7 +884,7 @@ class bookingRoom {
     } else {            // KECUALI ARTISTIKA
       let dinas = []
       userDinas.length > 0 && userDinas.forEach(el => {
-        dinas.push({ company_id: el.company_id})
+        dinas.push({ company_id: el.company_id })
       })
 
       dinamicCondition = {
