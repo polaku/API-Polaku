@@ -458,7 +458,7 @@ class bookingRoom {
       { where: { room_booking_id: req.params.id } }
     )
       .then(async () => {
-
+console.log(dataWillDelete)
         if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
           let accountCreator = await tbl_account_details.findOne({ where: { user_id: dataWillDelete.user_id } })
           let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
