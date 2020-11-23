@@ -1028,18 +1028,20 @@ class bookingRoom {
       // dinamicCondition = { building_id: 1, company_id: 2 }
     } else {      //KECUALI ARTISTIKA
 
-      let dinas = []
-      userDinas.length > 0 && userDinas.forEach(el => {
-        dinas.push({ company_id: el.company_id, room_id: { [Op.ne]: 12 } })
-      })
+      if (req.user.user_id !== 1) {
+        let dinas = []
+        userDinas.length > 0 && userDinas.forEach(el => {
+          dinas.push({ company_id: el.company_id, room_id: { [Op.ne]: 12 } })
+        })
 
-      dinamicCondition = {
-        [Op.or]: [
-          { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } },
-          { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } },
-          { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } },
-          ...dinas
-        ]
+        dinamicCondition = {
+          [Op.or]: [
+            { building_id: userAccountDetail.building_id, room_id: { [Op.ne]: 12 } },
+            { location_id: userAccountDetail.location_id, room_id: { [Op.ne]: 12 } },
+            { company_id: userAccountDetail.company_id, room_id: { [Op.ne]: 12 } },
+            ...dinas
+          ]
+        }
       }
     }
     // else if (userAccountDetail.company_id === 5) {            // Khusus BPW
