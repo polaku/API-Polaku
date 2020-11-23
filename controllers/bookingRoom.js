@@ -452,13 +452,13 @@ class bookingRoom {
   }
 
   static async delete(req, res) {
-    let dataWillDelete = await tbl_room_bookings.findByPk(req.params.id)
+    let dataWillDelete = await tbl_room_bookings.findByPk(req.params.id, { include: [{ model: tbl_rooms }] })
 
     tbl_room_bookings.destroy(
       { where: { room_booking_id: req.params.id } }
     )
       .then(async () => {
-console.log(dataWillDelete)
+        console.log(dataWillDelete)
         if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
           let accountCreator = await tbl_account_details.findOne({ where: { user_id: dataWillDelete.user_id } })
           let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
