@@ -458,7 +458,6 @@ class bookingRoom {
       { where: { room_booking_id: req.params.id } }
     )
       .then(async () => {
-        console.log(dataWillDelete)
         if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
           let accountCreator = await tbl_account_details.findOne({ where: { user_id: dataWillDelete.user_id } })
           let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
@@ -1105,12 +1104,18 @@ class bookingRoom {
 
     let newData = {
       room: req.body.room,
-      max: req.body.max,
+      max: req.body.max || 0,
       facilities: req.body.facilities,
-      company_id: building.company_id,
+      company_id: req.body.company_id || building.company_id || null,
       building_id: req.body.building_id,
-      location_id: building.location_id,
+      location_id: req.body.location_id || building.location_id || null,
+      open_gate: req.body.start_hour,
+      close_gate: req.body.end_hour,
+      access_by: req.body.access_by,
+      operational_day: req.body.operational_day
     }
+
+    if (req.file) newData.thumbnail = req.file.path
 
     tbl_rooms.create(newData)
       .then(async data => {
@@ -1152,12 +1157,23 @@ class bookingRoom {
       })
   }
 
-  static editRoom(req, res) {
+  static async editRoom(req, res) {
+    let building = await tbl_buildings.findByPk(req.body.building_id)
+
     let newData = {
       room: req.body.room,
-      max: req.body.max,
+      max: req.body.max || 0,
       facilities: req.body.facilities,
+      company_id: req.body.company_id || building.company_id || null,
+      building_id: req.body.building_id,
+      location_id: req.body.location_id || building.location_id || null,
+      open_gate: req.body.start_hour,
+      close_gate: req.body.end_hour,
+      access_by: req.body.access_by,
+      operational_day: req.body.operational_day
     }
+
+    if (req.file) newData.thumbnail = req.file.path
 
     tbl_rooms.update(newData,
       { where: { room_id: req.params.id } }

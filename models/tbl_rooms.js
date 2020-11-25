@@ -8,15 +8,17 @@ module.exports = (sequelize, DataTypes) => {
     room: DataTypes.STRING,
     max: DataTypes.INTEGER,
     facilities: DataTypes.STRING,
-		thumbnail: DataTypes.STRING,
+    thumbnail: DataTypes.STRING,
     company_id: DataTypes.INTEGER,
     building_id: DataTypes.INTEGER,
     location_id: DataTypes.INTEGER,
-    open_gate: DataTypes.TIME, 
-    close_gate: DataTypes.TIME 
+    open_gate: DataTypes.TIME,
+    close_gate: DataTypes.TIME,
+    access_by: DataTypes.STRING,
+    operational_day: DataTypes.STRING
   }, {
-      timestamps: false,
-    });
+    timestamps: false,
+  });
   tbl_rooms.removeAttribute('id');
 
   tbl_rooms.associate = function (models) {

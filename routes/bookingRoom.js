@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const bookingRoomController = require('../controllers/bookingRoom')
 const { authentication, authorizationBookingRoom } = require('../middleware/auth')
+const { uploadSingle } = require('../middleware/multer')
 
 router.use(authentication)
 
@@ -10,9 +11,9 @@ router.get('/myRoom', bookingRoomController.findAllMyBookingRooms)
 
 //Room
 router.get('/rooms', bookingRoomController.findAllRoom)
-router.post('/rooms', bookingRoomController.createRoom)
+router.post('/rooms', uploadSingle.single('thumbnail'), bookingRoomController.createRoom)
 router.delete('/rooms/:id', bookingRoomController.deleteRoom)
-router.put('/rooms/:id', bookingRoomController.editRoom)
+router.put('/rooms/:id', uploadSingle.single('thumbnail'), bookingRoomController.editRoom)
 
 //Building
 router.get('/building', bookingRoomController.findAllBuilding)
