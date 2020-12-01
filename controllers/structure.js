@@ -27,13 +27,16 @@ class department {
 
         deptname = search.deptname
       }
-      console.log(req.body)
+      console.log(">>>>>>", req.body)
       if (req.body.partOfDepartment) {
+        console.log("MASUK SINI 1")
         if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && req.body.partOfDepartment !== 'null' && req.body.partOfDepartment !== null && req.body.partOfDepartment !== 'undefined') {
           console.log("MASUK 3", req.body.partOfDepartment)
+          console.log("MASUK SINI 2")
           let createDepartment2 = await tbl_departments.create({ deptname: req.body.partOfDepartment })
           newStructureDepartment.department_section = createDepartment2.id || createDepartment2.null
         } else {
+          console.log("MASUK SINI 3")
           newStructureDepartment.department_section = req.body.partOfDepartment
         }
       }
