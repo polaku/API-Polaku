@@ -1,12 +1,12 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions } = require('../models')
-const { compare, hash } = require('../helpers/bcrypt')
-const { sign, verify } = require('../helpers/jwt')
-const { mailOptions, transporter } = require('../helpers/nodemailer')
-const logError = require('../helpers/logError')
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins } = require('../models');
+const { compare, hash } = require('../helpers/bcrypt');
+const { sign, verify } = require('../helpers/jwt');
+const { mailOptions, transporter } = require('../helpers/nodemailer');
+const logError = require('../helpers/logError');
 const excelToJson = require('convert-excel-to-json');
 const { createDateAsUTC } = require('../helpers/convertDate');
 
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 class user {
@@ -138,8 +138,8 @@ class user {
           company_id: req.body.company_id,
           designations_id: req.body.designations_id || null,
           phone: req.body.phone,
-          name_evaluator_1: req.body.name_evaluator_1,
-          name_evaluator_2: req.body.name_evaluator_2,
+          name_evaluator_1: req.body.name_evaluator_1 || null,
+          name_evaluator_2: req.body.name_evaluator_2 || null,
           nickname: req.body.nickname,
           status_employee: req.body.statusEmployee,
           join_date: req.body.joinDate,
@@ -286,7 +286,7 @@ class user {
               })
             })
 
-            let checkPIC = await tbl_PICs.findOne({ where: { user_id: userFound.user_id } })
+            let checkPIC = await tbl_PICs.findAll({ where: { user_id: userFound.user_id }, include: [{ model: tbl_companys }] })
 
             res.status(200).json({
               message: "Success",
@@ -306,9 +306,10 @@ class user {
               bawahan,
               designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
               dinas,
-              isPIC: checkPIC ? true : false
+              PIC: checkPIC
             })
-
+            // console.log()
+            // req.headers['user-agent']
             MyContactUs && MyContactUs.forEach(async element => {
               await tbl_contacts.update({ status: 'done' }, { where: { contact_id: element.contact_id } })
             });
@@ -321,6 +322,7 @@ class user {
             }
             logError(error)
             res.status(400).json({ msg: "Username/password invalid" })
+
           }
         } else {
           let error = {
@@ -358,14 +360,25 @@ class user {
     if (req.query.company && req.query.company !== '0') condition = { company_id: +req.query.company }
     else if (req.user.user_id !== 1) {
       let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
+      let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
 
       let tempCondition = []
       tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
 
+      let idCompany = []
       userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
+        idCompany.push(el.company_id)
         tempCondition.push({
           company_id: el.company_id,
         })
+      })
+      userPIC && userPIC.forEach(el => {
+        if (idCompany.indexOf(el.company_id) === -1) {
+          idCompany.push(el.company_id)
+          tempCondition.push({
+            company_id: el.company_id,
+          })
+        }
       })
 
       condition = { [Op.or]: tempCondition }
@@ -518,7 +531,8 @@ class user {
   static checktoken(req, res) {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1 = null, evaluator2 = null
     let decoded = verify(req.headers.token);
-
+    console.log(req.headers)
+    console.log(req.headers['user-agent'])
     tbl_users.findByPk(Number(decoded.user_id), { where: { activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }] })
       .then(async userFound => {
         if (userFound) {
@@ -570,7 +584,7 @@ class user {
             })
           })
 
-          let checkPIC = await tbl_PICs.findOne({ where: { user_id: userFound.user_id } })
+          let checkPIC = await tbl_PICs.findAll({ where: { user_id: userFound.user_id }, include: [{ model: tbl_companys }] })
 
           res.status(200).json({
             message: 'Oke',
@@ -589,7 +603,7 @@ class user {
             bawahan,
             designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
             dinas,
-            isPIC: checkPIC ? true : false
+            PIC: checkPIC
           })
 
           MyContactUs && MyContactUs.forEach(async element => {
@@ -1037,8 +1051,8 @@ class user {
       company_id: req.body.company_id,
       position_id: req.body.position_id,
       phone: req.body.phone,
-      name_evaluator_1: req.body.evaluator1,
-      name_evaluator_2: req.body.evaluator2,
+      name_evaluator_1: req.body.name_evaluator_1 || null,
+      name_evaluator_2: req.body.name_evaluator_2 || null,
       nickname: req.body.nickname,
       departments_id: req.body.departments_id,
       status_employee: req.body.statusEmployee,
@@ -1073,7 +1087,7 @@ class user {
         include: [{ model: tbl_structure_departments, where: { company_id: req.body.company_id } }]
       })
 
-      let listDivisi = JSON.parse(req.body.list_divisi)
+      let listDivisi = req.body.list_divisi ? JSON.parse(req.body.list_divisi) : []
 
       dataPosition.forEach(async (el) => {
         let checkAvailable = listDivisi.find(element => el.id === element.id)

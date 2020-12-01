@@ -1,4 +1,4 @@
-const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_details, tbl_master_rooms, tbl_companys, tbl_buildings, tbl_events, tbl_event_responses, tbl_notifications, tbl_event_invites, tbl_departments, tbl_dinas } = require('../models')
+const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_details, tbl_master_rooms, tbl_companys, tbl_buildings, tbl_events, tbl_event_responses, tbl_notifications, tbl_event_invites, tbl_departments, tbl_dinas, tbl_PICs } = require('../models')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
@@ -1028,8 +1028,14 @@ class bookingRoom {
     } else {      //KECUALI ARTISTIKA
 
       if (req.user.user_id !== 1) {
+        let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
+
         let dinas = []
-        userDinas.length > 0 && userDinas.forEach(el => {
+        userDinas.length > 0 && await userDinas.forEach(el => {
+          dinas.push({ company_id: el.company_id, room_id: { [Op.ne]: 12 } })
+        })
+
+        userPIC && await userPIC.forEach(el => {
           dinas.push({ company_id: el.company_id, room_id: { [Op.ne]: 12 } })
         })
 

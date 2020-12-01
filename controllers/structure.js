@@ -1,4 +1,4 @@
-const { tbl_departments, tbl_structure_departments, tbl_positions, tbl_department_positions, tbl_department_teams, tbl_team_positions, tbl_companys, tbl_dinas, tbl_users, tbl_account_details, tbl_log_structures } = require('../models')
+const { tbl_departments, tbl_structure_departments, tbl_positions, tbl_department_positions, tbl_department_teams, tbl_team_positions, tbl_companys, tbl_dinas, tbl_users, tbl_account_details, tbl_log_structures, tbl_PICs } = require('../models')
 const logError = require('../helpers/logError')
 const Op = require('sequelize').Op
 const { createDateAsUTC } = require('../helpers/convertDate');
@@ -14,7 +14,7 @@ class department {
         updatedAt: createDateAsUTC(new Date())
       }
 
-      if (typeof (req.body.nameDepartment) !== 'number' && req.body.nameDepartment !== '' && !req.body.nameDepartment) {
+      if (typeof (req.body.nameDepartment) !== 'number' && req.body.nameDepartment !== '' && req.body.nameDepartment !== 'null' && req.body.nameDepartment !== null && req.body.nameDepartment !== 'undefined') {
         deptname = req.body.nameDepartment
         let createDepartment1 = await tbl_departments.create({ deptname: req.body.nameDepartment })
         newStructureDepartment.departments_id = createDepartment1.id || createDepartment1.null
@@ -25,7 +25,7 @@ class department {
         deptname = search.deptname
       }
 
-      if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && !req.body.partOfDepartment) {
+      if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && req.body.partOfDepartment !== 'null' && req.body.partOfDepartment !== null && req.body.partOfDepartment !== 'undefined') {
         let createDepartment2 = await tbl_departments.create({ deptname: req.body.partOfDepartment })
         newStructureDepartment.department_section = createDepartment2.id || createDepartment2.null
       } else {
@@ -36,11 +36,13 @@ class department {
 
       for (let i = 0; i < req.body.position.length; i++) {
         let newData = { structure_department_id: createStructure.id, user_id: req.body.position[i].user || null }
-
-        if (typeof (req.body.position[i].position) !== 'number' && req.body.position[i].position !== '' && !req.body.position[i].position) {
+        console.log("1", typeof (req.body.position[i].position), req.body.position[i].position !== '', !req.body.position[i].position)
+        if (typeof (req.body.position[i].position) !== 'number' && req.body.position[i].position !== '' && req.body.position[i].position !== 'null' && req.body.position[i].position !== null && req.body.position[i].position !== 'undefined') {
+          console.log("2", req.body.position[i].position)
           let createPosition = await tbl_positions.create({ position: req.body.position[i].position })
           newData.position_id = createPosition.id || createPosition.null
         } else {
+          console.log("3", req.body.position[i].position)
           newData.position_id = req.body.position[i].position
         }
         await tbl_department_positions.create(newData)
@@ -57,7 +59,7 @@ class department {
         await team.teamPosition.forEach(async (element, index) => {
           let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null }
 
-          if (typeof (element) !== 'number' && element !== '' && !element) {
+          if (typeof (element) !== 'number' && element !== '' && element !== 'null' && element !== null && element !== 'undefined') {
             let createPosition = await tbl_positions.create({ position: element })
             newData.position_id = createPosition.id || createPosition.null
           } else {
@@ -98,14 +100,25 @@ class department {
 
       if (req.user.user_id !== 1 && !req.query.forOption) {
         let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
+        let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
 
         let tempCondition = []
         tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
 
+        let idCompany = []
         userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
+          idCompany.push(el.company_id)
           tempCondition.push({
             company_id: el.company_id,
           })
+        })
+        userPIC && userPIC.forEach(el => {
+          if (idCompany.indexOf(el.company_id) === -1) {
+            idCompany.push(el.company_id)
+            tempCondition.push({
+              company_id: el.company_id,
+            })
+          }
         })
 
         condition = { [Op.or]: tempCondition }
@@ -161,7 +174,7 @@ class department {
         updatedAt: createDateAsUTC(new Date())
       }
 
-      if (typeof (req.body.nameDepartment) !== 'number' && req.body.nameDepartment !== '' && !req.body.nameDepartment) {
+      if (typeof (req.body.nameDepartment) !== 'number' && req.body.nameDepartment !== '' && req.body.nameDepartment !== 'null' && req.body.nameDepartment !== null && req.body.nameDepartment !== 'undefined') {
         deptname = req.body.nameDepartment
 
         let createDepartment1 = await tbl_departments.create({ deptname: req.body.nameDepartment })
@@ -173,7 +186,7 @@ class department {
         deptname = search.deptname
       }
 
-      if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && !req.body.partOfDepartment) {
+      if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && req.body.partOfDepartment !== 'null' && req.body.partOfDepartment !== null && req.body.partOfDepartment !== 'undefined') {
         let createDepartment2 = await tbl_departments.create({ deptname: req.body.partOfDepartment })
         newStructureDepartment.department_section = createDepartment2.id || createDepartment2.null
       } else {
@@ -186,7 +199,7 @@ class department {
       for (let i = 0; i < req.body.position.length; i++) {
         let newData = { structure_department_id: req.params.id, user_id: req.body.position[i].user || null }
 
-        if (typeof (req.body.position[i].position) !== 'number' && req.body.position[i].position !== '' && !req.body.position[i].position) {
+        if (typeof (req.body.position[i].position) !== 'number' && req.body.position[i].position !== '' && req.body.position[i].position !== 'null' && req.body.position[i].position !== null && req.body.position[i].position !== 'undefined') {
           let createPosition = await tbl_positions.create({ position: req.body.position[i].position })
           newData.position_id = createPosition.id || createPosition.null
         } else {
@@ -208,7 +221,7 @@ class department {
         await team.teamPosition.forEach(async (element, index) => {
           let newData = { department_team_id: createTeam.id, user_id: team.user[index] || null }
 
-          if (typeof (element) !== 'number' && element !== '' && !element) {
+          if (typeof (element) !== 'number' && element !== '' && element !== 'null' && element !== null && element !== 'undefined') {
             let createPosition = await tbl_positions.create({ position: element })
             newData.position_id = createPosition.id || createPosition.null
           } else {

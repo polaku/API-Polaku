@@ -1,6 +1,7 @@
-const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details, tbl_buildings, tbl_dinas, tbl_users } = require('../models')
+const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details, tbl_buildings, tbl_dinas, tbl_users, tbl_PICs } = require('../models')
 const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
+const user = require('./user');
 const Op = require('sequelize').Op
 
 class address {
@@ -139,14 +140,25 @@ class address {
 
       if (req.user.user_id !== 1 && !req.query.forOption) {
         let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
+        let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
 
         let tempCondition = []
         tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
 
+        let idCompany = []
         userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
+          idCompany.push(el.company_id)
           tempCondition.push({
             company_id: el.company_id,
           })
+        })
+        userPIC && userPIC.forEach(el => {
+          if (idCompany.indexOf(el.company_id) === -1) {
+            idCompany.push(el.company_id)
+            tempCondition.push({
+              company_id: el.company_id,
+            })
+          }
         })
 
         condition = { [Op.or]: tempCondition }
@@ -161,7 +173,8 @@ class address {
           },
           {
             model: tbl_buildings,
-            where: conditionSearch
+            where: conditionSearch,
+            include: [{ model: tbl_dinas }]
           },
           {
             model: tbl_photo_address,

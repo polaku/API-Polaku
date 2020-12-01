@@ -1,4 +1,4 @@
-const { tbl_designations, tbl_user_roles, tbl_menus, tbl_users, tbl_account_details, tbl_dinas, tbl_log_admins, tbl_companys } = require('../models')
+const { tbl_designations, tbl_user_roles, tbl_menus, tbl_users, tbl_account_details, tbl_dinas, tbl_log_admins, tbl_companys, tbl_PICs } = require('../models')
 const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
 const Op = require('sequelize').Op
@@ -104,14 +104,25 @@ class designation {
 
         if (req.user.user_id !== 1) {
           let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
+          let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
 
           let tempCondition = []
           tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
 
+          let idCompany = []
           userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
+            idCompany.push(el.company_id)
             tempCondition.push({
               company_id: el.company_id,
             })
+          })
+          userPIC && userPIC.forEach(el => {
+            if (idCompany.indexOf(el.company_id) === -1) {
+              idCompany.push(el.company_id)
+              tempCondition.push({
+                company_id: el.company_id,
+              })
+            }
           })
           condition = { [Op.or]: tempCondition }
         }
