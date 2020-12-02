@@ -1223,7 +1223,7 @@ class user {
             if (monthBirth < 10) monthBirth = `0${monthBirth}`
             password = hash(`${dateBirth}${monthBirth}${new Date(el.birth_date).getFullYear()}`)
           } else {
-            password = hash(el.nik)
+            password = hash(`${el.nik}`)
           }
 
           let newUser = {
