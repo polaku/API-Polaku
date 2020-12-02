@@ -938,7 +938,7 @@ class user {
             }
 
             let newUser = {
-              username: el.username,
+              username: el.username || el.nik,
               password: hash(`${dateBirth}${monthBirth}${new Date(el.birth_date).getFullYear()}`),
               email: el.email,
               permission: "all",
@@ -1208,23 +1208,28 @@ class user {
 
         await result.Sheet1.forEach(async el => {
 
-          let gedung = await building.find(building => building.building === el.building)
-          let evaluator1 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1))
-          let evaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2))
-          let perusahaan = await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase())
-          let posisi = await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase())
-          let divisi = await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase())
+          let gedung = el.building ? await building.find(building => building.building === el.building) : null
+          let evaluator1 = el.evaluator1 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1)) : null
+          let evaluator2 = el.evaluator2 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2)) : null
+          let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
+          let posisi = el.position ? await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase()) : null
+          let divisi = el.department ? await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase()) : null
 
-          let dateBirth = new Date(el.birth_date).getDate()
-          let monthBirth = new Date(el.birth_date).getMonth() + 1
-
-          if (dateBirth < 10) dateBirth = `0${dateBirth}`
-          if (monthBirth < 10) monthBirth = `0${monthBirth}`
+          let dateBirth, monthBirth, password
+          if (el.birth_date) {
+            dateBirth = new Date(el.birth_date).getDate()
+            monthBirth = new Date(el.birth_date).getMonth() + 1
+            if (dateBirth < 10) dateBirth = `0${dateBirth}`
+            if (monthBirth < 10) monthBirth = `0${monthBirth}`
+            password = hash(`${dateBirth}${monthBirth}${new Date(el.birth_date).getFullYear()}`)
+          } else {
+            password = hash(el.nik)
+          }
 
           let newUser = {
-            username: el.username,
-            password: hash(`${dateBirth}${monthBirth}${new Date(el.birth_date).getFullYear()}`),
-            email: el.selfEmail,
+            username: el.username || el.nik,
+            password,
+            email: el.selfEmail || null,
             permission: "all",
             role_id: 3,
             activated: 1,
@@ -1234,20 +1239,20 @@ class user {
             .then(async data => {
               let newAccountDetail = {
                 user_id: data.null,
-                fullname: el.fullname,
-                nickname: el.nickname,
-                initial: el.initial,
-                address: el.address,
-                date_of_birth: el.birth_date,
+                fullname: el.fullname || null,
+                nickname: el.nickname || null,
+                initial: el.initial || null,
+                address: el.address || null,
+                date_of_birth: el.birth_date || null,
                 leave: el.leave || 0,
-                phone: el.phone,
-                status_employee: el.statusEmpolyee,
-                join_date: el.joinDate,
-                start_leave_big: el.startBigLeave,
-                leave_big: el.bigLeave,
-                next_frame_date: el.nextFrameDate,
-                next_lensa_date: el.nextLensaDate,
-                office_email: el.officeEmail,
+                phone: el.phone || null,
+                status_employee: el.statusEmpolyee || null,
+                join_date: el.joinDate || null,
+                start_leave_big: el.startBigLeave || null,
+                leave_big: el.bigLeave || null,
+                next_frame_date: el.nextFrameDate || null,
+                next_lensa_date: el.nextLensaDate || null,
+                office_email: el.officeEmail || null,
               }
 
 

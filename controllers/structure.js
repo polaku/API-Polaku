@@ -15,7 +15,6 @@ class department {
       }
 
       if (typeof (req.body.nameDepartment) !== 'number' && req.body.nameDepartment !== '' && req.body.nameDepartment !== 'null' && req.body.nameDepartment !== null && req.body.nameDepartment !== 'undefined') {
-        console.log("MASUK 1", req.body.nameDepartment)
         deptname = req.body.nameDepartment
         let createDepartment1 = await tbl_departments.create({ deptname: req.body.nameDepartment })
         newStructureDepartment.departments_id = createDepartment1.id || createDepartment1.null
@@ -27,16 +26,12 @@ class department {
 
         deptname = search.deptname
       }
-      console.log(">>>>>>", req.body)
+
       if (req.body.partOfDepartment) {
-        console.log("MASUK SINI 1")
         if (typeof (req.body.partOfDepartment) !== 'number' && req.body.partOfDepartment !== '' && req.body.partOfDepartment !== 'null' && req.body.partOfDepartment !== null && req.body.partOfDepartment !== 'undefined') {
-          console.log("MASUK 3", req.body.partOfDepartment)
-          console.log("MASUK SINI 2")
           let createDepartment2 = await tbl_departments.create({ deptname: req.body.partOfDepartment })
           newStructureDepartment.department_section = createDepartment2.id || createDepartment2.null
         } else {
-          console.log("MASUK SINI 3")
           newStructureDepartment.department_section = req.body.partOfDepartment
         }
       }
