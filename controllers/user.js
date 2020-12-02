@@ -1208,79 +1208,83 @@ class user {
 
         await result.Sheet1.forEach(async el => {
 
-          let gedung = el.building ? await building.find(building => building.building === el.building) : null
-          let evaluator1 = el.evaluator1 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1)) : null
-          let evaluator2 = el.evaluator2 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2)) : null
-          let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
-          let posisi = el.position ? await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase()) : null
-          let divisi = el.department ? await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase()) : null
+          let checkEmpolyee = await tbl_account_details.findOne({ where: { nik: el.nik } })
 
-          let dateBirth, monthBirth, password
-          if (el.birth_date) {
-            dateBirth = new Date(el.birth_date).getDate()
-            monthBirth = new Date(el.birth_date).getMonth() + 1
-            if (dateBirth < 10) dateBirth = `0${dateBirth}`
-            if (monthBirth < 10) monthBirth = `0${monthBirth}`
-            password = hash(`${dateBirth}${monthBirth}${new Date(el.birth_date).getFullYear()}`)
-          } else {
-            password = hash(`${el.nik}`)
-          }
+          if (!checkEmpolyee) {
+            let gedung = el.building ? await building.find(building => building.building === el.building) : null
+            let evaluator1 = el.evaluator1 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1)) : null
+            let evaluator2 = el.evaluator2 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2)) : null
+            let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
+            let posisi = el.position ? await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase()) : null
+            let divisi = el.department ? await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase()) : null
 
-          let newUser = {
-            username: el.username || el.nik,
-            password,
-            email: el.selfEmail || null,
-            permission: "all",
-            role_id: 3,
-            activated: 1,
-          }
+            let dateBirth, monthBirth, password
+            if (el.birth_date) {
+              dateBirth = new Date(el.birth_date).getDate()
+              monthBirth = new Date(el.birth_date).getMonth() + 1
+              if (dateBirth < 10) dateBirth = `0${dateBirth}`
+              if (monthBirth < 10) monthBirth = `0${monthBirth}`
+              password = hash(`${dateBirth}${monthBirth}${new Date(el.birth_date).getFullYear()}`)
+            } else {
+              password = hash(`${el.nik}`)
+            }
 
-          tbl_users.create(newUser)
-            .then(async data => {
-              let newAccountDetail = {
-                user_id: data.null,
-                fullname: el.fullname || null,
-                nickname: el.nickname || null,
-                initial: el.initial || null,
-                address: el.address || null,
-                date_of_birth: el.birth_date || null,
-                leave: el.leave || 0,
-                phone: el.phone || null,
-                status_employee: el.statusEmpolyee || null,
-                join_date: el.joinDate || null,
-                start_leave_big: el.startBigLeave || null,
-                leave_big: el.bigLeave || null,
-                next_frame_date: el.nextFrameDate || null,
-                next_lensa_date: el.nextLensaDate || null,
-                office_email: el.officeEmail || null,
-              }
+            let newUser = {
+              username: el.username || el.nik,
+              password,
+              email: el.selfEmail || null,
+              permission: "all",
+              role_id: 3,
+              activated: 1,
+            }
 
-
-              if (perusahaan) newAccountDetail.company_id = perusahaan.company_id
-
-              if (posisi) newAccountDetail.position_id = posisi.position_id
-
-              if (gedung) {
-                newAccountDetail.building_id = gedung.building_id
-                newAccountDetail.location_id = gedung.location_id
-              }
-
-              if (evaluator1) newAccountDetail.name_evaluator_1 = evaluator1.user_id
-              if (evaluator2) newAccountDetail.name_evaluator_2 = evaluator2.user_id
-
-              let tempNIK
-              if (String(el.nik).length < 5) {
-                tempNIK = el.nik
-                for (let i = String(el.nik).length; i < 5; i++) {
-                  tempNIK = `0${tempNIK}`
+            tbl_users.create(newUser)
+              .then(async data => {
+                let newAccountDetail = {
+                  user_id: data.null,
+                  fullname: el.fullname || null,
+                  nickname: el.nickname || null,
+                  initial: el.initial || null,
+                  address: el.address || null,
+                  date_of_birth: el.birth_date || null,
+                  leave: el.leave || 0,
+                  phone: el.phone || null,
+                  status_employee: el.statusEmpolyee || null,
+                  join_date: el.joinDate || null,
+                  start_leave_big: el.startBigLeave || null,
+                  leave_big: el.bigLeave || null,
+                  next_frame_date: el.nextFrameDate || null,
+                  next_lensa_date: el.nextLensaDate || null,
+                  office_email: el.officeEmail || null,
                 }
-              } else {
-                tempNIK = el.nik
-              }
-              newAccountDetail.nik = tempNIK
 
-              let createAccountDetail = await tbl_account_details.create(newAccountDetail)
-            })
+
+                if (perusahaan) newAccountDetail.company_id = perusahaan.company_id
+
+                if (posisi) newAccountDetail.position_id = posisi.position_id
+
+                if (gedung) {
+                  newAccountDetail.building_id = gedung.building_id
+                  newAccountDetail.location_id = gedung.location_id
+                }
+
+                if (evaluator1) newAccountDetail.name_evaluator_1 = evaluator1.user_id
+                if (evaluator2) newAccountDetail.name_evaluator_2 = evaluator2.user_id
+
+                let tempNIK
+                if (String(el.nik).length < 5) {
+                  tempNIK = el.nik
+                  for (let i = String(el.nik).length; i < 5; i++) {
+                    tempNIK = `0${tempNIK}`
+                  }
+                } else {
+                  tempNIK = el.nik
+                }
+                newAccountDetail.nik = tempNIK
+
+                let createAccountDetail = await tbl_account_details.create(newAccountDetail)
+              })
+          }
 
         })
       } else {
