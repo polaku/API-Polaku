@@ -20,6 +20,7 @@ const structure = require('./structure')
 const building = require('./building')
 const dinas = require('./dinas')
 const designation = require('./designation')
+const security = require('./security')
 
 router.get('/', (req, res) => {
     res.send('Welcome to server polaku-react')
@@ -44,5 +45,6 @@ router.use('/structure', structure)
 router.use('/building', building)
 router.use('/dinas', dinas)
 router.use('/designation', designation)
+router.use('/security', security)
 
 module.exports = router

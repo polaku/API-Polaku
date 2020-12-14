@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      tbl_activity_logins.belongsTo(models.tbl_users, { foreignKey: 'user_id' })
     }
   };
   tbl_activity_logins.init({
@@ -21,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     last_login: DataTypes.DATE,
     status: DataTypes.BOOLEAN,
     page: DataTypes.STRING,
-    action: DataTypes.STRING
+    action: DataTypes.STRING,
+    is_mobile: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'tbl_activity_logins',

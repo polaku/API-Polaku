@@ -5,6 +5,7 @@ const { uploadSingle } = require('../middleware/multer')
 
 router.get('/', authentication, userController.findAll)
 router.post('/signup', uploadSingle.single('avatar'), userController.signup)
+router.get('/signout', userController.signout)
 router.post('/register', authentication, uploadSingle.single('avatar'), userController.register)
 router.post('/signin', userController.signin)
 router.put('/forgetPassword', userController.forgetPassword)

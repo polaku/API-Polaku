@@ -288,6 +288,15 @@ class user {
 
             let checkPIC = await tbl_PICs.findAll({ where: { user_id: userFound.user_id }, include: [{ model: tbl_companys }] })
 
+            await tbl_activity_logins.create({
+              user_id: userFound.user_id,
+              os: req.headers.os,
+              browser: req.headers.browser,
+              ip: req.headers.ip || '-',
+              is_mobile: req.headers.isMobile === 'true' ? 1 : 0,
+              last_login: createDateAsUTC(new Date())
+            })
+
             res.status(200).json({
               message: "Success",
               token,
@@ -531,8 +540,7 @@ class user {
   static checktoken(req, res) {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1 = null, evaluator2 = null
     let decoded = verify(req.headers.token);
-    console.log(req.headers)
-    console.log(req.headers['user-agent'])
+
     tbl_users.findByPk(Number(decoded.user_id), { where: { activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }] })
       .then(async userFound => {
         if (userFound) {
@@ -585,6 +593,14 @@ class user {
           })
 
           let checkPIC = await tbl_PICs.findAll({ where: { user_id: userFound.user_id }, include: [{ model: tbl_companys }] })
+
+          if (req.headers.ip) {
+            await tbl_activity_logins.update({
+              page: req.headers.referer,
+              action: req.connection.parser.incoming.method,
+              last_login: createDateAsUTC(new Date())
+            }, { where: { ip: req.headers.ip, status: 1 } })
+          }
 
           res.status(200).json({
             message: 'Oke',
@@ -1246,7 +1262,7 @@ class user {
                   nickname: el.nickname || null,
                   initial: el.initial || null,
                   address: el.address || null,
-                  date_of_birth: el.birth_date || null,
+                  date_of_birth: el.birth_date ? new Date(new Date(el.birth_date).setHours(new Date(el.birth_date).getHours() + 9)) : null,
                   leave: el.leave || 0,
                   phone: el.phone || null,
                   status_employee: el.statusEmpolyee || null,
@@ -1295,16 +1311,20 @@ class user {
           }]
         })
 
-        let nik, fullname, nickname, initial, birth_date, address, phone, selfEmail, officeEmail, username, evaluator1, evaluator2, company, leave, statusEmpolyee, joinDate, startBigLeave, bigLeave, nextFrameDate, nextLensaDate
+        let nik, fullname, nickname, initial, date_of_birth, address, phone, selfEmail, officeEmail, username, evaluator1, evaluator2, company, leave, statusEmpolyee, joinDate, startBigLeave, bigLeave, nextFrameDate, nextLensaDate
 
         let header = result.Sheet1[0]
 
+        console.log(header)
         for (let key in header) {
           if (header[key].indexOf('nik') != -1) nik = key
           else if (header[key].indexOf('fullname') != -1) fullname = key
           else if (header[key].indexOf('nickname') != -1) nickname = key
           else if (header[key].indexOf('initial') != -1) initial = key
-          else if (header[key].indexOf('birth_date') != -1) birth_date = key
+          else if (header[key].indexOf('date_of_birth') != -1) {
+            date_of_birth = key
+            console.log("date_of_birth")
+          }
           else if (header[key].indexOf('address') != -1) address = key
           else if (header[key].indexOf('phone') != -1) phone = key
           else if (header[key].indexOf('selfEmail') != -1) selfEmail = key
@@ -1326,6 +1346,21 @@ class user {
 
         let accountDetail = await tbl_account_details.findAll()
         let listCompany = await tbl_companys.findAll()
+        console.log(">>>>>>>>>>>>>", listData[1])
+        // console.log(new Date(new Date(listData[0].E).setHours(new Date(listData[0].E).getHours() + 7)))
+        // console.log(new Date(new Date(listData[1].E).setHours(new Date(listData[1].E).getHours() + 7)))
+        // console.log(new Date(new Date(listData[2].E).setHours(new Date(listData[2].E).getHours() + 7)))
+
+        console.log(createDateAsUTC(new Date(listData[0].E)))
+        console.log(listData[0].E)
+        console.log(createDateAsUTC(new Date(listData[1].E)))
+        console.log(createDateAsUTC(new Date(listData[2].E)))
+
+        console.log("><<<<<", new Date(new Date(listData[0].E).setHours(new Date(listData[0].E).getHours() + 9)))
+        console.log("><<<<<", new Date(new Date(listData[1].E).setHours(new Date(listData[1].E).getHours() + 9)))
+        console.log("><<<<<", new Date(new Date(listData[2].E).setHours(new Date(listData[2].E).getHours() + 9)))
+        console.log("><<<<<", new Date(new Date(listData[3].E).setHours(new Date(listData[3].E).getHours() + 9)))
+
 
         await listData.forEach(async el => {
           let tempNIK
@@ -1352,7 +1387,7 @@ class user {
             if (fullname) newData2.fullname = el[fullname]
             if (nickname) newData2.nickname = el[nickname]
             if (initial) newData2.initial = el[initial]
-            if (birth_date) newData2.date_of_birth = el[birth_date]
+            if (date_of_birth) newData2.date_of_birth = new Date(new Date(el[date_of_birth]).setHours(new Date(el[date_of_birth]).getHours() + 9))
             if (address) newData2.address = el[address]
             if (phone) newData2.phone = el[phone]
             if (officeEmail) newData2.office_email = el[officeEmail]
@@ -1379,7 +1414,7 @@ class user {
               let selectEvaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el[evaluator2]))
               if (selectEvaluator2) newData2.name_evaluator_2 = selectEvaluator2.user_id
             }
-
+            console.log(newData2)
             await tbl_account_details.update(newData2, { where: { user_id: account.user_id } })
           }
         })
@@ -1434,6 +1469,20 @@ class user {
         user_id: req.user.user_id
       }
       logError(error)
+      res.status(500).json({ err })
+    }
+  }
+
+  static async signout(req, res) {
+    try {
+      await tbl_activity_logins.update({
+        status: 0,
+        last_login: createDateAsUTC(new Date())
+      }, { where: { ip: req.headers.ip, status: 1 } })
+
+      res.status(200).json({ message: "Success" })
+    } catch (err) {
+      console.log(err)
       res.status(500).json({ err })
     }
   }
