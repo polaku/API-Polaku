@@ -1079,15 +1079,15 @@ class user {
     }
 
 
-    if (req.body.dateOfBirth !== '' || req.body.dateOfBirth !== 'null' || req.body.dateOfBirth !== null) newData2.date_of_birth = req.body.dateOfBirth
+    if (req.body.dateOfBirth !== '' || req.body.dateOfBirth !== 'null' || req.body.dateOfBirth !== null || req.body.dateOfBirth !== '0000-00-00') newData2.date_of_birth = req.body.dateOfBirth
 
-    if (req.body.joinDate !== '' || req.body.joinDate !== 'null' || req.body.joinDate !== null) newData2.join_date = req.body.joinDate
+    if (req.body.joinDate !== '' || req.body.joinDate !== 'null' || req.body.joinDate !== null || req.body.joinDate !== '0000-00-00') newData2.join_date = req.body.joinDate
 
-    if (req.body.startLeaveBig !== '' || req.body.startLeaveBig !== 'null' || req.body.startLeaveBig !== null) newData2.start_leave_big = req.body.startLeaveBig
+    if (req.body.startLeaveBig !== '' || req.body.startLeaveBig !== 'null' || req.body.startLeaveBig !== null || req.body.startLeaveBig !== '0000-00-00') newData2.start_leave_big = req.body.startLeaveBig
 
-    if (req.body.nextFrameDate !== '' || req.body.nextFrameDate !== 'null' || req.body.nextFrameDate !== null) newData2.next_frame_date = req.body.nextFrameDate
+    if (req.body.nextFrameDate !== '' || req.body.nextFrameDate !== 'null' || req.body.nextFrameDate !== null || req.body.nextFrameDate !== '0000-00-00') newData2.next_frame_date = req.body.nextFrameDate
 
-    if (req.body.nextLensaDate !== '' || req.body.nextLensaDate !== 'null' || req.body.nextLensaDate !== null) newData2.next_lensa_date = req.body.nextLensaDate
+    if (req.body.nextLensaDate !== '' || req.body.nextLensaDate !== 'null' || req.body.nextLensaDate !== null || req.body.nextLensaDate !== '0000-00-00') newData2.next_lensa_date = req.body.nextLensaDate
 
 
     try {
