@@ -1045,6 +1045,7 @@ class user {
   }
 
   static async update(req, res) {
+    console.log(req.body)
     let newData1, newData2
 
     newData1 = {
