@@ -541,7 +541,7 @@ class user {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1 = null, evaluator2 = null
     let decoded = verify(req.headers.token);
 
-    tbl_users.findByPk(Number(decoded.user_id), { where: { activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }] })
+    tbl_users.findOne({ where: { user_id: decoded.user_id, activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }] })
       .then(async userFound => {
         if (userFound) {
           req.user = userFound

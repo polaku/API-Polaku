@@ -7,6 +7,7 @@ const Op = require('sequelize').Op
 class address {
   static async create(req, res) {
     try {
+      console.log("MASUK")
       let building_id
       if (req.body.isMainAddress) {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
@@ -39,7 +40,7 @@ class address {
       }
 
       let createAddress = await tbl_address_companies.create(newAddress)
-
+console.log(req.files)
       req.files.length > 0 && req.files.forEach(async element => {
         await tbl_photo_address.create({
           path: element.path,
@@ -113,6 +114,7 @@ class address {
         updatedAt: createDateAsUTC(new Date())
       })
     } catch (err) {
+      console.log(err)
       let error = {
         uri: `http://api.polagroup.co.id/address`,
         method: 'post',
