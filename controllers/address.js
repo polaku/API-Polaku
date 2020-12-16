@@ -7,7 +7,6 @@ const Op = require('sequelize').Op
 class address {
   static async create(req, res) {
     try {
-      console.log("MASUK")
       let building_id
       if (req.body.isMainAddress) {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
@@ -229,7 +228,8 @@ console.log(req.files)
   }
 
   static async update(req, res) {
-    try {
+      console.log("MASUK update")
+      try {
       if (req.body.isMainAddress) {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
       }
@@ -255,6 +255,7 @@ console.log(req.files)
       }
 
       await tbl_address_companies.update(newAddress, { where: { id: req.params.id } })
+      console.log(req.files)
 
       if (req.files.length > 0) {
         await tbl_photo_address.destroy({ where: { address_id: req.params.id } })
