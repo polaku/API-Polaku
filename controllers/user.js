@@ -1213,7 +1213,7 @@ class user {
             let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
             let posisi = el.position ? await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase()) : null
             let divisi = el.department ? await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase()) : null
-
+console.log(perusahaan)
             let dateBirth, monthBirth, password
             if (el.birth_date) {
               dateBirth = new Date(el.birth_date).getDate()
