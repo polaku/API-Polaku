@@ -1206,14 +1206,16 @@ class user {
           let checkEmpolyee = await tbl_account_details.findOne({ where: { nik: el.nik } })
           let checkUser = await tbl_users.findOne({ where: { username: el.username } })
 
+          console.log("MASUK 1")
           if (!checkEmpolyee && !checkUser) {
+            console.log("MASUK 2")
             let gedung = el.building ? await building.find(building => building.building === el.building) : null
             let evaluator1 = el.evaluator1 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1)) : null
             let evaluator2 = el.evaluator2 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2)) : null
             let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
             let posisi = el.position ? await position.find(pos => pos.position.toLowerCase() === el.position.toLowerCase()) : null
             let divisi = el.department ? await department.find(div => div.deptname.toLowerCase() === el.department.toLowerCase()) : null
-console.log(perusahaan)
+            console.log(perusahaan)
             let dateBirth, monthBirth, password
             if (el.birth_date) {
               dateBirth = new Date(el.birth_date).getDate()
