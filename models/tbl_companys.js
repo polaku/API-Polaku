@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_companys.hasMany(models.tbl_PICs, { foreignKey: "company_id" })
     tbl_companys.hasMany(models.tbl_address_companies, { foreignKey: 'company_id' })
     tbl_companys.belongsTo(models.tbl_structure_departments, { foreignKey: 'company_id' })
+    tbl_companys.belongsTo(models.tbl_admin_companies, { foreignKey: 'company_id' })
   };
 
   return tbl_companys;

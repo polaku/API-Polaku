@@ -153,7 +153,7 @@
 
 - **Check Token**
   - URL:
-    - `GET /users/checktoken`
+    - `GET /users/check-token`
   - Header:
     - `token`: `<Token>`, required
   - Expected response :

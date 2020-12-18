@@ -1,4 +1,4 @@
-const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details, tbl_buildings, tbl_dinas, tbl_users, tbl_PICs } = require('../models')
+const { tbl_address_companies, tbl_operation_hours, tbl_photo_address, tbl_recess, tbl_companys, tbl_log_addresses, tbl_account_details, tbl_buildings, tbl_dinas, tbl_users, tbl_PICs, tbl_admin_companies } = require('../models')
 const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
 const user = require('./user');
@@ -39,7 +39,7 @@ class address {
       }
 
       let createAddress = await tbl_address_companies.create(newAddress)
-console.log(req.files)
+      console.log(req.files)
       req.files.length > 0 && req.files.forEach(async element => {
         await tbl_photo_address.create({
           path: element.path,
@@ -140,20 +140,15 @@ console.log(req.files)
       if (req.query.search) conditionSearch = { address: { [Op.substring]: req.query.search } }
 
       if (req.user.user_id !== 1 && !req.query.forOption) {
-        let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
-        let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
+        // tbl_admin_companies
 
-        let tempCondition = []
-        tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
+        // let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
 
-        let idCompany = []
-        userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
-          idCompany.push(el.company_id)
-          tempCondition.push({
-            company_id: el.company_id,
-          })
-        })
-        userPIC && userPIC.forEach(el => {
+        let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
+
+        let tempCondition = [], idCompany = []
+
+        userAdmin && userAdmin.forEach(el => {
           if (idCompany.indexOf(el.company_id) === -1) {
             idCompany.push(el.company_id)
             tempCondition.push({
@@ -228,8 +223,8 @@ console.log(req.files)
   }
 
   static async update(req, res) {
-      console.log("MASUK update")
-      try {
+    console.log("MASUK update")
+    try {
       if (req.body.isMainAddress) {
         await tbl_address_companies.update({ is_main_address: 0 }, { where: { company_id: req.body.companyId } })
       }

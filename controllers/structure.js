@@ -1,4 +1,4 @@
-const { tbl_departments, tbl_structure_departments, tbl_positions, tbl_department_positions, tbl_department_teams, tbl_team_positions, tbl_companys, tbl_dinas, tbl_users, tbl_account_details, tbl_log_structures, tbl_PICs } = require('../models')
+const { tbl_departments, tbl_structure_departments, tbl_positions, tbl_department_positions, tbl_department_teams, tbl_team_positions, tbl_companys, tbl_dinas, tbl_users, tbl_account_details, tbl_log_structures, tbl_admin_companies } = require('../models')
 const logError = require('../helpers/logError')
 const Op = require('sequelize').Op
 const { createDateAsUTC } = require('../helpers/convertDate');
@@ -103,20 +103,11 @@ class department {
       if (req.query.company) conditionCompany = { company_id: req.query.company }
 
       if (req.user.user_id !== 1 && !req.query.forOption) {
-        let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
-        let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
+        let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
-        let tempCondition = []
-        tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
+        let tempCondition = [], idCompany = []
 
-        let idCompany = []
-        userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
-          idCompany.push(el.company_id)
-          tempCondition.push({
-            company_id: el.company_id,
-          })
-        })
-        userPIC && userPIC.forEach(el => {
+        userAdmin && userAdmin.forEach(el => {
           if (idCompany.indexOf(el.company_id) === -1) {
             idCompany.push(el.company_id)
             tempCondition.push({
@@ -124,6 +115,7 @@ class department {
             })
           }
         })
+
 
         condition = { [Op.or]: tempCondition }
       }

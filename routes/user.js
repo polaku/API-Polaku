@@ -9,7 +9,7 @@ router.get('/signout', userController.signout)
 router.post('/register', authentication, uploadSingle.single('avatar'), userController.register)
 router.post('/signin', userController.signin)
 router.put('/forgetPassword', userController.forgetPassword)
-router.get('/checktoken', userController.checktoken)
+router.get('/check-token', userController.checktoken)
 router.put('/changePassword', authentication, userController.firstLogin)
 router.put('/activationAccount', authentication, userController.activationAccount)
 router.put('/editProfil', authentication, userController.editProfil) //authorization

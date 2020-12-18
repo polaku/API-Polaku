@@ -1,4 +1,4 @@
-const { tbl_PICs, tbl_companys, tbl_users, tbl_account_details } = require('../models');
+const { tbl_PICs, tbl_companys, tbl_users, tbl_account_details, tbl_admin_companies } = require('../models');
 const logError = require('../helpers/logError')
 
 class pic {
@@ -25,6 +25,11 @@ class pic {
 
       listPIC.length > 0 && listPIC.forEach(async el => {
         await tbl_PICs.create({ company_id: companyId, user_id: el.user_id })
+
+        let checkPIC = await tbl_admin_companies.findOne({ where: { user_id: el.user_id, company_id: companyId, PIC: 1 } })
+        if (!checkPIC) {
+          await tbl_admin_companies.create({ user_id: el.user_id, company_id: companyId, PIC: 1 })
+        }
       })
 
       res.status(201).json({ message: "Success", data })
@@ -77,6 +82,11 @@ class pic {
         if (!check) {
           await tbl_PICs.create({ company_id: req.params.id, user_id: el.user_id })
         }
+
+        let checkPIC = await tbl_admin_companies.findOne({ where: { user_id: el.user_id, company_id: req.params.id, PIC: 1 } })
+        if (!checkPIC) {
+          await tbl_admin_companies.create({ user_id: el.user_id, company_id: req.params.id, PIC: 1 })
+        }
       })
       res.status(200).json({ message: "Success" })
     } catch (err) {
@@ -95,7 +105,11 @@ class pic {
 
   static async delete(req, res) {
     try {
+      let PIC_deleted = await tbl_PICs.findOne({ where: { id: req.params.id } })
+
       await tbl_PICs.destroy({ where: { id: req.params.id } })
+      await tbl_admin_companies.destroy({ where: { user_id: PIC_deleted.user_id, company_id: PIC_deleted.company_id, PIC: 1 } })
+
       res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {

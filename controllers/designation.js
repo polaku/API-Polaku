@@ -1,4 +1,4 @@
-const { tbl_designations, tbl_user_roles, tbl_menus, tbl_users, tbl_account_details, tbl_dinas, tbl_log_admins, tbl_companys, tbl_PICs } = require('../models')
+const { tbl_designations, tbl_user_roles, tbl_menus, tbl_users, tbl_account_details, tbl_dinas, tbl_log_admins, tbl_companys, tbl_PICs, tbl_admin_companies } = require('../models')
 const logError = require('../helpers/logError')
 const { createDateAsUTC } = require('../helpers/convertDate');
 const Op = require('sequelize').Op
@@ -6,11 +6,11 @@ const Op = require('sequelize').Op
 class designation {
   static async create(req, res) {
     try {
-      let designation
+      let designation, designation_id
       if (isNaN(req.body.name)) {
         let createDesignation = await tbl_designations.create({ departments_id: req.body.departments_id || null, designations: req.body.name })
-
-        await tbl_account_details.update({ designations_id: createDesignation.designations_id || createDesignation.null }, { where: { user_id: req.body.userId } })
+        // await tbl_account_details.update({ designations_id: createDesignation.designations_id || createDesignation.null }, { where: { user_id: req.body.userId } })
+        designation_id = createDesignation.designations_id || createDesignation.null
 
         req.body.roles.length > 0 && req.body.roles.forEach(async (element) => {
           await tbl_user_roles.create({
@@ -26,10 +26,17 @@ class designation {
 
         designation = req.body.name
       } else {
-        await tbl_account_details.update({ designations_id: req.body.name }, { where: { user_id: req.body.userId } })
+        // await tbl_account_details.update({ designations_id: req.body.name }, { where: { user_id: req.body.userId } })
+        designation_id = req.body.name
 
         let checkDesignation = await tbl_designations.findOne({ where: { designations_id: req.body.name } })
         designation = checkDesignation.designations
+
+      }
+
+      let checkPIC = await tbl_admin_companies.findOne({ where: { user_id: req.body.userId, company_id: req.body.companyId, PIC: 0, designations_id: designation_id } })
+      if (!checkPIC) {
+        await tbl_admin_companies.create({ user_id: req.body.userId, company_id: req.body.companyId, PIC: 0, designations_id: designation_id })
       }
 
       res.status(201).json({ message: 'Success' })
@@ -103,20 +110,11 @@ class designation {
         }
 
         if (req.user.user_id !== 1) {
-          let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
-          let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
+          let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
-          let tempCondition = []
-          tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
+          let tempCondition = [], idCompany = []
 
-          let idCompany = []
-          userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
-            idCompany.push(el.company_id)
-            tempCondition.push({
-              company_id: el.company_id,
-            })
-          })
-          userPIC && userPIC.forEach(el => {
+          userAdmin && userAdmin.forEach(el => {
             if (idCompany.indexOf(el.company_id) === -1) {
               idCompany.push(el.company_id)
               tempCondition.push({
@@ -127,31 +125,71 @@ class designation {
           condition = { [Op.or]: tempCondition }
         }
 
-        data = await tbl_account_details.findAll({
+        // data = await tbl_account_details.findAll({
+        //   ...query,
+        //   where: { ...condition, ...conditionSearch },
+        //   include: [
+        //     {
+        //       required: true,
+        //       model: tbl_designations,
+        //       include: [{
+        //         model: tbl_user_roles
+        //       }]
+        //     }],
+        //   order: [
+        //     ['user_id', 'ASC']
+        //   ]
+        // })
+
+        data = await tbl_users.findAll({
           ...query,
-          where: { ...condition, ...conditionSearch },
           include: [
             {
+              model: tbl_account_details,
+              where: conditionSearch,
+              attributes: ['fullname', 'nik']
+            },
+            {
               required: true,
-              model: tbl_designations,
-              include: [{
-                model: tbl_user_roles
-              }]
+              model: tbl_admin_companies,
+              where: { ...condition, PIC: 0 },
+              include: [
+                {
+                  model: tbl_designations,
+                  include: [{
+                    model: tbl_user_roles
+                  }]
+                },
+                {
+                  model: tbl_companys,
+                  attributes: ['company_id', 'acronym']
+                }
+              ]
             }],
           order: [
             ['user_id', 'ASC']
           ]
         })
 
-        dataSelected = await tbl_account_details.findAll({
-          where: { ...condition, ...conditionSearch },
+        dataSelected = await tbl_users.findAll({
           include: [
             {
+              model: tbl_account_details,
+              where: conditionSearch,
+              attributes: ['fullname', 'nik']
+            },
+            {
               required: true,
-              model: tbl_designations,
-              include: [{
-                model: tbl_user_roles
-              }]
+              model: tbl_admin_companies,
+              where: { ...condition, PIC: 0 },
+              include: [
+                {
+                  model: tbl_designations,
+                  include: [{
+                    model: tbl_user_roles
+                  }]
+                }
+              ]
             }],
           order: [
             ['user_id', 'ASC']
@@ -218,14 +256,15 @@ class designation {
 
   static async deleteUser(req, res) {
     try {
-      let checkUser = await tbl_account_details.findOne({ where: { user_id: req.params.userId } })
-      let checkDesignation = await tbl_designations.findOne({ where: { designations_id: checkUser.designations_id } })
+      let checkAdmin = await tbl_admin_companies.findOne({ where: { id: req.params.id } })
+      let checkUser = await tbl_account_details.findOne({ where: { user_id: checkAdmin.user_id } })
+      let checkDesignation = await tbl_designations.findOne({ where: { designations_id: checkAdmin.designations_id } })
 
-      await tbl_account_details.update({ designations_id: null }, { where: { user_id: req.params.userId } })
+      await tbl_admin_companies.destroy({ where: { id: req.params.id } })
+
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
 
-
-      let company = await tbl_companys.findByPk(checkUser.company_id)
+      let company = await tbl_companys.findByPk(checkAdmin.company_id)
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
       await tbl_log_admins.create({
         employee: checkUser.fullname,

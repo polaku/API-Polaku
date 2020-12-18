@@ -1,4 +1,4 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins } = require('../models');
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins, tbl_admin_companies } = require('../models');
 const { compare, hash } = require('../helpers/bcrypt');
 const { sign, verify } = require('../helpers/jwt');
 const { mailOptions, transporter } = require('../helpers/nodemailer');
@@ -233,7 +233,7 @@ class user {
 
   static signin(req, res) {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1, evaluator2
-    tbl_users.findOne({ where: { activated: 1, username: req.body.username }, include: [{ as: 'dinas', model: tbl_dinas }] })
+    tbl_users.findOne({ where: { activated: 1, username: req.body.username }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }] })
       .then(async userFound => {
         if (userFound) {
           if (compare(req.body.password, userFound.password)) {
@@ -286,16 +286,16 @@ class user {
               })
             })
 
-            let checkPIC = await tbl_PICs.findAll({ where: { user_id: userFound.user_id }, include: [{ model: tbl_companys }] })
+            // let checkPIC = await tbl_PICs.findAll({ where: { user_id: userFound.user_id }, include: [{ model: tbl_companys }] })
 
-            await tbl_activity_logins.create({
-              user_id: userFound.user_id,
-              os: req.headers.os,
-              browser: req.headers.browser,
-              ip: req.headers.ip || '-',
-              is_mobile: req.headers.isMobile === 'true' ? 1 : 0,
-              last_login: createDateAsUTC(new Date())
-            })
+            // await tbl_activity_logins.create({
+            //   user_id: userFound.user_id,
+            //   os: req.headers.os,
+            //   browser: req.headers.browser,
+            //   ip: req.headers.ip || '-',
+            //   is_mobile: req.headers.isMobile === 'true' ? 1 : 0,
+            //   last_login: createDateAsUTC(new Date())
+            // })
 
             res.status(200).json({
               message: "Success",
@@ -313,11 +313,9 @@ class user {
               evaluator1,
               evaluator2,
               bawahan,
-              designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
-              dinas,
-              PIC: checkPIC
+              admin: userFound.tbl_admin_companies || [],
             })
-            // console.log()
+
             // req.headers['user-agent']
             MyContactUs && MyContactUs.forEach(async element => {
               await tbl_contacts.update({ status: 'done' }, { where: { contact_id: element.contact_id } })
@@ -368,20 +366,11 @@ class user {
 
     if (req.query.company && req.query.company !== '0') condition = { company_id: +req.query.company }
     else if (req.user.user_id !== 1) {
-      let userLogin = await tbl_users.findOne({ where: { user_id: req.user.user_id }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_account_details }] })
-      let userPIC = await tbl_PICs.findAll({ where: { user_id: req.user.user_id } })
+      let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
-      let tempCondition = []
-      tempCondition.push({ company_id: userLogin.tbl_account_detail.company_id })
+      let tempCondition = [], idCompany = []
 
-      let idCompany = []
-      userLogin.dinas.length > 0 && userLogin.dinas.forEach(el => {
-        idCompany.push(el.company_id)
-        tempCondition.push({
-          company_id: el.company_id,
-        })
-      })
-      userPIC && userPIC.forEach(el => {
+      userAdmin && userAdmin.forEach(el => {
         if (idCompany.indexOf(el.company_id) === -1) {
           idCompany.push(el.company_id)
           tempCondition.push({
@@ -541,7 +530,7 @@ class user {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1 = null, evaluator2 = null
     let decoded = verify(req.headers.token);
 
-    tbl_users.findOne({ where: { user_id: decoded.user_id, activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }] })
+    tbl_users.findOne({ where: { user_id: decoded.user_id, activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }] })
       .then(async userFound => {
         if (userFound) {
           req.user = userFound
@@ -551,7 +540,6 @@ class user {
               [
                 { as: "idEvaluator1", model: tbl_users, include: [{ model: tbl_account_details }] },
                 { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] },
-                { model: tbl_designations, include: [{ model: tbl_user_roles }] }
               ]
           })
           roomMaster = await tbl_master_rooms.findOne({ where: { user_id: decoded.user_id, chief: 1 } })
@@ -592,16 +580,6 @@ class user {
             })
           })
 
-          let checkPIC = await tbl_PICs.findAll({ where: { user_id: userFound.user_id }, include: [{ model: tbl_companys }] })
-
-          if (req.headers.ip) {
-            await tbl_activity_logins.update({
-              page: req.headers.referer,
-              action: req.connection.parser.incoming.method,
-              last_login: createDateAsUTC(new Date())
-            }, { where: { ip: req.headers.ip, status: 1 } })
-          }
-
           res.status(200).json({
             message: 'Oke',
             username: userFound.username,
@@ -617,9 +595,9 @@ class user {
             evaluator1,
             evaluator2,
             bawahan,
-            designation: detailUser.tbl_designation ? detailUser.tbl_designation.tbl_user_roles : null,
-            dinas,
-            PIC: checkPIC
+            admin: userFound.tbl_admin_companies || [],
+            // dinas,
+            // PIC: checkPIC
           })
 
           MyContactUs && MyContactUs.forEach(async element => {
@@ -1226,8 +1204,9 @@ class user {
         await result.Sheet1.forEach(async el => {
 
           let checkEmpolyee = await tbl_account_details.findOne({ where: { nik: el.nik } })
+          let checkUser = await tbl_users.findOne({ where: { username: el.username } })
 
-          if (!checkEmpolyee) {
+          if (!checkEmpolyee && !checkUser) {
             let gedung = el.building ? await building.find(building => building.building === el.building) : null
             let evaluator1 = el.evaluator1 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1)) : null
             let evaluator2 = el.evaluator2 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2)) : null
@@ -1476,10 +1455,10 @@ class user {
 
   static async signout(req, res) {
     try {
-      await tbl_activity_logins.update({
-        status: 0,
-        last_login: createDateAsUTC(new Date())
-      }, { where: { ip: req.headers.ip, status: 1 } })
+      // await tbl_activity_logins.update({
+      //   status: 0,
+      //   last_login: createDateAsUTC(new Date())
+      // }, { where: { ip: req.headers.ip, status: 1 } })
 
       res.status(200).json({ message: "Success" })
     } catch (err) {

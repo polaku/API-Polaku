@@ -9,14 +9,15 @@ module.exports = (sequelize, DataTypes) => {
     designations: DataTypes.STRING,
     permission: DataTypes.STRING,
   }, {
-      timestamps: false,
-    });
+    timestamps: false,
+  });
   tbl_designations.removeAttribute('id');
 
   tbl_designations.associate = function (models) {
     // associations can be defined here
     tbl_designations.belongsTo(models.tbl_departments, { foreignKey: "departments_id" })
     tbl_designations.hasMany(models.tbl_user_roles, { foreignKey: "designations_id" })
+    tbl_designations.hasMany(models.tbl_admin_companies, { foreignKey: "designations_id" })
   };
 
   return tbl_designations;
