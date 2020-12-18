@@ -1159,7 +1159,10 @@ class user {
     let result
 
     try {
+      console.log("MASUK LOH")
+
       if (req.body.jenisImport === "add") {
+        console.log("MASUK SINI")
         result = excelToJson({
           sourceFile: req.file.path,
           sheets: [{
