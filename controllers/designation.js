@@ -241,6 +241,7 @@ class designation {
       await tbl_admin_companies.destroy({ where: { user_id: req.params.id } })
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
     } catch (err) {
+      console.log(err)
       let error = {
         uri: `http://api.polagroup.co.id/designation/${req.params.id}`,
         method: 'delete',
