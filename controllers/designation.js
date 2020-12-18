@@ -238,8 +238,7 @@ class designation {
 
   static async delete(req, res) {
     try {
-      await tbl_designations.destroy({ where: { designations_id: req.params.id } })
-      await tbl_user_roles.destroy({ where: { designations_id: req.params.id } })
+      await tbl_admin_companies.destroy({ where: { user_id: req.params.id } })
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
     } catch (err) {
       let error = {
