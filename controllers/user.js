@@ -1537,33 +1537,33 @@ class user {
   static async forOption(req, res) {
     let condition = {}
 
-    if (req.user.user_id !== 1) {
-      let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
+    // if (req.user.user_id !== 1) {
+    //   let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
-      let tempCondition = [], idCompany = []
+    //   let tempCondition = [], idCompany = []
 
-      userAdmin && userAdmin.forEach(el => {
-        if (idCompany.indexOf(el.company_id) === -1) {
-          idCompany.push(el.company_id)
-          tempCondition.push({
-            company_id: el.company_id,
-          })
-        }
-      })
+    //   userAdmin && userAdmin.forEach(el => {
+    //     if (idCompany.indexOf(el.company_id) === -1) {
+    //       idCompany.push(el.company_id)
+    //       tempCondition.push({
+    //         company_id: el.company_id,
+    //       })
+    //     }
+    //   })
 
-      condition = { [Op.or]: tempCondition }
-    }
+    //   condition = { [Op.or]: tempCondition }
+    // }
 
-    condition[Op.or] = {
-      status_employee: { [Op.ne]: 'Berhenti' },
-      status_employee: { [Op.is]: null }
-    }
+    // condition[Op.or] = {
+    //   status_employee: { [Op.ne]: 'Berhenti' },
+    //   status_employee: { [Op.is]: null }
+    // }
 
     tbl_users.findAll({
       where: { user_id: { [Op.ne]: 1 } },
       include: [{
         model: tbl_account_details,
-        where: condition,
+        // where: condition,
         attributes: ['user_id', 'fullname'],
       }],
       attributes: ['user_id'],
