@@ -167,7 +167,10 @@ class event {
       },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       },
       {
         model: tbl_event_invites,
@@ -205,7 +208,10 @@ class event {
       },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       }],
       order: [
         ['start_date', 'ASC'],
@@ -233,7 +239,10 @@ class event {
     tbl_events.findByPk(req.params.id, {
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       }]
     })
       .then(async (data) => {
@@ -244,7 +253,10 @@ class event {
             { model: tbl_departments },
             {
               model: tbl_users,
-              include: [{ model: tbl_account_details }]
+              include: [{
+                // as: "tbl_account_detail",
+                model: tbl_account_details
+              }]
             }]
         })
         res.status(200).json({ message: "Success", data, eventInvited })
@@ -339,7 +351,10 @@ class event {
             let dataReturning = await tbl_events.findByPk(req.params.id, {
               include: [{
                 model: tbl_users,
-                include: [{ model: tbl_account_details }]
+                include: [{
+                  // as: "tbl_account_detail",
+                  model: tbl_account_details
+                }]
               }],
             })
 
@@ -366,7 +381,10 @@ class event {
       where: { user_id: req.user.user_id, status: 1 },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       }],
       order: [
         ['start_date', 'ASC']
@@ -385,7 +403,10 @@ class event {
             }
           }, {
             model: tbl_users,
-            include: [{ model: tbl_account_details }]
+            include: [{
+              // as: "tbl_account_detail",
+              model: tbl_account_details
+            }]
           }]
         })
         res.status(200).json({ message: "Success", data, dataFollowing: datas })
@@ -472,7 +493,7 @@ class event {
         let creator = await tbl_events.findByPk(req.params.id)
         let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
 
-        res.status(200).json({ message: "Success Change", data : creator })
+        res.status(200).json({ message: "Success Change", data: creator })
 
         // if (dataEventInvite[0].option === 'company') {
         //   dataEventInvite.forEach(async element => {
@@ -654,12 +675,14 @@ class event {
       include: [{
         model: tbl_users,
         include: [{
+          // as: "tbl_account_detail", 
           model: tbl_account_details,
         }]
       }, {
         model: tbl_users,
         as: 'idChief',
         include: [{
+          // as: "tbl_account_detail", 
           model: tbl_account_details,
         }]
       }],

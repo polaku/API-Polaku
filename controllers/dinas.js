@@ -79,10 +79,12 @@ class dinas {
               as: 'evaluator',
               model: tbl_users,
               include: [{
+                // as: "tbl_account_detail", 
                 model: tbl_account_details,
               }]
             }]
           }, {
+            // as: "tbl_account_detail", 
             model: tbl_account_details,
             where: { ...condition, ...conditionSearch },
             attributes: ['fullname', 'status_employee', 'nik']
@@ -100,6 +102,7 @@ class dinas {
           model: tbl_dinas,
         }, {
           required: true,
+          // as: "tbl_account_detail", 
           model: tbl_account_details,
           where: { ...condition, ...conditionSearch },
         }]
@@ -109,6 +112,7 @@ class dinas {
         where: { user_id: { [Op.ne]: 1 } },
         include: [{
           required: true,
+          // as: "tbl_account_detail", 
           model: tbl_account_details
         }]
       })

@@ -6,6 +6,7 @@ class security {
     tbl_users.findAll({
       include: [
         {
+          // as: "tbl_account_detail", 
           model: tbl_account_details, attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial']
         },
         { require: true, model: tbl_activity_logins, where: { status: 1 } }

@@ -49,7 +49,19 @@ class pic {
 
   static async findAll(req, res) {
     try {
-      let data = await tbl_companys.findAll({ include: [{ required: true, model: tbl_PICs, include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }] }] })
+      let data = await tbl_companys.findAll({
+        include: [{
+          required: true,
+          model: tbl_PICs,
+          include: [{
+            model: tbl_users,
+            include: [{
+              // as: "tbl_account_detail", 
+              model: tbl_account_details
+            }]
+          }]
+        }]
+      })
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {

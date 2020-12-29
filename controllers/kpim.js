@@ -202,6 +202,7 @@ class kpim {
               exclude: ['user_id', 'password', 'flag_password']
             },
             include: [{
+              // as: "tbl_account_detail",
               model: tbl_account_details,
               attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial'],
               include: [{
@@ -262,6 +263,7 @@ class kpim {
               exclude: ['user_id', 'password', 'flag_password']
             },
             include: [{
+              // as: "tbl_account_detail",
               model: tbl_account_details,
               attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial'],
               include: [{
@@ -269,6 +271,7 @@ class kpim {
                 as: "idEvaluator1",
                 attributes: ['user_id', 'username'],
                 include: [{
+                  // as: "tbl_account_detail",
                   model: tbl_account_details,
                   attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial']
                 }]
@@ -310,6 +313,7 @@ class kpim {
               exclude: ['user_id', 'password', 'flag_password']
             },
             include: [{
+              // as: "tbl_account_detail",
               model: tbl_account_details,
               attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial'],
               include: [{
@@ -317,6 +321,7 @@ class kpim {
                 as: "idEvaluator1",
                 attributes: ['user_id', 'username'],
                 include: [{
+                  // as: "tbl_account_detail",
                   model: tbl_account_details,
                   attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial']
                 }]
@@ -346,9 +351,17 @@ class kpim {
         where: { year: req.query.year },
         include: [
           {
-            model: tbl_users, include: [{
-              model: tbl_account_details, include: [{
-                model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
+            model: tbl_users,
+            include: [{
+              // as: "tbl_account_detail",
+              model: tbl_account_details,
+              include: [{
+                model: tbl_users,
+                as: "idEvaluator1",
+                include: [{
+                  // as: "tbl_account_detail",
+                  model: tbl_account_details
+                }]
               }]
             }]
           }
@@ -362,9 +375,17 @@ class kpim {
     } else {
       situationKPIM = {
         include: [{
-          model: tbl_users, include: [{
-            model: tbl_account_details, include: [{
-              model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
+          model: tbl_users,
+          include: [{
+            // as: "tbl_account_detail",
+            model: tbl_account_details,
+            include: [{
+              model: tbl_users,
+              as: "idEvaluator1",
+              include: [{
+                // as: "tbl_account_detail",
+                model: tbl_account_details
+              }]
             }]
           }]
         }],

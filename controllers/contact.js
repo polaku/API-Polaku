@@ -80,7 +80,10 @@ class contact {
       },
       include: [
         {
-          model: tbl_users, include: [{ model: tbl_account_details }]
+          model: tbl_users, include: [{
+            // as: "tbl_account_detail",
+            model: tbl_account_details
+          }]
         },
         { model: tbl_companys },
         {
@@ -463,7 +466,12 @@ class contact {
     tbl_contacts.findAll({
       where: condition,
       include: [
-        { model: tbl_users, include: [{ model: tbl_account_details }] },
+        {
+          model: tbl_users, include: [{
+            // as: "tbl_account_detail",
+            model: tbl_account_details
+          }]
+        },
         { model: tbl_companys },
         { model: tbl_contact_categories },
         { model: tbl_categoris },
@@ -570,7 +578,12 @@ class contact {
   static discussion(req, res) {
     tbl_contact_comments.findAll({
       where: { contact_id: req.params.id },
-      include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }],
+      include: [{
+        model: tbl_users, include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
+      }],
       order: [['created_at', 'DESC']]
     })
       .then(data => {

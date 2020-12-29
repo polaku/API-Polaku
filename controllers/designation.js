@@ -145,6 +145,7 @@ class designation {
           ...query,
           include: [
             {
+              // as: "tbl_account_detail", 
               model: tbl_account_details,
               where: conditionSearch,
               attributes: ['fullname', 'nik']
@@ -174,6 +175,7 @@ class designation {
         dataSelected = await tbl_users.findAll({
           include: [
             {
+              // as: "tbl_account_detail", 
               model: tbl_account_details,
               where: conditionSearch,
               attributes: ['fullname', 'nik']
@@ -238,10 +240,10 @@ class designation {
 
   static async delete(req, res) {
     try {
-      await tbl_admin_companies.destroy({ where: { user_id: req.params.id } })
+      await tbl_designations.destroy({ where: { designations_id: req.params.id } })
+      await tbl_user_roles.destroy({ where: { designations_id: req.params.id } })
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
     } catch (err) {
-      console.log(err)
       let error = {
         uri: `http://api.polagroup.co.id/designation/${req.params.id}`,
         method: 'delete',
@@ -256,26 +258,33 @@ class designation {
 
   static async deleteUser(req, res) {
     try {
-      let checkAdmin = await tbl_admin_companies.findOne({ where: { id: req.params.id } })
-      let checkUser = await tbl_account_details.findOne({ where: { user_id: checkAdmin.user_id } })
-      let checkDesignation = await tbl_designations.findOne({ where: { designations_id: checkAdmin.designations_id } })
+      let checkAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.params.id, PIC: 0 } })
+      let checkUser = await tbl_account_details.findOne({ where: { user_id: req.params.id } })
 
-      await tbl_admin_companies.destroy({ where: { id: req.params.id } })
+      await tbl_admin_companies.destroy({ where: { user_id: req.params.id, PIC: 0 } })
 
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
 
-      let company = await tbl_companys.findByPk(checkAdmin.company_id)
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
-      await tbl_log_admins.create({
-        employee: checkUser.fullname,
-        admin: checkDesignation.designations,
-        company: company.company_name,
-        action: "DELETE",
-        action_by: req.user.user_id + '-' + userDetail.fullname,
-        createdAt: createDateAsUTC(new Date()),
-        updatedAt: createDateAsUTC(new Date())
-      })
+
+      if (checkAdmin.length > 0) {
+        checkAdmin.forEach(async (el) => {
+          let checkDesignation = await tbl_designations.findOne({ where: { designations_id: el.designations_id } })
+          let company = await tbl_companys.findByPk(el.company_id)
+
+          await tbl_log_admins.create({
+            employee: checkUser.fullname,
+            admin: checkDesignation ? checkDesignation.designations : '-',
+            company: company ? company.company_name : '-',
+            action: "DELETE",
+            action_by: req.user.user_id + '-' + userDetail.fullname,
+            createdAt: createDateAsUTC(new Date()),
+            updatedAt: createDateAsUTC(new Date())
+          })
+        })
+      }
     } catch (err) {
+      console.log(err)
       let error = {
         uri: `http://api.polagroup.co.id/designation/${req.params.id}`,
         method: 'delete',

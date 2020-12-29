@@ -75,7 +75,12 @@ class tal {
           // ========== UPDATE KPIM SCORE (END)  ========== 
 
           if (req.user.user_id === req.body.user_id) {
-            let bawahanUser = await tbl_users.findByPk(req.body.user_id, { include: [{ model: tbl_account_details }] })
+            let bawahanUser = await tbl_users.findByPk(req.body.user_id, {
+              include: [{
+                // as: "tbl_account_detail",
+                model: tbl_account_details
+              }]
+            })
 
             let atasanUser = await tbl_users.findByPk(bawahanUser.tbl_account_detail.name_evaluator_1)
 

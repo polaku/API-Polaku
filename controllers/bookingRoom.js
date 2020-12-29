@@ -327,7 +327,10 @@ class bookingRoom {
       where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       },
       {
         model: tbl_rooms
@@ -350,7 +353,10 @@ class bookingRoom {
                 include: [
                   {
                     model: tbl_users,
-                    include: [{ model: tbl_account_details }]
+                    include: [{
+                      // as: "tbl_account_detail",
+                      model: tbl_account_details
+                    }]
                   }]
               })
               eventResponses.push(eventRespon)
@@ -382,7 +388,10 @@ class bookingRoom {
       where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` }, user_id: req.user.user_id },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       },
       {
         model: tbl_rooms
@@ -414,7 +423,10 @@ class bookingRoom {
     tbl_room_bookings.findByPk(req.params.id, {
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       },
       {
         model: tbl_rooms,
@@ -430,7 +442,10 @@ class bookingRoom {
             include: [
               {
                 model: tbl_users,
-                include: [{ model: tbl_account_details }]
+                include: [{
+                  // as: "tbl_account_detail",
+                  model: tbl_account_details
+                }]
               }]
           })
         }
@@ -684,7 +699,10 @@ class bookingRoom {
       where: { room_id: req.params.idRoom },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       }],
       order: [
         ['date_in', 'ASC'],
@@ -720,7 +738,10 @@ class bookingRoom {
       where: { room_id: req.params.idRoom, user_id: req.user.user_id },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       }]
     })
       .then(data => {
@@ -799,7 +820,10 @@ class bookingRoom {
       where: { chief: req.user.user_id },
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       }],
       order: [
         ['master_room_id', 'DESC']

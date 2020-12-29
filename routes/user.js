@@ -10,6 +10,7 @@ router.post('/register', authentication, uploadSingle.single('avatar'), userCont
 router.post('/signin', userController.signin)
 router.put('/forgetPassword', userController.forgetPassword)
 router.get('/check-token', userController.checktoken)
+router.get('/for-option', authentication, userController.forOption)
 router.put('/changePassword', authentication, userController.firstLogin)
 router.put('/activationAccount', authentication, userController.activationAccount)
 router.put('/editProfil', authentication, userController.editProfil) //authorization

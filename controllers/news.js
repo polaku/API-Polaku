@@ -56,7 +56,12 @@ class news {
 
   static findAll(req, res) {
     tbl_polanews.findAll({
-      include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }],
+      include: [{
+        model: tbl_users, include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
+      }],
       order: [
         ['created_at', 'DESC']
       ],
@@ -79,7 +84,14 @@ class news {
   }
 
   static findOne(req, res) {
-    tbl_polanews.findByPk(req.params.id, { include: [{ model: tbl_users, include: [{ model: tbl_account_details }] }] })
+    tbl_polanews.findByPk(req.params.id, {
+      include: [{
+        model: tbl_users, include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
+      }]
+    })
       .then(data => {
         res.status(200).json({ message: "Success", data })
       })

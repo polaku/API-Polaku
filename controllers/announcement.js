@@ -107,7 +107,10 @@ class announcement {
     tbl_announcements.findAll({
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail", 
+          model: tbl_account_details
+        }]
       }],
       order: [
         ['announcements_id', 'DESC']
@@ -121,7 +124,10 @@ class announcement {
           where: { highlight: 1 },
           include: [{
             model: tbl_users,
-            include: [{ model: tbl_account_details }]
+            include: [{
+              //  as: "tbl_account_detail", 
+              model: tbl_account_details
+            }]
           }],
           order: [
             ['announcements_id', 'DESC']
@@ -148,7 +154,10 @@ class announcement {
     tbl_announcements.findByPk(req.params.id, {
       include: [{
         model: tbl_users,
-        include: [{ model: tbl_account_details }]
+        include: [{
+          // as: "tbl_account_detail",
+          model: tbl_account_details
+        }]
       }]
     })
       .then(async data => {
@@ -266,7 +275,7 @@ class announcement {
           // if (thumbnail) newData.thumbnail = `http://api.polagroup.co.id/${thumbnail.path}`
           if (attachment) newData.attachment = `http://165.22.110.159/${attachment.path}`
           if (thumbnail) newData.thumbnail = `http://165.22.110.159/${thumbnail.path}`
-          
+
 
           tbl_announcements.update(newData, {
             where: { announcements_id: req.params.id }, returning: true
@@ -275,7 +284,10 @@ class announcement {
               let dataReturning = await tbl_announcements.findByPk(req.params.id, {
                 include: [{
                   model: tbl_users,
-                  include: [{ model: tbl_account_details }]
+                  include: [{
+                    // as: "tbl_account_detail",
+                    model: tbl_account_details
+                  }]
                 }]
               })
 
