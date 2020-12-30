@@ -30,7 +30,15 @@ class bookingRoom {
       dateIn = req.body.date_in
 
       //Validation Date in
-      if (new Date(dateIn).getDate() > 31 || new Date(dateIn).getDate() < 1 || new Date(dateIn).getMonth() + 1 > 12 || new Date(dateIn).getMonth() + 1 < 1 || new Date(dateIn).getMonth() + 1 < new Date().getMonth() + 1 || new Date(dateIn).getMonth() + 1 == Number(new Date().getMonth() + 1) && new Date(dateIn).getDate() < Number(new Date().getDate())) {
+      if (
+        new Date(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          new Date().getDate(),
+          0
+          ) >
+        new Date(new Date(dateIn).setHours(0))
+      ) {
         let error = {
           uri: `http://api.polagroup.co.id/bookingRoom`,
           method: 'post',
@@ -305,6 +313,7 @@ class bookingRoom {
                 res.status(400).json({ error: 'Bad request!' })
               }
             } catch (err) {
+              console.log(err)
               let error = {
                 uri: `http://api.polagroup.co.id/bookingRoom`,
                 method: 'post',
