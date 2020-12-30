@@ -1563,7 +1563,7 @@ class user {
       where: { user_id: { [Op.ne]: 1 } },
       include: [{
         model: tbl_account_details,
-        // where: condition,
+        where: condition,
         attributes: ['user_id', 'fullname'],
       }],
       attributes: ['user_id'],
