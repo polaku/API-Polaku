@@ -58,7 +58,7 @@ class bookingRoom {
         data_bookingRoomSelected = data_bookingRoomSelected.filter(el => {
           return el.date_in === req.body.date_in.slice(0, 10)
         })
-        console.log(data_bookingRoomSelected)
+
         data_bookingRoomSelected.forEach(el => {
           let everyTimeIn, everyTimeOut
           everyTimeIn = el.time_in.split(':')
