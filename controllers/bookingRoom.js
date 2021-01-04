@@ -58,11 +58,14 @@ class bookingRoom {
         data_bookingRoomSelected = data_bookingRoomSelected.filter(el => {
           return el.date_in === req.body.date_in.slice(0, 10)
         })
-
+        console.log(data_bookingRoomSelected)
         data_bookingRoomSelected.forEach(el => {
           let everyTimeIn, everyTimeOut
           everyTimeIn = el.time_in.split(':')
           everyTimeOut = el.time_out.split(':')
+          console.log("el.date_in", el.date_in)
+          console.log("el.time_in", el.time_in)
+          console.log("el.time_out", el.time_out)
 
           if (
             (Number(everyTimeIn[0]) < Number(timeIn[0]) && Number(timeIn[0]) < Number(everyTimeOut[0]) && Number(req.body.room_id) === Number(el.room_id)) ||
