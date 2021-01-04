@@ -36,7 +36,7 @@ class bookingRoom {
           new Date().getMonth(),
           new Date().getDate(),
           0
-          ) >
+        ) >
         new Date(new Date(dateIn).setHours(0))
       ) {
         let error = {
@@ -53,12 +53,12 @@ class bookingRoom {
         timeOut = req.body.time_out.split(':')
 
         //Validation time
-        data_bookingRoomSelected = await tbl_room_bookings.findAll()
+        data_bookingRoomSelected = await tbl_room_bookings.findAll({ where: { room_id: req.body.room_id } })
 
         data_bookingRoomSelected = data_bookingRoomSelected.filter(el => {
           return el.date_in === req.body.date_in.slice(0, 10)
         })
-console.log(data_bookingRoomSelected)
+        console.log(data_bookingRoomSelected)
         data_bookingRoomSelected.forEach(el => {
           let everyTimeIn, everyTimeOut
           everyTimeIn = el.time_in.split(':')
