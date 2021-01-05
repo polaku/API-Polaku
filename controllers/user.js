@@ -1287,15 +1287,19 @@ class user {
         let company = await tbl_companys.findAll()
 
         await result.Sheet1.forEach(async el => {
+          console.log(el.company)
+          let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
+          let query = {}
 
-          let checkEmpolyee = await tbl_account_details.findOne({ where: { nik: el.nik } })
+          if (perusahaan) query = { company_id: perusahaan.company_id }
+          console.log(query)
+          let checkEmpolyee = await tbl_account_details.findOne({ where: { nik: el.nik, ...query } })
           let checkUser = await tbl_users.findOne({ where: { username: el.username } })
 
           if (!checkEmpolyee && !checkUser) {
             let gedung = el.building ? await building.find(building => building.building === el.building) : null
             let evaluator1 = el.evaluator1 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator1)) : null
             let evaluator2 = el.evaluator2 ? await accountDetail.find(user => Number(user.nik) === Number(el.evaluator2)) : null
-            let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
 
             let dateBirth, monthBirth, password
             if (el.birth_date) {
@@ -1361,6 +1365,13 @@ class user {
 
                 await tbl_account_details.create(newAccountDetail)
               })
+          } else {
+            console.log('error import employee')
+            if (checkEmpolyee) console.log("checkEmpolyee", true)
+            if (checkUser) console.log("checkUser", true)
+            console.log('nik', el.nik)
+            console.log('username', el.username)
+            console.log('')
           }
 
         })
@@ -1540,7 +1551,12 @@ class user {
     if (req.user.user_id !== 1) {
       let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
-      let tempCondition = [], idCompany = []
+      let idCompany = [], tempCondition = [
+        { user_id: 30 },
+        { user_id: 265 },
+        { user_id: 269 },
+        // {user_id:},
+      ]
 
       userAdmin && userAdmin.forEach(el => {
         if (idCompany.indexOf(el.company_id) === -1) {
