@@ -1555,7 +1555,7 @@ class user {
         { user_id: 30 },
         { user_id: 265 },
         { user_id: 269 },
-        // {user_id:},
+        { user_id: 1073 },
       ]
 
       userAdmin && userAdmin.forEach(el => {

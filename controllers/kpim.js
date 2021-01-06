@@ -689,40 +689,20 @@ class kpim {
   }
 
   static async sendGradeOneYear(req, res) {
-    let arrayKPIMScoreId = null, tal, day = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     try {
-      let allKPIMin2020 = tbl_kpims.findAll({ where: { year: req.query.year } })
-
-      
-
-
-      if (typeof req.body.arrayKPIMScoreId === 'object') arrayKPIMScoreId = req.body.arrayKPIMScoreId
-      else arrayKPIMScoreId = JSON.parse(req.body.arrayKPIMScoreId)
-
-      await arrayKPIMScoreId.forEach(async kpimScoreId => {
-
-        await tbl_kpim_scores.update({ hasConfirm: 1 }, { where: { kpim_score_id: kpimScoreId } })
-
-        let kpimScore = await tbl_kpim_scores.findByPk(kpimScoreId)
-        let kpim = await tbl_kpims.findByPk(kpimScore.kpim_id)
-        let weekDate20 = await getNumberOfWeek(`${kpim.year}-${kpimScore.month}-20`)
-
-        tal = await tbl_tals.findAll({
-          where: { kpim_score_id: kpimScoreId },
-          include: [{ model: tbl_tal_scores, where: { week: { [Op.lte]: weekDate20 } } }]
-        })
-
-        tal.forEach(async el => {
-          await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month, week: { [Op.lt]: weekDate20 } } })
-          el.tbl_tal_scores.forEach(async tal_score => {
-            if (tal_score.month === kpimScore.month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${kpimScore.month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20))) {
-              // console.log("tanggal", tal_score.when_date, "when_day", tal_score.when_day && day.indexOf(tal_score.when_day), new Date(`${kpim.year}-${kpimScore.month}-20`).getDay(), "when_date", (tal_score.when_date && Number(tal_score.when_date) <= 20))
-              await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_score_id: tal_score.tal_score_id } })
-            }
+      if (req.user.user_id === 1) {
+        let allKPIMinYear = await tbl_kpims.findAll({ where: { year: req.query.year }, include: [{ model: tbl_kpim_scores }] })
+        await allKPIMinYear.forEach(async (el) => {
+          await el.tbl_kpim_scores.forEach(async (kpimScore) => {
+            await tbl_kpim_scores.update({ hasConfirm: 1 }, { where: { kpim_score_id: kpimScore.kpim_score_id } })
           })
         })
-      })
-      res.status(200).json({ message: "Success" })
+        await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { year: req.query.year } })
+
+        res.status(200).json({ message: "Success" })
+      } else {
+        res.status(400).json({ message: "Not Authorize" })
+      }
     } catch (err) {
       console.log(err)
       res.status(500).json(err)
