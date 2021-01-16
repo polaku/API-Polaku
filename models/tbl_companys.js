@@ -15,7 +15,9 @@ module.exports = (sequelize, DataTypes) => {
 
   tbl_companys.associate = function (models) {
     // associations can be defined here
-    tbl_companys.hasMany(models.tbl_account_details, { foreignKey: "company_id" })
+    tbl_companys.hasMany(models.tbl_account_details, { as: 'tbl_company', foreignKey: "company_id" })
+    tbl_companys.hasMany(models.tbl_account_details, { as: 'companyKPI', foreignKey: "company_KPI" })
+    tbl_companys.hasMany(models.tbl_account_details, { as: 'companyHRD', foreignKey: "company_HRD" })
     tbl_companys.hasMany(models.tbl_buildings, { foreignKey: "company_id" })
     tbl_companys.hasMany(models.tbl_contacts, { foreignKey: "company_id" })
     tbl_companys.hasMany(models.tbl_PICs, { foreignKey: "company_id" })

@@ -200,7 +200,6 @@ class announcement {
 
   static update(req, res) {
     let startDate, endDate, newData, attachment, thumbnail
-    // console.log(req.files)
     if (req.files.length != 0) {
       attachment = req.files.find(el => el.mimetype === 'application/pdf')
       thumbnail = req.files.find(el => el.mimetype != 'application/pdf')

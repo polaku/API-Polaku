@@ -31,7 +31,9 @@ module.exports = (sequelize, DataTypes) => {
     next_frame_date: DataTypes.DATE,
     next_lensa_date: DataTypes.DATE,
     office_email: DataTypes.STRING,
-    updatedAt: DataTypes.DATE
+    updatedAt: DataTypes.DATE,
+    company_KPI: DataTypes.INTEGER,
+    company_HRD: DataTypes.INTEGER,
   }, {
     timestamps: false,
   });
@@ -42,7 +44,9 @@ module.exports = (sequelize, DataTypes) => {
     tbl_account_details.belongsTo(models.tbl_users, { as: "userId", foreignKey: "user_id" })
     tbl_account_details.belongsTo(models.tbl_users, { as: "idEvaluator1", foreignKey: "name_evaluator_1" })
     tbl_account_details.belongsTo(models.tbl_users, { as: "idEvaluator2", foreignKey: "name_evaluator_2" })
-    tbl_account_details.belongsTo(models.tbl_companys, { foreignKey: "company_id" })
+    tbl_account_details.belongsTo(models.tbl_companys, { as: 'tbl_company', foreignKey: "company_id" })
+    tbl_account_details.belongsTo(models.tbl_companys, { as: 'companyKPI', foreignKey: "company_KPI" })
+    tbl_account_details.belongsTo(models.tbl_companys, { as: 'companyHRD', foreignKey: "company_HRD" })
     tbl_account_details.belongsTo(models.tbl_designations, { foreignKey: "designations_id" })
     tbl_account_details.belongsTo(models.tbl_positions, { foreignKey: "position_id" })
     tbl_account_details.belongsTo(models.tbl_departments, { foreignKey: "departments_id" })

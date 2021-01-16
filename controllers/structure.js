@@ -22,7 +22,6 @@ class department {
         newStructureDepartment.departments_id = req.body.nameDepartment
 
         let search = await tbl_departments.findOne({ where: { departments_id: req.body.nameDepartment } })
-        console.log("MASUK 2", search.deptname)
 
         deptname = search.deptname
       }
@@ -40,13 +39,10 @@ class department {
 
       for (let i = 0; i < req.body.position.length; i++) {
         let newData = { structure_department_id: createStructure.id, user_id: req.body.position[i].user || null }
-        console.log("1", typeof (req.body.position[i].position), req.body.position[i].position !== '', !req.body.position[i].position)
         if (typeof (req.body.position[i].position) !== 'number' && req.body.position[i].position !== '' && req.body.position[i].position !== 'null' && req.body.position[i].position !== null && req.body.position[i].position !== 'undefined') {
-          console.log("2", req.body.position[i].position)
           let createPosition = await tbl_positions.create({ position: req.body.position[i].position })
           newData.position_id = createPosition.id || createPosition.null
         } else {
-          console.log("3", req.body.position[i].position)
           newData.position_id = req.body.position[i].position
         }
         await tbl_department_positions.create(newData)
@@ -155,6 +151,28 @@ class department {
       })
 
       res.status(200).json({ message: 'Success', totalData: allData.length, data })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ message: 'Error', err })
+    }
+  }
+
+  static async findOne(req, res) {
+    try {
+      let data = await tbl_structure_departments.findAll({
+        include: [
+          { as: "department", model: tbl_departments },
+          {
+            model: tbl_department_positions,
+            include: [
+              { model: tbl_users },
+              { model: tbl_positions }
+            ]
+          }
+        ]
+      })
+
+      res.status(200).json({ message: 'Success', data })
     } catch (err) {
       console.log(err)
       res.status(500).json({ message: 'Error', err })

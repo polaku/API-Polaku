@@ -41,7 +41,7 @@ class designation {
 
       res.status(201).json({ message: 'Success' })
 
-      let userAdmin = await tbl_account_details.findOne({ where: { user_id: req.body.userId }, include: [{ model: tbl_companys }] })
+      let userAdmin = await tbl_account_details.findOne({ where: { user_id: req.body.userId }, include: [{ as: 'tbl_company', model: tbl_companys }] })
       let userDinas = await tbl_dinas.findAll({ where: { user_id: req.body.userId }, include: [{ model: tbl_companys }] })
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 

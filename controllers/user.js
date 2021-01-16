@@ -277,7 +277,7 @@ class user {
             let bawahan = await tbl_account_details.findAll({
               where: { name_evaluator_1: userFound.user_id, },
               include: [
-                { model: tbl_companys },
+                { as: 'tbl_company', model: tbl_companys },
                 { model: tbl_users, as: "userId", where: { activated: 1 } }
               ]
             })
@@ -413,8 +413,8 @@ class user {
       conditionPT = { company_id: req.query.company }
       condition = {
         [Op.or]: [
-          { 'tbl_account_detail.company_id': +req.query.company },
-          { 'dinas.company_id': +req.query.company }
+          { '$tbl_account_detail.company_id$': +req.query.company },
+          { '$dinas.company_id$': +req.query.company }
         ]
       }
     }
@@ -426,8 +426,8 @@ class user {
       userAdmin && userAdmin.forEach(el => {
         if (idCompany.indexOf(el.company_id) === -1) {
           idCompany.push(el.company_id)
-          tempConditionPT.push({ 'tbl_account_detail.company_id': el.company_id })
-          tempConditionDinas.push({ 'dinas.company_id': el.company_id })
+          tempConditionPT.push({ '$tbl_account_detail.company_id$': el.company_id })
+          tempConditionDinas.push({ '$dinas.company_id$': el.company_id })
           tempPt.push({ company_id: el.company_id })
         }
       })
@@ -457,16 +457,22 @@ class user {
 
     tbl_users.findAll({
       // where: { activated: 1, user_id: { [Op.ne]: 1 } },
+      where: {
+        user_id: { [Op.ne]: 1 },
+        ...condition
+      },
       ...query,
       include: [{
         required: true,
         model: tbl_account_details,
-        where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
+        // where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
+        where: { ...conditionStatus, ...conditionSearch },
         include: [{
           model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
         }, {
           model: tbl_users, as: "idEvaluator2", include: [{ model: tbl_account_details }]
         }, {
+          as: 'tbl_company',
           model: tbl_companys
         }, {
           model: tbl_departments
@@ -485,9 +491,6 @@ class user {
           model: tbl_positions
         }]
       }],
-      where: {
-        user_id: { [Op.ne]: 1 }
-      },
       order
     })
       .then(async (data) => {
@@ -577,7 +580,7 @@ class user {
         let bawahan = await tbl_account_details.findAll({
           where: { name_evaluator_1: req.params.id, },
           include: [
-            { model: tbl_companys },
+            { as: 'tbl_company', model: tbl_companys },
             // as: "userId",  =>  as: "tbl_account_detail",  
             { model: tbl_users, as: "userId", where: { activated: 1 } }
           ]
@@ -643,6 +646,7 @@ class user {
             where: { name_evaluator_1: userFound.user_id },
             include: [
               {
+                as: 'tbl_company',
                 model: tbl_companys
               }, {
                 // as: "userId",  =>  as: "tbl_account_detail",  
@@ -1111,7 +1115,6 @@ class user {
   }
 
   static async update(req, res) {
-    console.log(req.body)
     let newData1, newData2
 
     newData1 = {
@@ -1287,12 +1290,10 @@ class user {
         let company = await tbl_companys.findAll()
 
         await result.Sheet1.forEach(async el => {
-          console.log(el.company)
           let perusahaan = el.company ? await company.find(pt => pt.acronym.toLowerCase() === el.company.toLowerCase()) : null
           let query = {}
 
           if (perusahaan) query = { company_id: perusahaan.company_id }
-          console.log(query)
           let checkEmpolyee = await tbl_account_details.findOne({ where: { nik: el.nik, ...query } })
           let checkUser = await tbl_users.findOne({ where: { username: el.username } })
 
@@ -1365,15 +1366,7 @@ class user {
 
                 await tbl_account_details.create(newAccountDetail)
               })
-          } else {
-            console.log('error import employee')
-            if (checkEmpolyee) console.log("checkEmpolyee", true)
-            if (checkUser) console.log("checkUser", true)
-            console.log('nik', el.nik)
-            console.log('username', el.username)
-            console.log('')
-          }
-
+          } 
         })
       } else {
         result = excelToJson({
@@ -1426,19 +1419,15 @@ class user {
           } else {
             tempNIK = el[nik]
           }
-          console.log(userId)
-          console.log(el[userId])
           let account = await accountDetail.find(user => user.user_id === el[userId])
 
           if (account) {
             let newData1 = {}
             if (username) newData1.username = el[username]
             if (selfEmail) newData1.email = el[selfEmail]
-            console.log("newData1", newData1)
             tbl_users.update(newData1, { where: { user_id: account.user_id } })
               .then(() => { })
               .catch(() => { })
-
 
             let newData2 = {}
             if (nik) newData2.nik = el[nik]
@@ -1472,7 +1461,6 @@ class user {
               let selectEvaluator2 = await accountDetail.find(user => Number(user.nik) === Number(el[evaluator2]))
               if (selectEvaluator2) newData2.name_evaluator_2 = selectEvaluator2.user_id
             }
-            console.log("newData2", newData2)
             await tbl_account_details.update(newData2, { where: { user_id: account.user_id } })
           }
         })
@@ -1561,26 +1549,36 @@ class user {
       userAdmin && userAdmin.forEach(el => {
         if (idCompany.indexOf(el.company_id) === -1) {
           idCompany.push(el.company_id)
-          tempCondition.push({
-            company_id: el.company_id,
-          })
+          // tempCondition.push({
+          //   company_id: el.company_id,
+          // })
+          tempCondition.push(
+            { '$tbl_account_detail.company_id$': el.company_id },
+            { '$dinas.company_id$': el.company_id }
+          )
         }
       })
 
       condition = { [Op.or]: tempCondition }
     }
 
-    // condition[Op.or] = {
-    //   status_employee: { [Op.ne]: 'Berhenti' },
-    //   status_employee: { [Op.is]: null }
-    // }
-
     tbl_users.findAll({
-      where: { user_id: { [Op.ne]: 1 } },
+      where: {
+        user_id: { [Op.ne]: 1 },
+        ...condition
+      },
       include: [{
         model: tbl_account_details,
-        where: condition,
-        attributes: ['user_id', 'fullname'],
+        where: {
+          [Op.or]: [
+            { status_employee: { [Op.ne]: 'Berhenti' } },
+            { status_employee: { [Op.is]: null } }
+          ]
+        },
+        attributes: ['user_id', 'fullname', 'nik', 'status_employee'],
+      }, {
+        as: 'dinas',
+        model: tbl_dinas,
       }],
       attributes: ['user_id'],
       order: [
@@ -1589,7 +1587,7 @@ class user {
 
     })
       .then(async (data) => {
-        res.status(200).json({ message: "Success", data })
+        res.status(200).json({ message: "Success", total: data.length, data })
       })
       .catch(err => {
         console.log(err);
