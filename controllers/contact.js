@@ -461,7 +461,7 @@ class contact {
           }
         })
       }
-
+console.log(tempCondition)
       condition = {
         [Op.or]: tempCondition,
         [Op.or]: [
@@ -493,7 +493,6 @@ class contact {
       query = { offset, limit }
     }
 
-    console.log(condition)
     console.log(query)
 
     tbl_contacts.findAll({
