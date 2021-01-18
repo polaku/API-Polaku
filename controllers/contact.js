@@ -460,8 +460,8 @@ class contact {
       }
 
       condition = {
-        [Op.or]: tempCondition,
-        '$tbl_user.tbl_account_detail.company_id$': 15,
+        // [Op.or]: tempCondition,
+        '$tbl_user.$tbl_account_detail.company_id$': 1,
         [Op.or]: [
           {
             [Op.and]: [
