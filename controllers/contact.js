@@ -443,9 +443,14 @@ class contact {
       let tempCondition = []
 
       if (req.user.user_id !== 1) {
+        let userDetail = await tbl_account_details.findAll({ where: { user_id: req.user.user_id } })
         let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
         let idCompany = []
+        idCompany.push(userDetail.company_id)
+        userDetail.push(
+          { company_id: userDetail.company_id },
+        )
 
         userAdmin && userAdmin.forEach(el => {
           if (idCompany.indexOf(el.company_id) === -1) {
