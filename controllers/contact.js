@@ -461,7 +461,7 @@ class contact {
 
       condition = {
         // [Op.or]: tempCondition,
-        '$tbl_user.dinas$.company_id$': 1,
+        'tbl_user.$dinas.company_id$': 1,
         [Op.or]: [
           {
             [Op.and]: [
