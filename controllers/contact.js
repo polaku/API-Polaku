@@ -493,6 +493,9 @@ class contact {
       query = { offset, limit }
     }
 
+    console.log(condition)
+    console.log(query)
+
     tbl_contacts.findAll({
       where: condition,
       ...query,
