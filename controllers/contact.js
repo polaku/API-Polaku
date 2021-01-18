@@ -450,7 +450,7 @@ class contact {
           if (idCompany.indexOf(el.company_id) === -1) {
             idCompany.push(el.company_id)
             tempCondition.push(
-              { '$tbl_user.$tbl_account_detail.company_id$': el.company_id },
+              { '$tbl_user.tbl_account_detail.company_id$': el.company_id },
               { '$tbl_user.$dinas.company_id$': el.company_id }
             )
           }
@@ -458,7 +458,8 @@ class contact {
       }
 
       condition = {
-        [Op.or]: tempCondition,
+        // [Op.or]: tempCondition,
+        '$tbl_user.tbl_account_detail.company_id$': el.company_id,
         [Op.or]: [
           {
             [Op.and]: [
