@@ -426,6 +426,7 @@ class user {
       userAdmin && userAdmin.forEach(el => {
         if (idCompany.indexOf(el.company_id) === -1) {
           idCompany.push(el.company_id)
+
           tempConditionPT.push({ '$tbl_account_detail.company_id$': el.company_id })
           tempConditionDinas.push({ '$dinas.company_id$': el.company_id })
           tempPt.push({ company_id: el.company_id })
@@ -461,12 +462,12 @@ class user {
         user_id: { [Op.ne]: 1 },
         ...condition
       },
-      ...query,
+      // ...query,
       include: [{
         required: true,
         model: tbl_account_details,
-        // where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
-        where: { ...conditionStatus, ...conditionSearch },
+        where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
+        // where: { ...conditionStatus, ...conditionSearch },
         include: [{
           model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
         }, {
@@ -498,13 +499,19 @@ class user {
           include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details,
-            where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
+            where: { ...conditionStatus, ...conditionSearch },
           }, {
             as: 'dinas',
             model: tbl_dinas,
           }],
-          where: { user_id: { [Op.ne]: 1 } }
+          where: {
+            user_id: { [Op.ne]: 1 },
+            ...condition
+          }
         })
+
+        data = data.slice((req.query.page * (req.query.limit)), ((+req.query.page + 1) * (req.query.limit)))
+
         res.status(200).json({ message: "Success", totalRecord: allData.length, data })
       })
       .catch(err => {
@@ -1366,7 +1373,7 @@ class user {
 
                 await tbl_account_details.create(newAccountDetail)
               })
-          } 
+          }
         })
       } else {
         result = excelToJson({

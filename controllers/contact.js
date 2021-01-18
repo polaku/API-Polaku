@@ -1,4 +1,4 @@
-const { tbl_contacts, tbl_account_details, tbl_users, tbl_contact_categories, tbl_categoris, tbl_companys, tbl_contact_comments } = require('../models')
+const { tbl_contacts, tbl_account_details, tbl_users, tbl_contact_categories, tbl_categoris, tbl_companys, tbl_contact_comments, tbl_admin_companies, tbl_dinas } = require('../models')
 const logError = require('../helpers/logError')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
@@ -388,7 +388,7 @@ class contact {
       })
   }
 
-  static findAllContactUs(req, res) {
+  static async findAllContactUs(req, res) {
     let condition = {}
     if (req.query["for-hr"] === "true") {
       condition = {
@@ -439,7 +439,26 @@ class contact {
         ]
       }
     } else if (req.query["for-report-hr"] === "true") {
+      let tempCondition = []
+
+      if (req.user.user_id !== 1) {
+        let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
+
+        let idCompany = []
+
+        userAdmin && userAdmin.forEach(el => {
+          if (idCompany.indexOf(el.company_id) === -1) {
+            idCompany.push(el.company_id)
+            tempCondition.push(
+              { '$tbl_user.$tbl_account_detail.company_id$': el.company_id },
+              { '$tbl_user.$dinas.company_id$': el.company_id }
+            )
+          }
+        })
+      }
+
       condition = {
+        [Op.or]: tempCondition,
         [Op.or]: [
           {
             [Op.and]: [
@@ -465,11 +484,17 @@ class contact {
 
     tbl_contacts.findAll({
       where: condition,
+      offset: 0,
+      limit: 5,
       include: [
         {
-          model: tbl_users, include: [{
+          model: tbl_users,
+          include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details
+          }, {
+            as: 'dinas',
+            model: tbl_dinas,
           }]
         },
         { model: tbl_companys },
