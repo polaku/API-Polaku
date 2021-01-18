@@ -463,7 +463,8 @@ class contact {
       }
 console.log(tempCondition)
       condition = {
-        [Op.or]: tempCondition,
+        // [Op.or]: tempCondition,
+        company_id: 15,
         [Op.or]: [
           {
             [Op.and]: [
