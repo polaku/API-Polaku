@@ -461,10 +461,12 @@ class contact {
           }
         })
       }
-console.log(tempCondition)
+      console.log(tempCondition)
       condition = {
         // [Op.or]: tempCondition,
-        company_id: 15,
+        [Op.or]: [
+          { company_id: 15 }
+        ],
         [Op.or]: [
           {
             [Op.and]: [
