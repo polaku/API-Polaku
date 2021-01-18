@@ -450,8 +450,8 @@ class contact {
           if (idCompany.indexOf(el.company_id) === -1) {
             idCompany.push(el.company_id)
             tempCondition.push(
-              { '$tbl_user.tbl_account_detail.company_id$': el.company_id },
-              { '$tbl_user.$dinas.company_id$': el.company_id }
+              { company_id: el.company_id },
+              { '$tbl_user.dinas$.company_id$': el.company_id }
             )
           }
         })
@@ -461,7 +461,7 @@ class contact {
 
       condition = {
         // [Op.or]: tempCondition,
-        // '$tbl_user.$tbl_account_detail.company_id$': 1,
+        '$tbl_user.dinas$.company_id$': 1,
         [Op.or]: [
           {
             [Op.and]: [
@@ -487,8 +487,6 @@ class contact {
 
     tbl_contacts.findAll({
       where: condition,
-      offset: 0,
-      limit: 5,
       include: [
         {
           model: tbl_users,
@@ -517,6 +515,10 @@ class contact {
       ],
     })
       .then(data => {
+        if (req.query.page) {
+          data = data.slice((req.query.page * (req.query.limit)), ((+req.query.page + 1) * (req.query.limit)))
+        }
+
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
