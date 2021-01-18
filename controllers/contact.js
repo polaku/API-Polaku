@@ -3,6 +3,7 @@ const logError = require('../helpers/logError')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const { createDateAsUTC } = require('../helpers/convertDate');
+const { query } = require('express');
 
 class contact {
   static async create(req, res) {
@@ -389,7 +390,7 @@ class contact {
   }
 
   static async findAllContactUs(req, res) {
-    let condition = {}
+    let condition = {}, query = {}
     if (req.query["for-hr"] === "true") {
       condition = {
         [Op.or]: [
@@ -451,17 +452,13 @@ class contact {
             idCompany.push(el.company_id)
             tempCondition.push(
               { company_id: el.company_id },
-              { '$tbl_user.dinas$.company_id$': el.company_id }
             )
           }
         })
-
-        console.log(tempCondition)
       }
 
       condition = {
-        // [Op.or]: tempCondition,
-        'tbl_user.$dinas.company_id$': 1,
+        [Op.or]: tempCondition,
         [Op.or]: [
           {
             [Op.and]: [
@@ -485,8 +482,15 @@ class contact {
       }
     }
 
+    if (req.query.page) {
+      let offset = +req.query.page, limit = +req.query.limit
+      if (offset > 0) offset = offset * limit
+      query = { offset, limit }
+    }
+
     tbl_contacts.findAll({
       where: condition,
+      ...query,
       include: [
         {
           model: tbl_users,
@@ -515,10 +519,6 @@ class contact {
       ],
     })
       .then(data => {
-        if (req.query.page) {
-          data = data.slice((req.query.page * (req.query.limit)), ((+req.query.page + 1) * (req.query.limit)))
-        }
-
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
