@@ -455,11 +455,13 @@ class contact {
             )
           }
         })
+
+        console.log(tempCondition)
       }
 
       condition = {
-        // [Op.or]: tempCondition,
-        '$tbl_user.tbl_account_detail.company_id$': el.company_id,
+        [Op.or]: tempCondition,
+        '$tbl_user.tbl_account_detail.company_id$': 15,
         [Op.or]: [
           {
             [Op.and]: [
