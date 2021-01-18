@@ -467,7 +467,7 @@ class contact {
         [Op.and]: [
           {
             [Op.or]: [
-              { company_id: 15 }
+              { company_id: 1 }
             ]
           },
           {
