@@ -468,8 +468,8 @@ class contact {
           {
             [Op.or]: [
               { company_id: 15 }
-            ],
-          }
+            ]
+          },
           {
             [Op.or]: [
               {
