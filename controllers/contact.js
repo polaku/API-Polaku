@@ -464,26 +464,32 @@ class contact {
       console.log(tempCondition)
       condition = {
         // [Op.or]: tempCondition,
-        [Op.or]: [
-          { company_id: 15 }
-        ],
-        [Op.or]: [
+        [Op.and]: [
           {
-            [Op.and]: [
-              { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
-              { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
-            ]
-          },
+            [Op.or]: [
+              { company_id: 15 }
+            ],
+          }
           {
-            [Op.and]: [
-              { date_imp: { [Op.gte]: new Date(req.query["after-date"]) } },
-              { date_imp: { [Op.lte]: new Date(req.query["before-date"]) } },
-            ]
-          },
-          {
-            [Op.and]: [
-              { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
-              { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
+            [Op.or]: [
+              {
+                [Op.and]: [
+                  { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
+                  { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
+                ]
+              },
+              {
+                [Op.and]: [
+                  { date_imp: { [Op.gte]: new Date(req.query["after-date"]) } },
+                  { date_imp: { [Op.lte]: new Date(req.query["before-date"]) } },
+                ]
+              },
+              {
+                [Op.and]: [
+                  { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
+                  { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
+                ]
+              }
             ]
           }
         ]
