@@ -506,7 +506,7 @@ class contact {
 
     tbl_contacts.findAll({
       where: condition,
-      ...query,
+      // ...query,
       include: [
         {
           model: tbl_users,
