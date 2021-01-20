@@ -395,46 +395,56 @@ class contact {
       condition = {
         [Op.or]: [
           {
-            [Op.or]: [
-              { user_id: req.user.user_id },
-              { evaluator_1: req.user.user_id },
-              { evaluator_2: req.user.user_id },
-            ],
-            [Op.or]: [ //data dari sebulan sebelumnya
-              { date_ijin_absen_end: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
-              { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
-              { leave_date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+            [Op.and]: [
+              {
+                [Op.or]: [
+                  { user_id: req.user.user_id },
+                  { evaluator_1: req.user.user_id },
+                  { evaluator_2: req.user.user_id },
+                ]
+              }, {
+                [Op.or]: [ //data dari sebulan sebelumnya
+                  { date_ijin_absen_end: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+                  { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+                  { leave_date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+                ]
+              }
             ]
           }, {
-            [Op.or]: [
-              { evaluator_1: req.user.user_id },
-              { evaluator_2: req.user.user_id },
-            ],
-            [Op.or]: [
+            [Op.and]: [
               {
-                date_ijin_absen_end: {
-                  [Op.between]: [
-                    `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
-                    `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
-                  // [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
-                }
-              },
-              {
-                date_imp: {
-                  [Op.between]: [
-                    `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
-                    `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
-                  // [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
-                }
-              },
-              {
-                leave_date_in: {
-                  [Op.between]: [
-                    `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
-                    `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
-                  // [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
-                }
-              },
+                [Op.or]: [
+                  { evaluator_1: req.user.user_id },
+                  { evaluator_2: req.user.user_id },
+                ]
+              }, {
+                [Op.or]: [
+                  {
+                    date_ijin_absen_end: {
+                      [Op.between]: [
+                        `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
+                        `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
+                      // [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
+                    }
+                  },
+                  {
+                    date_imp: {
+                      [Op.between]: [
+                        `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
+                        `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
+                      // [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
+                    }
+                  },
+                  {
+                    leave_date_in: {
+                      [Op.between]: [
+                        `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
+                        `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
+                      // [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
+                    }
+                  },
+                ]
+              }
             ]
           }
         ]
@@ -499,11 +509,9 @@ class contact {
       query = { offset, limit }
     }
 
-    console.log(query)
-
     tbl_contacts.findAll({
       where: condition,
-      // ...query,
+      ...query,
       include: [
         {
           model: tbl_users,
