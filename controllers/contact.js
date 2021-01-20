@@ -392,6 +392,15 @@ class contact {
   static async findAllContactUs(req, res) {
     let condition = {}, query = {}
     if (req.query["for-hr"] === "true") {
+      let monthBefore = new Date().getMonth()
+      let monthCurrent = new Date().getMonth() + 1
+      let year = new Date().getFullYear()
+
+      if (monthBefore === 0) {
+        year -= 1
+        monthBefore = 12
+      }
+
       condition = {
         [Op.or]: [
           {
@@ -404,9 +413,9 @@ class contact {
                 ]
               }, {
                 [Op.or]: [ //data dari sebulan sebelumnya
-                  { date_ijin_absen_end: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
-                  { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
-                  { leave_date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01` } },
+                  { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+                  { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+                  { leave_date_in: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
                 ]
               }
             ]
@@ -422,25 +431,25 @@ class contact {
                   {
                     date_ijin_absen_end: {
                       // [Op.between]: [
-                      //   `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
-                      //   `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
-                      [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
+                      //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+                      //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+                      [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
                     }
                   },
                   {
                     date_imp: {
                       // [Op.between]: [
-                      //   `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
-                      //   `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
-                      [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
+                      //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+                      //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+                      [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
                     }
                   },
                   {
                     leave_date_in: {
                       // [Op.between]: [
-                      //   `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-21`,
-                      //   `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-20`]
-                      [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`
+                      //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+                      //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+                      [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
                     }
                   },
                 ]
@@ -508,7 +517,7 @@ class contact {
       if (offset > 0) offset = offset * limit
       query = { offset, limit }
     }
-console.log(`${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`)
+    console.log(`${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`)
     tbl_contacts.findAll({
       where: condition,
       ...query,
