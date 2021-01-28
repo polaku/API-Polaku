@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     tbl_departments.hasMany(models.tbl_structure_departments, { as: "department", foreignKey: 'departments_id' })
     tbl_departments.hasMany(models.tbl_structure_departments, { as: "section", foreignKey: 'department_section' })
     tbl_departments.hasMany(models.tbl_account_details, { foreignKey: "departments_id" })
+    tbl_departments.hasMany(models.tbl_question_fors, { foreignKey: 'departments_id' })
   };
 
   return tbl_departments;
