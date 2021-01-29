@@ -67,6 +67,9 @@ class helpdesk {
 
         condition = {
           [Op.or]: [
+            {
+              user_id: req.user.user_id
+            },
             { '$tbl_sub_topics_helpdesks.tbl_question_helpdesks.tbl_question_fors.option$': 'all' },
             {
               [Op.and]: [
@@ -100,14 +103,7 @@ class helpdesk {
           ['order', 'ASC'],
           ['id', 'ASC']
         ],
-        where: {
-          [Op.or]: [
-            {
-              user_id: req.user.user_id
-            },
-            condition
-          ]
-        }
+        where: condition
       })
 
       res.status(201).json({ message: 'Success', data })
