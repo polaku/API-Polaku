@@ -33,7 +33,7 @@ class helpdesk {
 
   static async getAllTopics(req, res) {
     try {
-      let tempConditionPT = [], conditionPT = {}, tempConditionDepartment = [], conditionDepartment = {}
+      let tempConditionPT = [], conditionPT = {}, tempConditionDepartment = [], conditionDepartment = {}, condition
       if (req.user.user_id !== 1) {
         let userAccount = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
         let dataPosition = await tbl_department_positions.findAll({ where: { user_id: req.user.user_id }, include: [{ model: tbl_structure_departments }] })
@@ -64,6 +64,20 @@ class helpdesk {
 
         conditionPT = { [Op.or]: tempConditionPT }
         conditionDepartment = { [Op.or]: tempConditionDepartment }
+
+        condition = {
+          [Op.or]: [
+            { '$tbl_sub_topics_helpdesks.tbl_question_helpdesks.tbl_question_fors.option$': 'all' },
+            {
+              [Op.and]: [
+                { '$tbl_sub_topics_helpdesks.tbl_question_helpdesks.tbl_question_fors.option$': 'employee' },
+                { '$tbl_sub_topics_helpdesks.tbl_question_helpdesks.tbl_question_fors.user_id$': req.user.user_id },
+              ]
+            },
+            conditionPT,
+            conditionDepartment
+          ]
+        }
       }
 
       let data = await tbl_topics_helpdesks.findAll({
@@ -88,15 +102,10 @@ class helpdesk {
         ],
         where: {
           [Op.or]: [
-            { '$tbl_sub_topics_helpdesks.tbl_question_helpdesks.tbl_question_fors.option$': 'all' },
             {
-              [Op.and]: [
-                { '$tbl_sub_topics_helpdesks.tbl_question_helpdesks.tbl_question_fors.option$': 'employee' },
-                { '$tbl_sub_topics_helpdesks.tbl_question_helpdesks.tbl_question_fors.user_id$': req.user.user_id },
-              ]
+              user_id: req.user.user_id
             },
-            conditionPT,
-            conditionDepartment
+            condition
           ]
         }
       })
@@ -521,6 +530,7 @@ class helpdesk {
       console.log(err)
     }
   }
+
 }
 
 module.exports = helpdesk
