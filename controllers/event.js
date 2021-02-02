@@ -300,31 +300,31 @@ class event {
   }
 
   static delete(req, res) {
-    tbl_events.destroy(
-      { where: { event_id: req.params.id } }
-    )
-      .then(async () => {
-        await tbl_event_responses.destroy(
-          { where: { event_id: req.params.id } }
-        )
-        await tbl_event_invites.destroy(
-          { where: { event_id: req.params.id } }
-        )
+    try {
+      await tbl_events.destroy(
+        { where: { event_id: req.params.id } }
+      )
+      await tbl_event_responses.destroy(
+        { where: { event_id: req.params.id } }
+      )
+      await tbl_event_invites.destroy(
+        { where: { event_id: req.params.id } }
+      )
 
-        res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
-      })
-      .catch(err => {
-        let error = {
-          uri: `http://api.polagroup.co.id/events/${req.params.id}`,
-          method: 'delete',
-          status: 500,
-          message: err,
-          user_id: req.user.user_id
-        }
-        logError(error)
-        res.status(500).json({ err })
-        console.log(err);
-      })
+      res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
+    } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/events/${req.params.id}`,
+        method: 'delete',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
+      res.status(500).json({ err })
+      console.log(err);
+    }
+
   }
 
   static update(req, res) {
