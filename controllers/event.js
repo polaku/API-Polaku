@@ -303,7 +303,14 @@ class event {
     tbl_events.destroy(
       { where: { event_id: req.params.id } }
     )
-      .then(() => {
+      .then(async () => {
+        await tbl_event_responses.destroy(
+          { where: { event_id: req.params.id } }
+        )
+        await tbl_event_invites.destroy(
+          { where: { event_id: req.params.id } }
+        )
+
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
