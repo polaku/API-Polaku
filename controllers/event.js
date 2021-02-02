@@ -1,4 +1,4 @@
-const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details, tbl_master_creators, tbl_event_invites, tbl_designations, tbl_notifications, tbl_companys, tbl_departments } = require('../models')
+const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details, tbl_master_creators, tbl_event_invites, tbl_department_positions, tbl_structure_departments, tbl_notifications, tbl_companys, tbl_departments } = require('../models')
 const { mailOptions, transporter } = require('../helpers/nodemailer')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
@@ -168,9 +168,6 @@ class event {
 
       condition = {
         [Op.or]: [
-          {
-            user_id: req.user.user_id
-          },
           { option: 'all' },
           {
             [Op.and]: [
@@ -183,7 +180,8 @@ class event {
         ]
       }
     }
-
+    console.log(condition)
+console.log('clg ', `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01`)
     tbl_events.findAll({
       where: {
         end_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01` },
@@ -226,7 +224,7 @@ class event {
   static findAllEvent(req, res) {
     tbl_events.findAll({
       where: {
-        start_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` },
+        start_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-${new Date().getDate() > 10 ? `0${new Date().getDate()}` : new Date().getDate()}` },
       },
       include: [{
         model: tbl_users,
