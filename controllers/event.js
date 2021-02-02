@@ -8,7 +8,7 @@ class event {
   static async create(req, res) {
     let newData, startDate, endDate
 
-    if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date || !req.body.location) {
+    if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date) {
       let error = {
         uri: `http://api.polagroup.co.id/events`,
         method: 'post',
@@ -50,6 +50,7 @@ class event {
           end_date: req.body.end_date,
           location: req.body.location,
           user_id: req.user.user_id,
+          status: 1
         }
 
         // if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
@@ -137,32 +138,55 @@ class event {
   }
 
   static async findAll(req, res) {
-    let condition = []
-    let paraPegawai = await tbl_account_details.findOne({
-      where: { user_id: req.user.user_id },
-      include: [{
-        model: tbl_designations,
-      }]
-    })
+    let tempConditionPT = [], tempConditionDepartment = [], condition = {}
+    if (req.user.user_id !== 1) {
+      let userAccount = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+      let dataPosition = await tbl_department_positions.findAll({ where: { user_id: req.user.user_id }, include: [{ model: tbl_structure_departments }] })
 
-    if (!paraPegawai.tbl_designation) {
-      condition = [
-        { option: 'all' },
-        { option: 'company', company_id: paraPegawai.company_id },
-        { option: 'user', user_id: req.user.user_id }
-      ]
-    } else {
-      condition = [
-        { option: 'all' },
-        { option: 'company', company_id: paraPegawai.company_id },
-        { option: 'department', departments_id: paraPegawai.tbl_designation.departments_id },
-        { option: 'user', user_id: req.user.user_id }
-      ]
+      tempConditionPT.push({
+        [Op.and]: [
+          { option: 'company' },
+          { company_id: userAccount.company_id },
+        ]
+      })
+
+      dataPosition.length > 0 && await dataPosition.forEach(position => {
+        tempConditionPT.push({
+          [Op.and]: [
+            { option: 'company' },
+            { company_id: position.tbl_structure_department.company_id },
+          ]
+        })
+
+        tempConditionDepartment.push({
+          [Op.and]: [
+            { option: 'department' },
+            { departments_id: position.tbl_structure_department.departments_id },
+          ]
+        })
+      })
+
+      condition = {
+        [Op.or]: [
+          {
+            user_id: req.user.user_id
+          },
+          { option: 'all' },
+          {
+            [Op.and]: [
+              { option: 'user' },
+              { user_id: req.user.user_id },
+            ]
+          },
+          ...tempConditionPT,
+          ...tempConditionDepartment
+        ]
+      }
     }
 
     tbl_events.findAll({
       where: {
-        end_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` },
+        end_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01` },
         status: 1
       },
       include: [{
@@ -174,11 +198,8 @@ class event {
       },
       {
         model: tbl_event_invites,
-        where: {
-          [Op.or]: condition
-        }
-      }
-      ],
+        where: condition
+      }],
       order: [
         ['start_date', 'ASC'],
         ['created_at', 'DESC']
@@ -199,6 +220,7 @@ class event {
         res.status(500).json({ err });
         console.log(err);
       })
+
   }
 
   static findAllEvent(req, res) {

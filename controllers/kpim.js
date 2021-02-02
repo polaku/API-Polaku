@@ -773,6 +773,16 @@ function getNumberOfWeek(date) {
   return weekNr;
 }
 
+// CALENDER GOOGLE
+// function getNumberOfWeek(date) {
+//   //yyyy-mm-dd (first date in week)
+//   var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+//   var dayNum = d.getUTCDay() || 7;
+//   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+//   var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+//   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+// }
+
 function compareMonth(a, b) {
   if (Number(a.month) < Number(b.month)) {
     return -1;
