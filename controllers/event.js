@@ -299,7 +299,7 @@ class event {
       })
   }
 
-  static delete(req, res) {
+  async static delete(req, res) {
     try {
       await tbl_events.destroy(
         { where: { event_id: req.params.id } }
