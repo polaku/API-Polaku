@@ -7,6 +7,7 @@ const logError = require('../helpers/logError')
 class event {
   static async create(req, res) {
     let newData, startDate, endDate, eventName, createdBy
+    console.log(req.body.invited)
 
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date) {
       let error = {
@@ -119,8 +120,7 @@ class event {
                   await tbl_event_invites.create(newData)
                 });
               }
-
-              sendEmail(eventName, req.body.option, req.body.invited, req.user.user_id)
+              // sendEmail(eventName, req.body.option, req.body.invited, req.user.user_id)
 
             } catch (err) {
               console.log(err)
@@ -185,11 +185,10 @@ class event {
         ]
       }
     }
-    console.log(condition)
-    console.log('clg ', `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01`)
+
     tbl_events.findAll({
       where: {
-        end_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01` },
+        end_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01` },
         status: 1
       },
       include: [{
@@ -229,7 +228,7 @@ class event {
   static findAllEvent(req, res) {
     tbl_events.findAll({
       where: {
-        start_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-${new Date().getDate() > 10 ? `0${new Date().getDate()}` : new Date().getDate()}` },
+        start_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-${new Date().getDate() < 10 ? `0${new Date().getDate()}` : new Date().getDate()}` },
       },
       include: [{
         model: tbl_users,
