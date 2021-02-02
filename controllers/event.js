@@ -6,7 +6,7 @@ const logError = require('../helpers/logError')
 
 class event {
   static async create(req, res) {
-    let newData, startDate, endDate
+    let newData, startDate, endDate, eventName, createdBy
 
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date) {
       let error = {
@@ -52,6 +52,8 @@ class event {
           user_id: req.user.user_id,
           status: 1
         }
+
+        eventName = req.body.event_name, createdBy = req.user.user_id
 
         // if (req.file) newData.thumbnail = `http://api.polagroup.co.id/${req.file.path}`
         if (req.file) newData.thumbnail = `http://165.22.110.159/${req.file.path}`
@@ -117,6 +119,9 @@ class event {
                   await tbl_event_invites.create(newData)
                 });
               }
+
+              sendEmail(eventName, req.body.option, req.body.invited, req.user.user_id)
+
             } catch (err) {
               console.log(err)
             }
@@ -181,7 +186,7 @@ class event {
       }
     }
     console.log(condition)
-console.log('clg ', `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01`)
+    console.log('clg ', `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01`)
     tbl_events.findAll({
       where: {
         end_date: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1}-01` },
@@ -574,7 +579,7 @@ console.log('clg ', `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 1
         //       if (pegawai.tbl_user.email !== '-') {
         //         mailOptions.subject = "There's new Event!"
         //         mailOptions.to = pegawai.tbl_user.email
-        //         mailOptions.html = `Dear , <br/><br/>Haii ada acara baru nih <b>${creator.event_name}.`
+        //         mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
         //         transporter.sendMail(mailOptions, function (error, info) {
         //           if (error) {
         //             let error = {
@@ -750,4 +755,116 @@ console.log('clg ', `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 1
 
 }
 
+
+async function sendEmail(eventName, option, data, createdBy) {
+  if (option === 'company') {
+    let user = []
+    data.forEach(async element => {
+      let paraPegawai = await tbl_department_positions.findAll({
+        include: [
+          { model: tbl_structure_departments, where: { company_id: element } },
+          { model: tbl_users }]
+      })
+
+      await paraPegawai.forEach(async pegawai => {
+        if (user.indexOf(pegawai.tbl_user.email) === -1) {
+          if (pegawai.tbl_user.email !== '-' && pegawai.tbl_user.email) {
+            mailOptions.subject = "There's new Event!"
+            mailOptions.to = pegawai.tbl_user.email
+            mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
+            transporter.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                let error = {
+                  uri: `http://api.polagroup.co.id/events`,
+                  method: 'post',
+                  status: 0,
+                  message: `Send email to ${pegawai.tbl_user.email} is error`,
+                  user_id: createdBy
+                }
+                logError(error)
+              }
+            })
+          }
+          user.push(pegawai.tbl_user.email)
+        }
+      });
+    });
+  } else if (option === 'department') {
+    let user = []
+    data.forEach(async element => {
+      let paraPegawai = await tbl_department_positions.findAll({
+        include: [
+          { model: tbl_structure_departments, where: { departments_id: element } },
+          { model: tbl_users }]
+      })
+
+      await paraPegawai.forEach(async pegawai => {
+        if (user.indexOf(pegawai.tbl_user.email) === -1) {
+          if (pegawai.tbl_user.email !== '-' && pegawai.tbl_user.email) {
+            mailOptions.subject = "There's new Event!"
+            mailOptions.to = pegawai.tbl_user.email
+            mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
+            transporter.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                let error = {
+                  uri: `http://api.polagroup.co.id/events`,
+                  method: 'post',
+                  status: 0,
+                  message: `Send email to ${pegawai.tbl_user.email} is error`,
+                  user_id: createdBy
+                }
+                logError(error)
+              }
+            })
+          }
+          user.push(pegawai.tbl_user.email)
+        }
+      });
+    });
+  } else if (option === 'user') { //
+    data.forEach(async element => {
+      await tbl_users.findByPk(element.user_id)
+        .then(async ({ dataValues }) => {
+          if (dataValues.email !== '-' && dataValues.email) {
+            mailOptions.subject = "There's new Event!"
+            mailOptions.to = dataValues.email
+            mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
+            transporter.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                let error = {
+                  uri: `http://api.polagroup.co.id/events`,
+                  method: 'post',
+                  status: 0,
+                  message: `Send email to ${dataValues.email} is error`,
+                  user_id: createdBy
+                }
+                logError(error)
+              }
+            })
+          }
+        })
+    });
+  } else if (option === 'all') { //
+    let paraPegawai = await tbl_users.findAll()
+    paraPegawai.forEach(async element => {
+      if (element.email !== '-' && element.email) {
+        mailOptions.subject = "There's new Event!"
+        mailOptions.to = element.email
+        mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            let error = {
+              uri: `http://api.polagroup.co.id/events`,
+              method: 'post',
+              status: 0,
+              message: `Send email to ${element.email} is error`,
+              user_id: createdBy
+            }
+            logError(error)
+          }
+        })
+      }
+    });
+  }
+}
 module.exports = event
