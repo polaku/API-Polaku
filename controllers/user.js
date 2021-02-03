@@ -368,11 +368,11 @@ class user {
 
   static async findAll(req, res) {
     let query = {}, condition = {}, conditionPT = {}, conditionDinas = {}, conditionStatus = {}, conditionSearch = {}, order = []
-    if (req.query.page) {
-      let offset = +req.query.page, limit = +req.query.limit
-      if (offset > 0) offset = offset * limit
-      query = { offset, limit }
-    }
+    // if (req.query.page) {
+    //   let offset = +req.query.page, limit = +req.query.limit
+    //   if (offset > 0) offset = offset * limit
+    //   query = { offset, limit }
+    // }
 
     if (req.query.search) {
       conditionSearch = {
@@ -510,7 +510,7 @@ class user {
           }
         })
 
-        data = data.slice((req.query.page * (req.query.limit)), ((+req.query.page + 1) * (req.query.limit)))
+        if (req.query.page) data = data.slice((req.query.page * (req.query.limit)), ((+req.query.page + 1) * (req.query.limit)))
 
         res.status(200).json({ message: "Success", totalRecord: allData.length, data })
       })
