@@ -7,7 +7,6 @@ const logError = require('../helpers/logError')
 class event {
   static async create(req, res) {
     let newData, startDate, endDate, eventName, createdBy
-    console.log(req.body.invited)
 
     if (!req.body.event_name || !req.body.description || !req.body.start_date || !req.body.end_date) {
       let error = {

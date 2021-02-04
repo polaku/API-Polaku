@@ -1,4 +1,4 @@
-const { tbl_topics_helpdesks, tbl_sub_topics_helpdesks, tbl_question_helpdesks, tbl_question_fors, tbl_question_likes, tbl_companys, tbl_department_positions, tbl_structure_departments, tbl_users, tbl_account_details } = require('../models')
+const { tbl_topics_helpdesks, tbl_sub_topics_helpdesks, tbl_question_helpdesks, tbl_question_fors, tbl_question_likes, tbl_companys, tbl_department_positions, tbl_structure_departments, tbl_users, tbl_account_details , tbl_s} = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const logError = require('../helpers/logError')
@@ -45,7 +45,6 @@ class helpdesk {
           ]
         })
 
-        console.log(dataPosition[0].tbl_structure_department)
         dataPosition.length > 0 && await dataPosition.forEach(position => {
           tempConditionPT.push({
             [Op.and]: [
@@ -270,7 +269,6 @@ class helpdesk {
   // QUESTION
   static async createQuestion(req, res) {
     try {
-      console.log(req.body)
       let newDataQuestion = {
         question: req.body.question,
         answer: req.body.editorState,

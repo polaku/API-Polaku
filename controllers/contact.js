@@ -517,7 +517,7 @@ class contact {
       if (offset > 0) offset = offset * limit
       query = { offset, limit }
     }
-    console.log(`${new Date().getFullYear()}-${new Date().getMonth() < 10 ? `0${new Date().getMonth()}` : new Date().getMonth()}-01`)
+
     tbl_contacts.findAll({
       where: condition,
       ...query,
