@@ -20,6 +20,8 @@ router.post('/importUser', authentication, uploadSingle.single('file'), userCont
 router.post('/settingImportUser', authentication, uploadSingle.single('file'), userController.settingImportUser)
 router.get('/normalitationNIK', authentication, userController.normalitationNIK)
 router.get('/log', authentication, userController.findAllLog)
+router.put('/reset-password/:token', userController.resetPassword);
+router.get('/forget-password', userController.forgetPassword);
 
 router.put('/:id', authentication, uploadSingle.single('avatar'), userController.update)
 router.get('/:id', userController.findOne)

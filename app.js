@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cors())
 app.use('/uploads', express.static('uploads'))
+app.use('/asset/img', express.static('assets'));
 app.use(morgan('dev'))
 
 app.use(function (req, res, next) {

@@ -1609,6 +1609,88 @@ class user {
         res.status(500).json({ err })
       })
   }
+
+  static async forgetPassword(req, res) {
+    try {
+      let user = await tbl_users.findOne({ where: { email: req.query.email }, include: [{ model: tbl_account_details }] });
+      if (user) {
+        let randomNumber = Math.floor(Math.random() * 10);
+        let key = `${user.user_id}${new Date().setHours(new Date().getHours())}${randomNumber}`
+
+        await tbl_users.update({ new_password_key: key, new_password_requested: createDateAsUTC(new Date()) }, { where: { user_id: user.user_id } })
+
+        mailOptions.to = user.email;
+        mailOptions.subject = 'Reset password Polaku';
+        mailOptions.html = `
+				<img src="${process.env.BaseUrlServer}/asset/img/logo-polagroup.png" height="30" width="150" alt="logo-polagroup" />
+				<p style="font-size: 20px;"><b>Hai ${user.tbl_account_detail.fullname}</b></p>
+				<p style="margin:10px 0px;">Kami baru saja menerima permintaan untuk mengganti password.</p>
+				<p style="margin:10px 0px;">Silahkan klik link di bawah dan ikuti petunjuk untuk mengganti password Anda.</p>
+				<br />
+        <p style="margin:10px 0px;">Username anda adalah <b>${user.username}</b></p>
+				<div style="border-radius: 2px;background-color:#91c640;width:128px;">
+					<a href="${process.env.BaseUrlClient}/reset-password/${key}" target="_blank" style="padding: 8px 12px; border: 1px solid #91c640;border-radius: 2px;color: #ffffff;text-decoration: none;font-weight:bold;display: inline-block;">
+						Reset Password
+					</a>
+				</div>
+				<br />			
+				<p style="margin:10px 0px;">Jika permintaan penggantian password ini bukan dari Anda, atau jika Anda merasa akun
+				Anda sedang diretas, silahkan laporkan ke polaku.digital@gmail.com</p>
+				
+				<div style="border-top:1px solid #aaa;font-size:0;margin:8px auto;"></div>
+				<div style="text-align:center;font-size: small;">
+				<b>Email ini dibuat secara otomatis. Mohon tidak mengirim balasan ke email ini.</b>
+				</div>
+				<div style="border-top:1px solid #aaa;font-size:0;margin:8px auto;"></div>
+				
+				`;
+        res.status(200).json({ message: 'success' });
+        console.log('Berhasil');
+
+
+        await transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            console.log('GAGAL');
+            console.log(error);
+            res.status(400).json({ message: 'failed' });
+          } else {
+            res.status(200).json({ message: 'success' });
+            console.log('Berhasil');
+          }
+        });
+      } else {
+        res.status(400).json({ message: 'failed' });
+        console.log('User not found');
+      }
+    } catch (Error) {
+      console.log(createDateAsUTC(new Date()), Error);
+      res.status(500).json({ Error });
+    }
+  }
+
+  static async resetPassword(req, res) {
+    try {
+      console.log("MASUK", req.body)
+      let user = await tbl_users.findOne({ where: { new_password_key: req.params.token } });
+
+      if (user) {
+        if (user.new_password_requested.setDate(user.new_password_requested.getDate() + 1) > createDateAsUTC(new Date())) {
+          await tbl_users.update({ new_password_key: null, password: hash(req.body.password) }, { where: { user_id: user.user_id } });
+          let token = sign({ user_id: user.user_id })
+
+          res.status(200).json({ message: 'success', token })
+        } else {
+          await tbl_users.update({ new_password_key: null }, { where: { user_id: user.user_id } });
+          res.status(400).json({ message: 'link expired' })
+        }
+      } else {
+        res.status(400).json({ message: 'token not found' })
+      }
+    } catch (Error) {
+      console.log(createDateAsUTC(new Date()), Error);
+      res.status(500).json({ Error });
+    }
+  }
 }
 
 // queue.process('email', function (job, done) {

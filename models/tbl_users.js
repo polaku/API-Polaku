@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
     role_id: DataTypes.INTEGER,
     activated: DataTypes.INTEGER,
     flag_password: DataTypes.INTEGER,
+    new_password_key: DataTypes.STRING,
+    new_password_requested: DataTypes.DATE,
     /*
     banned: DataTypes.INTEGER,
     ban_reason: DataTypes.STRING,
-    new_password_key: DataTypes.STRING,
-    new_password_requested: DataTypes.DATE,
     new_email: DataTypes.STRING,
     new_email_key: DataTypes.STRING,
     last_ip: DataTypes.STRING,
