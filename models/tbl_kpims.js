@@ -12,9 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     year: DataTypes.STRING,
     user_id: DataTypes.INTEGER,
     created_at: DataTypes.DATE,
+    is_inverse: DataTypes.BOOLEAN
   }, {
-      timestamps: false,
-    });
+    timestamps: false,
+  });
   tbl_kpims.removeAttribute('id');
 
   tbl_kpims.associate = function (models) {

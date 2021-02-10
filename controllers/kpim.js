@@ -88,7 +88,8 @@ class kpim {
             target: req.body.target,
             unit: req.body.unit,
             year: req.body.year,
-            user_id: req.body.user_id
+            user_id: req.body.user_id,
+            is_inverse: req.body.is_inverse
           }
 
           let createKPIM = await tbl_kpims.create(newKPIMScore)
@@ -142,7 +143,8 @@ class kpim {
             target: req.body.target,
             unit: req.body.unit,
             year: req.body.year,
-            user_id: req.body.user_id
+            user_id: req.body.user_id,
+            is_inverse: req.body.is_inverse
           }
 
           let createKPIM = await tbl_kpims.create(newKPIMScore)
@@ -487,7 +489,6 @@ class kpim {
             ['kpim_score_id', 'ASC']
           ]
         })
-        // console.log(kpimScore)
         data.dataValues.kpimScore = kpimScore
 
         res.status(200).json({ message: "Success", total_record: data.length, data })
@@ -529,13 +530,20 @@ class kpim {
         if (totalBobotAfter <= 100 || !req.body.bobot) {
           //for update kpim_score kpim newest
           let newScore
+          let targetMonthly = Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)
+          let capaianMonthly = Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly)
 
-          if (kpimSelected.unit.toLowerCase() === "keluhan" || kpimSelected.unit.toLowerCase() === "komplen" || kpimSelected.unit.toLowerCase() === "complain" || kpimSelected.unit.toLowerCase() === "reject") {
+          if (kpimSelected.unit.toLowerCase() === "keluhan" || kpimSelected.unit.toLowerCase() === "komplen" || kpimSelected.unit.toLowerCase() === "complain" || kpimSelected.unit.toLowerCase() === "reject" || kpimSelected.is_inverse) {
             statusKhusus = true
-            newScore = (((Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)) - (Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly))) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
+            if (targetMonthly < capaianMonthly) {
+              newScore = 0
+            } else {
+              newScore = ((targetMonthly - capaianMonthly) / targetMonthly) * 100
+            }
           } else {
-            newScore = ((Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly)) / (Number(req.body.target_monthly) || Number(kpimMonth.target_monthly))) * 100
+            newScore = (capaianMonthly / targetMonthly) * 100
           }
+
           let newData = {
             target_monthly: req.body.target_monthly,
             bobot: req.body.bobot,
@@ -578,23 +586,37 @@ class kpim {
 
         if (updateKPIM && req.body.monthly) {
           await targetPerbulan.forEach(async (element, index) => {
+            if (+req.body.month > index) {
+              let newData = {
+                bobot: element.bobot,
+                target_monthly: +element.target_monthly,
+                pencapaian_monthly: +element.pencapaian_monthly
+              }
+              let targetMonthly = +element.target_monthly
+              let capaianMonthly = +element.pencapaian_monthly
 
-            let newData = {
-              bobot: element.bobot,
-              target_monthly: +element.target_monthly,
-              pencapaian_monthly: element.pencapaian_monthly,
-              score_kpim_monthly: ((Number(element.pencapaian_monthly) / Number(element.target_monthly)) * 100)
-            }
+              if (req.body.is_inverse) {
+                statusKhusus = true
 
-            let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: element.kpim_score_id } })
+                if (targetMonthly < capaianMonthly) {
+                  newData.score_kpim_monthly = 0
+                } else {
+                  newData.score_kpim_monthly = ((targetMonthly - capaianMonthly) / targetMonthly) * 100
+                }
+              } else {
+                newData.score_kpim_monthly = (capaianMonthly / targetMonthly) * 100
+              }
 
-            if (updateKPIMScore) {
-              let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: req.params.id } })
-              let tempScore = 0
-              kpimOneYear.forEach(kpimScore => {
-                tempScore += kpimScore.pencapaian_monthly
-              })
-              await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
+              let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: element.kpim_score_id } })
+
+              if (updateKPIMScore) {
+                let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: req.params.id } })
+                let tempScore = 0
+                kpimOneYear.forEach(kpimScore => {
+                  tempScore += kpimScore.pencapaian_monthly
+                })
+                await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
+              }
             }
           });
           let kpimSelected = await tbl_kpims.findByPk(req.params.id)
@@ -645,6 +667,7 @@ class kpim {
   static async sendGrade(req, res) {
     let arrayKPIMScoreId = null, tal, day = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     try {
+      console.log(req.body)
       if (typeof req.body.arrayKPIMScoreId === 'object') arrayKPIMScoreId = req.body.arrayKPIMScoreId
       else arrayKPIMScoreId = JSON.parse(req.body.arrayKPIMScoreId)
 
@@ -665,7 +688,6 @@ class kpim {
           await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month, week: { [Op.lt]: weekDate20 } } })
           el.tbl_tal_scores.forEach(async tal_score => {
             if (tal_score.month === kpimScore.month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${kpimScore.month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20))) {
-              // console.log("tanggal", tal_score.when_date, "when_day", tal_score.when_day && day.indexOf(tal_score.when_day), new Date(`${kpim.year}-${kpimScore.month}-20`).getDay(), "when_date", (tal_score.when_date && Number(tal_score.when_date) <= 20))
               await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_score_id: tal_score.tal_score_id } })
             }
           })
@@ -744,12 +766,12 @@ async function createKPIMTeam(userIdBawahan, year, month) {
       year: year,
       user_id: evaluator1.user_id
     }
-    let tal = await tbl_kpims.create(newKPIM)
+    let newKPIMTEAM = await tbl_kpims.create(newKPIM)
 
-    if (tal) {
+    if (newKPIMTEAM) {
       for (let i = month; i <= 12; i++) {
         let newData = {
-          kpim_id: tal.null,
+          kpim_id: newKPIMTEAM.null,
           month: i,
           target_monthly: 0
         }
