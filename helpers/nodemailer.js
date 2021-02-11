@@ -27,7 +27,9 @@ const createTransporter = async () => {
   });
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       type: 'OAuth2',
       user: 'polaku.digital@gmail.com',
@@ -46,7 +48,7 @@ let transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'polaku.digital@gmail.com',
-    password: process.env.GOOGLE_EMAIL_PASS
+    pass: process.env.GOOGLE_EMAIL_PASS
   }
 });
 
