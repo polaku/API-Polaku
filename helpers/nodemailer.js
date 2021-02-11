@@ -19,15 +19,18 @@ const createTransporter = async () => {
     oauth2Client.getAccessToken((err, token) => {
       if (err) {
         reject();
+        console.log("Get access token failed")
       }
       resolve(token);
     });
   });
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
-      type: "OAuth2",
+      type: 'OAuth2',
       user: 'polaku.digital@gmail.com',
       accessToken,
       clientId: process.env.CLIENT_ID,
