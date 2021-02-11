@@ -1690,7 +1690,7 @@ class user {
         res.status(400).json({ message: 'token not found' })
       }
     } catch (Error) {
-      console.log(createDateAsUTC(new Date()), Error);
+      console.log('error reset password', createDateAsUTC(new Date()), Error);
       res.status(500).json({ Error });
     }
   }
