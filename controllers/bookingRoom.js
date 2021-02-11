@@ -1,5 +1,5 @@
 const { tbl_room_bookings, tbl_rooms, tbl_users, tbl_account_details, tbl_master_rooms, tbl_companys, tbl_buildings, tbl_events, tbl_event_responses, tbl_notifications, tbl_event_invites, tbl_departments, tbl_dinas, tbl_PICs } = require('../models')
-const { mailOptions, transporter } = require('../helpers/nodemailer')
+const { mailOptions, createTransporter } = require('../helpers/nodemailer')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const logError = require('../helpers/logError')
@@ -249,7 +249,9 @@ class bookingRoom {
                                 mailOptions.subject = "You have invited!"
                                 mailOptions.to = dataValues.email
                                 mailOptions.html = `Dear , <br/><br/>Anda telah diundang oleh <b>${created.dataValues.fullname}</b> untuk mengikuti <b>${req.body.subject}</b> di ruangan <b>${room.dataValues.room}</b>.`
-                                transporter.sendMail(mailOptions, function (error, info) {
+
+                                let sendEmail = await createTransporter()
+                                sendEmail.sendMail(mailOptions, function (error, info) {
                                   if (error) {
                                     let error = {
                                       uri: `http://api.polagroup.co.id/bookingRoom`,
@@ -489,7 +491,9 @@ class bookingRoom {
           mailOptions.to = accountCreator.email
           mailOptions.html = `Dear , <br/><br/>Ruangan anda yang dibooking pada tanggal 
           ${new Date(dataWillDelete.date_in).getDate()}-${new Date(dataWillDelete.date_in).getMonth() + 1}-${new Date(dataWillDelete.date_in).getFullYear()} di ruang ${dataWillDelete.tbl_room.room}, telah di batalkan oleh <b>${accountAdmin.fullname}</b>.<br/><br/>Terima Kasih.`
-          transporter.sendMail(mailOptions, function (error, info) {
+
+          let sendEmail = await createTransporter()
+          sendEmail.sendMail(mailOptions, function (error, info) {
             if (error) {
               let error = {
                 uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
