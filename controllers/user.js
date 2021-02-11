@@ -1,7 +1,7 @@
 const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins, tbl_admin_companies } = require('../models');
 const { compare, hash } = require('../helpers/bcrypt');
 const { sign, verify } = require('../helpers/jwt');
-const { mailOptions, createTransporter } = require('../helpers/nodemailer');
+const { mailOptions, createTransporter, transporter } = require('../helpers/nodemailer');
 const logError = require('../helpers/logError');
 const excelToJson = require('convert-excel-to-json');
 const { createDateAsUTC } = require('../helpers/convertDate');
@@ -1650,8 +1650,11 @@ class user {
         console.log('Berhasil');
 
 
-        let sendEmail = await createTransporter()
-        sendEmail.sendMail(mailOptions, function (error, info) {
+        // let sendEmail = await createTransporter()
+        // sendEmail.sendMail(mailOptions, function (error, info) {
+
+        transporter.sendMail(mailOptions, function (error, info) {
+
           if (error) {
             console.log('GAGAL');
             console.log(error);
