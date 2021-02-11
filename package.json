@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cli": "^1.0.1",
     "convert-excel-to-json": "^1.6.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
@@ -22,7 +23,7 @@
     "mysql2": "^2.0.1",
     "node-cron": "^2.0.3",
     "nodemailer": "^6.3.0",
-    "sequelize": "^5.21.2"
+    "sequelize": "^5.22.3"
   },
   "devDependencies": {
     "dotenv": "^8.0.0"
