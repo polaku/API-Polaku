@@ -20,6 +20,7 @@ const createTransporter = async () => {
       if (err) {
         reject();
         console.log("Get access token failed")
+        console.log(err)
       }
       resolve(token);
     });
