@@ -1,7 +1,7 @@
 const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins, tbl_admin_companies } = require('../models');
 const { compare, hash } = require('../helpers/bcrypt');
 const { sign, verify } = require('../helpers/jwt');
-const { mailOptions, transporter } = require('../helpers/nodemailer');
+const { mailOptions, createTransporter } = require('../helpers/nodemailer');
 const logError = require('../helpers/logError');
 const excelToJson = require('convert-excel-to-json');
 const { createDateAsUTC } = require('../helpers/convertDate');
@@ -842,7 +842,9 @@ class user {
         mailOptions.subject = "Your password has been changed!"
         mailOptions.to = dataReturning.email
         mailOptions.html = `Dear , <br/><br/>Password anda sudah diganti oleh admin menjadi <b>${req.body.password}</b>.<br />Terimakasih`
-        transporter.sendMail(mailOptions, function (error, info) {
+
+        let sendEmail = await createTransporter()
+        sendEmail.sendMail(mailOptions, function (error, info) {
           if (error) {
             let error = {
               uri: `http://api.polagroup.co.id/editUser/${req.params.id}`,
@@ -1648,7 +1650,8 @@ class user {
         console.log('Berhasil');
 
 
-        await transporter.sendMail(mailOptions, function (error, info) {
+        let sendEmail = await createTransporter()
+        sendEmail.sendMail(mailOptions, function (error, info) {
           if (error) {
             console.log('GAGAL');
             console.log(error);
@@ -1694,14 +1697,16 @@ class user {
 }
 
 // queue.process('email', function (job, done) {
-//   transporter.sendMail(mailOptions, function (error, info) {
+//   let sendEmail = await createTransporter()
+//    sendEmail.sendMail(mailOptions, function (error, info) {
 //     if (error) {
 //       return console.log(error);
 //     } else {
 //       done()
 //     }
 //   })
-// transporter.sendMail(mailOptions, function (error, info) {
+// let sendEmail = await createTransporter()
+// sendEmail.sendMail(mailOptions, function (error, info) {
 //   if (error) {
 //     let error = {
 //       uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,

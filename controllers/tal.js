@@ -1,6 +1,6 @@
 const { tbl_tals, tbl_users, tbl_account_details, tbl_tal_scores, tbl_kpim_scores, tbl_kpims } = require('../models')
 const logError = require('../helpers/logError')
-const { mailOptions, transporter } = require('../helpers/nodemailer')
+const { mailOptions, createTransporter } = require('../helpers/nodemailer')
 const inputNilaiKPIMTeam = require('../helpers/inputKPIMTEAM')
 
 const Op = require("sequelize").Op
@@ -90,7 +90,8 @@ class tal {
               mailOptions.to = atasanUser.email
               mailOptions.html = `Dear , <br/><br/>Sdr/i.  <b>${bawahanUser.tbl_account_detail.fullname}</b> telah menambahkan TAL baru dengan indicator <b>${req.body.indicator_tal}</b> diminggu ke <b>${req.body.week}</b> dibulan <b>${months[Number(req.body.month) - 1]}</b> tahun <b>${req.body.year}</b>.`
 
-              transporter.sendMail(mailOptions, function (error, info) {
+              let sendEmail = await createTransporter()
+              sendEmail.sendMail(mailOptions, function (error, info) {
                 if (error) {
                   let error = {
                     uri: `http://api.polagroup.co.id/tal`,
