@@ -59,7 +59,7 @@ let transporter = nodemailer.createTransport({
 });
 
 const mailOptions = {
-  from: 'Polaku <noreply.polaku.digital@gmail.com>',
+  from: 'polaku.digital@gmail.com',
   to: '',
 }
 
