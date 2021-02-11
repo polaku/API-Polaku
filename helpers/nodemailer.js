@@ -27,9 +27,7 @@ const createTransporter = async () => {
   });
 
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    service: 'gmail',
     auth: {
       type: 'OAuth2',
       user: 'polaku.digital@gmail.com',
