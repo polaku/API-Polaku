@@ -1644,17 +1644,10 @@ class user {
 				<b>Email ini dibuat secara otomatis. Mohon tidak mengirim balasan ke email ini.</b>
 				</div>
 				<div style="border-top:1px solid #aaa;font-size:0;margin:8px auto;"></div>
-				
 				`;
-        res.status(200).json({ message: 'success' });
-        console.log('Berhasil');
 
-
-        // let sendEmail = await createTransporter()
-        // sendEmail.sendMail(mailOptions, function (error, info) {
-
-        transporter.sendMail(mailOptions, function (error, info) {
-
+        let sendEmail = await createTransporter()
+        sendEmail.sendMail(mailOptions, function (error, info) {
           if (error) {
             console.log('GAGAL');
             console.log(error);
