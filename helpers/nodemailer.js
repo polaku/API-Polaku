@@ -8,8 +8,9 @@ let transporter = nodemailer.createTransport({
   auth: {
     type: 'OAuth2',
     user: 'polaku.digital@gmail.com',
-    // refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+    refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
     accessToken: process.env.ACCESS_TOKEN_GMAIL,
+    expires: 1484314697598
   }
 });
 
