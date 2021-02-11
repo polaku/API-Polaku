@@ -55,4 +55,4 @@ const mailOptions = {
   to: '',
 }
 
-module.exports = { mailOptions, createTransporter }
+module.exports = { mailOptions, createTransporter, transporter }
