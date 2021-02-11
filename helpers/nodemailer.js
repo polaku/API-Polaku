@@ -6,10 +6,8 @@ let transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    type: 'OAuth2',
     user: 'polaku.digital@gmail.com',
     pass: process.env.GOOGLE_EMAIL_PASS,
-    accessToken: 'AIzaSyCrY_NuYWUkTN4DavcwxbDH-HAE3cb8ERc',
   }
 });
 
