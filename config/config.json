@@ -1,9 +1,9 @@
 {
   "development": {
     "username": "root",
-    "password": "polaku2019",
-    "database": "polaadmin_polaku",
-    "host": "127.0.0.1",
+    "password": "Testing123.",
+    "database": "dump_polagroup_polaku",
+    "host": "localhost",
     "dialect": "mysql",
     "logging": false,
     "operatorsAliases": "Op",
@@ -15,9 +15,9 @@
   },
   "test": {
     "username": "root",
-    "password": "polaku2019",
-    "database": "polaadmin_polaku",
-    "host": "127.0.0.1",
+    "password": "Testing123.",
+    "database": "dump_polagroup_polaku",
+    "host": "localhost",
     "dialect": "mysql",
     "logging": false,
     "operatorsAliases": "Op",
@@ -29,9 +29,9 @@
   },
   "production": {
     "username": "root",
-    "password": "polaku2019",
-    "database": "polaadmin_polaku",
-    "host": "127.0.0.1",
+    "password": "Testing123.",
+    "database": "dump_polagroup_polaku",
+    "host": "localhost",
     "dialect": "mysql",
     "logging": false,
     "operatorsAliases": "Op",

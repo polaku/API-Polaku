@@ -673,24 +673,27 @@ class kpim {
 
       await arrayKPIMScoreId.forEach(async kpimScoreId => {
 
-        await tbl_kpim_scores.update({ hasConfirm: 1 }, { where: { kpim_score_id: kpimScoreId } })
+        // await tbl_kpim_scores.update({ hasConfirm: 1 }, { where: { kpim_score_id: kpimScoreId } })
 
         let kpimScore = await tbl_kpim_scores.findByPk(kpimScoreId)
         let kpim = await tbl_kpims.findByPk(kpimScore.kpim_id)
-        let weekDate20 = await getNumberOfWeek(`${kpim.year}-${kpimScore.month}-20`)
-
-        tal = await tbl_tals.findAll({
-          where: { kpim_score_id: kpimScoreId },
-          include: [{ model: tbl_tal_scores, where: { week: { [Op.lte]: weekDate20 } } }]
-        })
+        // let weekDate20 = await getNumberOfWeek(`${kpim.year}-${kpimScore.month}-20`)
+console.log(kpimScore)
+        // tal = await tbl_tals.findAll({
+        //   where: { kpim_score_id: kpimScoreId },
+        //   include: [{ model: tbl_tal_scores, where: { month: }]
+        // })
 
         tal.forEach(async el => {
-          await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month, week: { [Op.lt]: weekDate20 } } })
-          el.tbl_tal_scores.forEach(async tal_score => {
-            if (tal_score.month === kpimScore.month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${kpimScore.month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20))) {
-              await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_score_id: tal_score.tal_score_id } })
-            }
-          })
+          // await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month } })
+
+          // 21 - 20
+          // await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month, week: { [Op.lt]: weekDate20 } } })
+          // el.tbl_tal_scores.forEach(async tal_score => {
+          //   if (tal_score.month === kpimScore.month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${kpimScore.month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20))) {
+          //     await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_score_id: tal_score.tal_score_id } })
+          //   }
+          // })
         })
       })
       res.status(200).json({ message: "Success" })
