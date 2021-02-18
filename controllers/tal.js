@@ -443,7 +443,7 @@ async function updateScoreTALMonth(kpimScoreId, month, userId) {
 
   let KPIMSelected = await tbl_kpims.findByPk(KPIMScoreSelected.kpim_id)
 
-  let weekDate20 = await getNumberOfWeek(`${KPIMSelected.year}-${month}-20`)
+  // let weekDate20 = await getNumberOfWeek(`${KPIMSelected.year}-${month}-20`)
 
   let allTALUser = await tbl_tals.findAll({
     where: { user_id: userId },
@@ -462,11 +462,13 @@ async function updateScoreTALMonth(kpimScoreId, month, userId) {
 
   await tempScore.forEach((tal_score) => {
 
-    if (tempWeekSelected !== tal_score.week && tal_score.week <= weekDate20) {
+    // if (tempWeekSelected !== tal_score.week && tal_score.week <= weekDate20) {
+    if (tempWeekSelected !== tal_score.week) {
       tempWeekSelected = tal_score.week
       counterWeek++
     }
-    if ((tal_score.month === month && tal_score.week < weekDate20) || (tal_score.month === month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${KPIMSelected.year}-${month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20)))) {
+    // if ((tal_score.month === month && tal_score.week < weekDate20) || (tal_score.month === month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${KPIMSelected.year}-${month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20)))) {
+    if (tal_score.month === month) {
       tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
     }
   })

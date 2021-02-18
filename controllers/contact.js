@@ -45,6 +45,10 @@ class contact {
       evaluator_2: evalutor2,
     }
 
+    if (req.user.user_id === 265) {
+      newData.status = 'approved'
+    }
+
     tbl_contacts.create(newData)
       .then(async data => {
         let findNew = await tbl_contacts.findByPk(data.null)

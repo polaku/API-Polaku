@@ -672,22 +672,24 @@ class kpim {
       else arrayKPIMScoreId = JSON.parse(req.body.arrayKPIMScoreId)
 
       await arrayKPIMScoreId.forEach(async kpimScoreId => {
-
-        // await tbl_kpim_scores.update({ hasConfirm: 1 }, { where: { kpim_score_id: kpimScoreId } })
+        // HANDLE KPIM BULANAN
+        await tbl_kpim_scores.update({ hasConfirm: 1 }, { where: { kpim_score_id: kpimScoreId } })
 
         let kpimScore = await tbl_kpim_scores.findByPk(kpimScoreId)
-        let kpim = await tbl_kpims.findByPk(kpimScore.kpim_id)
+
+        // UNTUK TANGGAL PENILAIAN 21 - 20
+        // let kpim = await tbl_kpims.findByPk(kpimScore.kpim_id)
         // let weekDate20 = await getNumberOfWeek(`${kpim.year}-${kpimScore.month}-20`)
-console.log(kpimScore)
-        // tal = await tbl_tals.findAll({
-        //   where: { kpim_score_id: kpimScoreId },
-        //   include: [{ model: tbl_tal_scores, where: { month: }]
-        // })
+
+        tal = await tbl_tals.findAll({
+          where: { kpim_score_id: kpimScoreId },
+          include: [{ model: tbl_tal_scores, where: { month: kpimScore.month } }]
+        })
 
         tal.forEach(async el => {
-          // await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month } })
+          await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month } })
 
-          // 21 - 20
+          // UNTUK TANGGAL PENILAIAN 21 - 20
           // await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { tal_id: el.tal_id, month: kpimScore.month, week: { [Op.lt]: weekDate20 } } })
           // el.tbl_tal_scores.forEach(async tal_score => {
           //   if (tal_score.month === kpimScore.month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${kpim.year}-${kpimScore.month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20))) {
