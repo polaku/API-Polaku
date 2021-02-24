@@ -466,8 +466,8 @@ class user {
       include: [{
         required: true,
         model: tbl_account_details,
-        where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
-        // where: { ...conditionStatus, ...conditionSearch },
+        // where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
+        where: { ...conditionStatus, ...conditionSearch },
         include: [{
           model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
         }, {

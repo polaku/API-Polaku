@@ -63,7 +63,7 @@ class news {
         }]
       }],
       order: [
-        ['created_at', 'DESC']
+        ['polanews_id', 'DESC']
       ],
     })
       .then(data => {
