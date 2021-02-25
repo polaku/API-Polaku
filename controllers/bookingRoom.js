@@ -513,7 +513,26 @@ class bookingRoom {
         await tbl_event_invites.destroy({ where: { event_id: theEvent.event_id } })
         await tbl_event_responses.destroy({ where: { event_id: theEvent.event_id } })
 
-        res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
+        let dataReturn = await tbl_room_bookings.findAll({
+          where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
+          include: [{
+            model: tbl_users,
+            include: [{
+              // as: "tbl_account_detail",
+              model: tbl_account_details
+            }]
+          },
+          {
+            model: tbl_rooms
+          }],
+          order: [
+            ['room_id', 'ASC'],
+            ['date_in', 'ASC'],
+            ['time_in', 'ASC'],
+          ],
+        })
+
+        res.status(200).json({ info: "Delete Success", id_deleted: req.params.id, data: dataReturn })
       })
       .catch(err => {
         let error = {
