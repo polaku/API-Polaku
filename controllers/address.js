@@ -168,8 +168,7 @@ class address {
           },
           {
             model: tbl_buildings,
-            where: conditionSearch,
-            include: [{ model: tbl_dinas }]
+            where: conditionSearch
           },
           {
             model: tbl_photo_address,
@@ -184,6 +183,7 @@ class address {
             },
           },
           {
+            // jam istirahat
             model: tbl_recess,
             attributes: {
               exclude: ['updatedAt', 'updatedAt']
@@ -205,6 +205,14 @@ class address {
         ]
       })
 
+      let allUser = await tbl_account_details.findAll()
+
+      await data.forEach(async address => {
+        let userInAddress = await allUser.filter(user => +user.company_id === +address.company_id && +user.building_id === +address.building_id)
+
+        address.dataValues.totalEmployee = userInAddress.length || 0
+      })
+      
       res.status(200).json({ message: "Success", totalData: allData.length, data })
     } catch (err) {
       console.log(err)
