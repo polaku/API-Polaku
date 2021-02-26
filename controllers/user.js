@@ -1646,8 +1646,9 @@ class user {
 				<div style="border-top:1px solid #aaa;font-size:0;margin:8px auto;"></div>
 				`;
 
-        let sendEmail = await createTransporter()
-        sendEmail.sendMail(mailOptions, function (error, info) {
+        // let sendEmail = await createTransporter()
+        // sendEmail.sendMail(mailOptions, function (error, info) {
+        transporter.sendMail(mailOptions, function (error, info) {
           if (error) {
             console.log('GAGAL');
             console.log(error);

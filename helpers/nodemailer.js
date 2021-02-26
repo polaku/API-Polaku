@@ -50,9 +50,8 @@ const createTransporter = async () => {
 
 
 let transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: 'Gmail',
   auth: {
-    type: "login",
     user: 'polaku.digital@gmail.com',
     pass: process.env.GOOGLE_EMAIL_PASS
   }
