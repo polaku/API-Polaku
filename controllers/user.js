@@ -843,8 +843,9 @@ class user {
         mailOptions.to = dataReturning.email
         mailOptions.html = `Dear , <br/><br/>Password anda sudah diganti oleh admin menjadi <b>${req.body.password}</b>.<br />Terimakasih`
 
-        let sendEmail = await createTransporter()
-        sendEmail.sendMail(mailOptions, function (error, info) {
+        // let sendEmail = await createTransporter()
+        // sendEmail.sendMail(mailOptions, function (error, info) {
+        transporter.sendMail(mailOptions, function (error, info) {
           if (error) {
             let error = {
               uri: `http://api.polagroup.co.id/editUser/${req.params.id}`,

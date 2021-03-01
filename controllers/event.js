@@ -1,5 +1,5 @@
 const { tbl_events, tbl_users, tbl_event_responses, tbl_account_details, tbl_master_creators, tbl_event_invites, tbl_department_positions, tbl_structure_departments, tbl_notifications, tbl_companys, tbl_departments } = require('../models')
-const { mailOptions, createTransporter } = require('../helpers/nodemailer')
+const { mailOptions, createTransporter, transporter } = require('../helpers/nodemailer')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const logError = require('../helpers/logError')
@@ -119,7 +119,7 @@ class event {
                   await tbl_event_invites.create(newData)
                 });
               }
-              // sendEmail(eventName, req.body.option, req.body.invited, req.user.user_id)
+              sendEmail(eventName, req.body.option, req.body.invited, req.user.user_id)
 
             } catch (err) {
               console.log(err)
@@ -552,8 +552,9 @@ class event {
         //             mailOptions.to = dataValues.email
         //             mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${creator.event_name}.`
 
-        //             let sendEmail = await createTransporter()
-        //             sendEmail.sendMail(mailOptions, function (error, info) {
+        //             // let sendEmail = await createTransporter()
+        //             // sendEmail.sendMail(mailOptions, function (error, info) {
+        //             transporter.sendMail(mailOptions, function (error, info) {
         //               if (error) {
         //                 let error = {
         //                   uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
@@ -590,6 +591,7 @@ class event {
 
         //         let sendEmail = await createTransporter()
         //          sendEmail.sendMail(mailOptions, function (error, info) {
+        // transporter.sendMail(mailOptions, function (error, info) {
         //           if (error) {
         //             let error = {
         //               uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
@@ -614,6 +616,7 @@ class event {
 
         //         let sendEmail = await createTransporter()
         //          sendEmail.sendMail(mailOptions, function (error, info) {
+        // transporter.sendMail(mailOptions, function (error, info) {
         //           if (error) {
         //             let error = {
         //               uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
@@ -637,6 +640,7 @@ class event {
 
         //       let sendEmail = await createTransporter()
         //        sendEmail.sendMail(mailOptions, function (error, info) {
+        // transporter.sendMail(mailOptions, function (error, info) {
         //         if (error) {
         //           let error = {
         //             uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,
@@ -786,8 +790,9 @@ async function sendEmail(eventName, option, data, createdBy) {
             mailOptions.to = pegawai.tbl_user.email
             mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
 
-            let sendEmail = await createTransporter()
-            sendEmail.sendMail(mailOptions, function (error, info) {
+            // let sendEmail = await createTransporter()
+            // sendEmail.sendMail(mailOptions, function (error, info) {
+            transporter.sendMail(mailOptions, function (error, info) {
               if (error) {
                 let error = {
                   uri: `http://api.polagroup.co.id/events`,
@@ -820,8 +825,9 @@ async function sendEmail(eventName, option, data, createdBy) {
             mailOptions.to = pegawai.tbl_user.email
             mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
 
-            let sendEmail = await createTransporter()
-            sendEmail.sendMail(mailOptions, function (error, info) {
+            // let sendEmail = await createTransporter()
+            // sendEmail.sendMail(mailOptions, function (error, info) {
+            transporter.sendMail(mailOptions, function (error, info) {
               if (error) {
                 let error = {
                   uri: `http://api.polagroup.co.id/events`,
@@ -847,8 +853,9 @@ async function sendEmail(eventName, option, data, createdBy) {
             mailOptions.to = dataValues.email
             mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
 
-            let sendEmail = await createTransporter()
-            sendEmail.sendMail(mailOptions, function (error, info) {
+            // let sendEmail = await createTransporter()
+            // sendEmail.sendMail(mailOptions, function (error, info) {
+            transporter.sendMail(mailOptions, function (error, info) {
               if (error) {
                 let error = {
                   uri: `http://api.polagroup.co.id/events`,
@@ -871,8 +878,9 @@ async function sendEmail(eventName, option, data, createdBy) {
         mailOptions.to = element.email
         mailOptions.html = `Dear , <br/><br/>Hai ada acara baru nih <b>${eventName}.`
 
-        let sendEmail = await createTransporter()
-        sendEmail.sendMail(mailOptions, function (error, info) {
+        // let sendEmail = await createTransporter()
+        // sendEmail.sendMail(mailOptions, function (error, info) {
+        transporter.sendMail(mailOptions, function (error, info) {
           if (error) {
             let error = {
               uri: `http://api.polagroup.co.id/events`,
