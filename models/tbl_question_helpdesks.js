@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     user_id: DataTypes.INTEGER,
     sub_topics_id: DataTypes.STRING,
     help: DataTypes.STRING,
+    order: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'tbl_question_helpdesks',

@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
   tbl_sub_topics_helpdesks.init({
     sub_topics: DataTypes.STRING,
     topics_id: DataTypes.INTEGER,
-    user_id: DataTypes.INTEGER
+    user_id: DataTypes.INTEGER,
+    order: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'tbl_sub_topics_helpdesks',

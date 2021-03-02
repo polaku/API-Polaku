@@ -12,12 +12,14 @@ router.put('/topics/:id', uploadSingle.single('icon'), helpdeskController.update
 router.delete('/topics/:id', helpdeskController.deleteTopics)
 
 router.get('/sub-topics/:id', helpdeskController.getOneTopics)
+router.put('/sub-topics/:id/order', helpdeskController.updateOrderSubTopics)
 router.put('/sub-topics/:id', helpdeskController.updateSubTopics)
 router.delete('/sub-topics/:id', helpdeskController.deleteSubTopics)
 
 router.post('/question', helpdeskController.createQuestion)
 router.put('/question/like-unlike/:id', helpdeskController.likeUnlikeQuestion)
 router.get('/question/like-unlike/:id', helpdeskController.getLikeUnlikeQuestion)
+router.put('/question/:id/order', helpdeskController.updateOrderSubTopics)
 router.put('/question/:id', helpdeskController.updateQuestion)
 router.delete('/question/:id', helpdeskController.deleteQuestion)
 

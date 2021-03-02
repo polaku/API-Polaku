@@ -307,10 +307,14 @@ class user {
             //   last_login: createDateAsUTC(new Date())
             // })
 
+            let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
+
+
             res.status(200).json({
               message: "Success",
               token,
               username: userFound.username,
+              nickname: detailUser.nickname,
               user_id: userFound.user_id,
               role_id: userFound.role_id,
               status: userFound.flag_password,
@@ -324,6 +328,7 @@ class user {
               evaluator2,
               bawahan,
               admin: userFound.tbl_admin_companies || [],
+              firstHierarchy: checkFirstHierarchy ? 1 : 0,
             })
 
             // req.headers['user-agent']
@@ -676,9 +681,12 @@ class user {
             })
           })
 
+          let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
+
           res.status(200).json({
             message: 'Oke',
             username: userFound.username,
+            nickname: detailUser.nickname,
             user_id: userFound.user_id,
             role_id: userFound.role_id,
             status: userFound.flag_password,
@@ -692,6 +700,7 @@ class user {
             evaluator2,
             bawahan,
             admin: userFound.tbl_admin_companies || [],
+            firstHierarchy: checkFirstHierarchy ? 1 : 0,
             // dinas,
             // PIC: checkPIC
           })
@@ -1616,13 +1625,14 @@ class user {
   static async forgetPassword(req, res) {
     try {
       let user = await tbl_users.findOne({ where: { email: req.query.email }, include: [{ model: tbl_account_details }] });
+
       if (user) {
         let randomNumber = Math.floor(Math.random() * 10);
         let key = `${user.user_id}${new Date().setHours(new Date().getHours())}${randomNumber}`
 
         await tbl_users.update({ new_password_key: key, new_password_requested: createDateAsUTC(new Date()) }, { where: { user_id: user.user_id } })
 
-        mailOptions.to = user.email;
+        mailOptions.to = [user.email, user.tbl_account_detail.office_email];
         mailOptions.subject = 'Reset password Polaku';
         mailOptions.html = `
 				<img src="${process.env.BaseUrlServer}/asset/img/logo-polagroup.png" height="30" width="150" alt="logo-polagroup" />
@@ -1632,11 +1642,12 @@ class user {
 				<br />
         <p style="margin:10px 0px;">Username anda adalah <b>${user.username}</b></p>
 				<div style="border-radius: 2px;background-color:#91c640;width:128px;">
-					<a href="${process.env.BaseUrlClient}/reset-password/${key}" target="_blank" style="padding: 8px 12px; border: 1px solid #91c640;border-radius: 2px;color: #ffffff;text-decoration: none;font-weight:bold;display: inline-block;">
+					<a href="${process.env.BaseUrlClient}/reset-password/${key}" target="_blank" style="padding: 8px 12px; border: 1px solid #91c640; border-radius: 2px; color: #ffffff; text-decoration: none; font-weight:bold;display: inline-block;">
 						Reset Password
 					</a>
 				</div>
-				<br />			
+        <p style="margin:5px 0px 10px 0px; font-size: 10px;">Link hanya berlaku selama 24 jam</p>
+				<br />
 				<p style="margin:10px 0px;">Jika permintaan penggantian password ini bukan dari Anda, atau jika Anda merasa akun
 				Anda sedang diretas, silahkan laporkan ke polaku.digital@gmail.com</p>
 				
@@ -1695,16 +1706,18 @@ class user {
 }
 
 // queue.process('email', function (job, done) {
-//   let sendEmail = await createTransporter()
-//    sendEmail.sendMail(mailOptions, function (error, info) {
+//    // let sendEmail = await createTransporter()
+//    // sendEmail.sendMail(mailOptions, function (error, info) {
+//    transporter.sendMail(mailOptions, function (error, info) {
 //     if (error) {
 //       return console.log(error);
 //     } else {
 //       done()
 //     }
 //   })
-// let sendEmail = await createTransporter()
-// sendEmail.sendMail(mailOptions, function (error, info) {
+// // let sendEmail = await createTransporter()
+// // sendEmail.sendMail(mailOptions, function (error, info) {
+// transporter.sendMail(mailOptions, function (error, info) {
 //   if (error) {
 //     let error = {
 //       uri: `http://api.polagroup.co.id/events/approvalEvent/${req.params.id}`,

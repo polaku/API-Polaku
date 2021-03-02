@@ -484,30 +484,30 @@ class bookingRoom {
       { where: { room_booking_id: req.params.id } }
     )
       .then(async () => {
-        // if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
-        //   let accountCreator = await tbl_account_details.findOne({ where: { user_id: dataWillDelete.user_id } })
-        //   let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+        if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
+          let accountCreator = await tbl_account_details.findOne({ where: { user_id: dataWillDelete.user_id } })
+          let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 
-        //   mailOptions.subject = "Your meeting room had cancelled"
-        //   mailOptions.to = accountCreator.email
-        //   mailOptions.html = `Dear , <br/><br/>Ruangan anda yang dibooking pada tanggal 
-        //   ${new Date(dataWillDelete.date_in).getDate()}-${new Date(dataWillDelete.date_in).getMonth() + 1}-${new Date(dataWillDelete.date_in).getFullYear()} di ruang ${dataWillDelete.tbl_room.room}, telah di batalkan oleh <b>${accountAdmin.fullname}</b>.<br/><br/>Terima Kasih.`
+          mailOptions.subject = "Your meeting room had cancelled"
+          mailOptions.to = accountCreator.email
+          mailOptions.html = `Dear , <br/><br/>Ruangan anda yang dibooking pada tanggal 
+          ${new Date(dataWillDelete.date_in).getDate()}-${new Date(dataWillDelete.date_in).getMonth() + 1}-${new Date(dataWillDelete.date_in).getFullYear()} di ruang ${dataWillDelete.tbl_room.room}, telah di batalkan oleh <b>${accountAdmin.fullname}</b>.<br/><br/>Terima Kasih.`
 
-        //   // let sendEmail = await createTransporter()
-        //   // sendEmail.sendMail(mailOptions, function (error, info) {
-        //   transporter.sendMail(mailOptions, function (error, info) {
-        //     if (error) {
-        //       let error = {
-        //         uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
-        //         method: 'delete',
-        //         status: 0,
-        //         message: `Send email to ${accountCreator.email} is error`,
-        //         user_id: req.user.user_id
-        //       }
-        //       logError(error)
-        //     }
-        //   })
-        // }
+          // let sendEmail = await createTransporter()
+          // sendEmail.sendMail(mailOptions, function (error, info) {
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              let error = {
+                uri: `http://api.polagroup.co.id/bookingRoom/${req.params.id}`,
+                method: 'delete',
+                status: 0,
+                message: `Send email to ${accountCreator.email} is error`,
+                user_id: req.user.user_id
+              }
+              logError(error)
+            }
+          })
+        }
 
         let theEvent = await tbl_events.findOne({ where: { room_booking_id: req.params.id } })
 

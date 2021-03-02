@@ -1,4 +1,4 @@
-const { tbl_topics_helpdesks, tbl_sub_topics_helpdesks, tbl_question_helpdesks, tbl_question_fors, tbl_question_likes, tbl_companys, tbl_department_positions, tbl_structure_departments, tbl_users, tbl_account_details , tbl_s} = require('../models')
+const { tbl_topics_helpdesks, tbl_sub_topics_helpdesks, tbl_question_helpdesks, tbl_question_fors, tbl_question_likes, tbl_companys, tbl_department_positions, tbl_structure_departments, tbl_users, tbl_account_details, tbl_s } = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const logError = require('../helpers/logError')
@@ -94,13 +94,16 @@ class helpdesk {
                     model: tbl_question_fors,
                   }
                 ],
+                order: [
+                  ['order', 'ASC']
+                ],
               }
             ],
           }
         ],
         order: [
           ['order', 'ASC'],
-          ['id', 'ASC']
+          // ['id', 'ASC']
         ],
         where: condition
       })
@@ -143,8 +146,8 @@ class helpdesk {
           }
         ],
         order: [
-          [tbl_sub_topics_helpdesks, 'id', 'ASC'],
-          [tbl_sub_topics_helpdesks, tbl_question_helpdesks, 'id', 'ASC']
+          [tbl_sub_topics_helpdesks, 'order', 'ASC'],
+          [tbl_sub_topics_helpdesks, tbl_question_helpdesks, 'order', 'ASC']
         ],
       })
 
@@ -257,7 +260,31 @@ class helpdesk {
     }
   }
 
+  static async updateOrderSubTopics(req, res) {
+    try {
+      let subTopicsSelected = await tbl_sub_topics_helpdesks.findOne({ where: { id: req.params.id } })
 
+      let oldOrder = subTopicsSelected.order, newOrder = req.body.order === 'up' ? +subTopicsSelected.order - 1 : +subTopicsSelected.order + 1
+
+      let subTopicsForChangeOrder = await tbl_sub_topics_helpdesks.findOne({ where: { topics_id: +req.body.topics_id, order: newOrder } })
+
+      await tbl_sub_topics_helpdesks.update({ order: newOrder }, { where: { id: req.params.id } })
+      await tbl_sub_topics_helpdesks.update({ order: oldOrder }, { where: { id: subTopicsForChangeOrder.id } })
+
+      res.status(201).json({ message: 'Success' })
+    } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/helpdesk/sub-topics/${req.params.id}`,
+        method: 'put',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
+      res.status(500).json({ err });
+      console.log(err)
+    }
+  }
 
 
 
@@ -276,11 +303,15 @@ class helpdesk {
         help: req.body.help
       }
 
+      let lastRecordQuestion = await tbl_question_helpdesks.findOne({ order: [['order', 'DESC']] })
+      let lastRecordSubTopics = await tbl_sub_topics_helpdesks.findOne({ order: [['order', 'DESC']] })
+
       if (isNaN(req.body.subTopik)) { // CHECK AVAILABLE CUB TOPICS
         let newSubTopics = {
           sub_topics: req.body.subTopik,
           topics_id: req.body.topicsId,
-          user_id: req.user.user_id
+          user_id: req.user.user_id,
+          order: lastRecordSubTopics.order++
         }
         let dataSubTopics = await tbl_sub_topics_helpdesks.create(newSubTopics)
         newDataQuestion.sub_topics_id = dataSubTopics.id
@@ -288,6 +319,7 @@ class helpdesk {
         newDataQuestion.sub_topics_id = req.body.subTopik
       }
 
+      newDataQuestion.order = lastRecordQuestion.order++
       let dataQuestionHelpdesk = await tbl_question_helpdesks.create(newDataQuestion)
 
 
@@ -525,6 +557,31 @@ class helpdesk {
     }
   }
 
+  static async updateOrderSubTopics(req, res) {
+    try {
+      let questionSelected = await tbl_question_helpdesks.findOne({ where: { id: req.params.id } })
+
+      let oldOrder = questionSelected.order, newOrder = req.body.order === 'up' ? +questionSelected.order - 1 : +questionSelected.order + 1
+
+      let questionForChangeOrder = await tbl_question_helpdesks.findOne({ where: { sub_topics_id: +req.body.sub_topics_id, order: newOrder } })
+
+      await tbl_question_helpdesks.update({ order: newOrder }, { where: { id: req.params.id } })
+      await tbl_question_helpdesks.update({ order: oldOrder }, { where: { id: questionForChangeOrder.id } })
+
+      res.status(201).json({ message: 'Success' })
+    } catch (err) {
+      let error = {
+        uri: `http://api.polagroup.co.id/helpdesk/sub-topics/${req.params.id}`,
+        method: 'put',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
+      res.status(500).json({ err });
+      console.log(err)
+    }
+  }
 }
 
 module.exports = helpdesk
