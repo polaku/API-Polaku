@@ -498,22 +498,31 @@ class contact {
           {
             [Op.or]: [
               {
-                [Op.and]: [
-                  { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
-                  { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
-                ]
+                date_ijin_absen_start: {
+                  [Op.between]: [new Date(req.query["before-date"]), new Date(req.query["after-date"])]
+                }
+                // [Op.and]: [
+                //   { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
+                //   { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
+                // ]
               },
               {
-                [Op.and]: [
-                  { date_imp: { [Op.gte]: new Date(req.query["after-date"]) } },
-                  { date_imp: { [Op.lte]: new Date(req.query["before-date"]) } },
-                ]
+                date_imp: {
+                  [Op.between]: [new Date(req.query["before-date"]), new Date(req.query["after-date"])]
+                }
+                // [Op.and]: [
+                //   { date_imp: { [Op.gte]: new Date(req.query["after-date"]) } },
+                //   { date_imp: { [Op.lte]: new Date(req.query["before-date"]) } },
+                // ]
               },
               {
-                [Op.and]: [
-                  { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
-                  { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
-                ]
+                leave_date: {
+                  [Op.between]: [new Date(req.query["before-date"]), new Date(req.query["after-date"])]
+                }
+                // [Op.and]: [
+                //   { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
+                //   { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
+                // ]
               }
             ]
           }
