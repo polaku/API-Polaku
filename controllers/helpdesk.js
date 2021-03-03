@@ -565,8 +565,10 @@ class helpdesk {
 
       let questionForChangeOrder = await tbl_question_helpdesks.findOne({ where: { sub_topics_id: +req.body.sub_topics_id, order: newOrder } })
 
-      await tbl_question_helpdesks.update({ order: newOrder }, { where: { id: req.params.id } })
-      await tbl_question_helpdesks.update({ order: oldOrder }, { where: { id: questionForChangeOrder.id } })
+      if(questionForChangeOrder){
+        await tbl_question_helpdesks.update({ order: newOrder }, { where: { id: req.params.id } })
+        await tbl_question_helpdesks.update({ order: oldOrder }, { where: { id: questionForChangeOrder.id } })
+      }
 
       res.status(201).json({ message: 'Success' })
     } catch (err) {

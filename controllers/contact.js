@@ -484,6 +484,11 @@ class contact {
           }
         })
       }
+      console.log("tempCondition", tempCondition)
+      console.log("after-date", new Date(req.query["after-date"]))
+      console.log("after-date createDateAsUTC", createDateAsUTC(new Date(req.query["after-date"])))
+      console.log("before-date", new Date(req.query["before-date"]))
+      console.log("before-date", createDateAsUTC(new Date(req.query["before-date"])))
 
       condition = {
         [Op.and]: [
