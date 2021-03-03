@@ -493,9 +493,9 @@ class contact {
 
       condition = {
         [Op.and]: [
-          // {
-          //   status: 'approved'
-          // },
+          {
+            status: 'approved'
+          },
           tempCondition,
           {
             [Op.or]: [
