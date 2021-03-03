@@ -492,9 +492,9 @@ class contact {
 
       condition = {
         [Op.and]: [
-          {
-            [Op.or]: tempCondition
-          },
+          // {
+          //   [Op.or]: tempCondition
+          // },
           {
             [Op.or]: [
               {
