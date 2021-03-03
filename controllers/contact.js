@@ -463,7 +463,7 @@ class contact {
         ]
       }
     } else if (req.query["for-report-hr"] === "true") {
-      let tempCondition = []
+      let conditionCompany = []
 
       if (req.user.user_id !== 1) {
         let userDetail = await tbl_account_details.findAll({ where: { user_id: req.user.user_id } })
@@ -478,51 +478,53 @@ class contact {
         userAdmin && userAdmin.forEach(el => {
           if (idCompany.indexOf(el.company_id) === -1) {
             idCompany.push(el.company_id)
-            tempCondition.push(
+            conditionCompany.push(
               { company_id: el.company_id },
             )
           }
         })
       }
-      console.log("tempCondition", tempCondition)
-      console.log("after-date", new Date(req.query["after-date"]))
-      console.log("after-date createDateAsUTC", createDateAsUTC(new Date(req.query["after-date"])))
-      console.log("before-date", new Date(req.query["before-date"]))
-      console.log("before-date", createDateAsUTC(new Date(req.query["before-date"])))
+      // console.log("tempCondition", conditionCompany)
+      // console.log("after-date", new Date(req.query["after-date"]))
+      // console.log("before-date", new Date(req.query["before-date"]))
+
+      let tempCondition
+      if (conditionCompany.length > 0) tempCondition = { [Op.or]: conditionCompany }
 
       condition = {
         [Op.and]: [
           // {
-          //   [Op.or]: tempCondition
+          //   status: 'approved'
           // },
+          tempCondition,
           {
             [Op.or]: [
               {
-                date_ijin_absen_start: {
-                  [Op.between]: [new Date(req.query["before-date"]), new Date(req.query["after-date"])]
-                }
-                // [Op.and]: [
-                //   { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
-                //   { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
-                // ]
+                // date_ijin_absen_start: {
+                //   [Op.between]: [req.query["after-date"], req.query["before-date"]]
+                // }
+                [Op.and]: [
+                  { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
+                  { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
+                ]
               },
               {
-                date_imp: {
-                  [Op.between]: [new Date(req.query["before-date"]), new Date(req.query["after-date"])]
-                }
-                // [Op.and]: [
-                //   { date_imp: { [Op.gte]: new Date(req.query["after-date"]) } },
-                //   { date_imp: { [Op.lte]: new Date(req.query["before-date"]) } },
-                // ]
+                // date_imp: {
+                //   [Op.between]: [req.query["after-date"], req.query["before-date"]]
+                // }
+                [Op.and]: [
+                  { date_imp: { [Op.gte]: new Date(req.query["after-date"]) } },
+                  { date_imp: { [Op.lte]: new Date(req.query["before-date"]) } },
+                ]
               },
               {
-                leave_date: {
-                  [Op.between]: [new Date(req.query["before-date"]), new Date(req.query["after-date"])]
-                }
-                // [Op.and]: [
-                //   { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
-                //   { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
-                // ]
+                // leave_date: {
+                //   [Op.between]: [req.query["after-date"], req.query["before-date"]]
+                // }
+                [Op.and]: [
+                  { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
+                  { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
+                ]
               }
             ]
           }
@@ -538,7 +540,7 @@ class contact {
 
     tbl_contacts.findAll({
       where: condition,
-      ...query,
+      // ...query,
       include: [
         {
           model: tbl_users,
@@ -566,7 +568,14 @@ class contact {
         ['date_imp', 'DESC'],
       ],
     })
-      .then(data => {
+      .then(async (data) => {
+        console.log(data.length)
+
+        // let allData = await tbl_contacts.findAll({
+        //   where: condition,
+        // })
+
+        // res.status(200).json({ message: "Success", data, totalData: allData.length })
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
