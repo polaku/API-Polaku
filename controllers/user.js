@@ -1646,10 +1646,9 @@ class user {
 						Reset Password
 					</a>
 				</div>
-        <p style="margin:5px 0px 10px 0px; font-size: 10px;">Link hanya berlaku selama 24 jam</p>
+        <p style="margin:5px 0px 10px 0px; font-size: 10px;">Link hanya berlaku selama 24 jam dan hanya satu kali pakai</p>
 				<br />
-				<p style="margin:10px 0px;">Jika permintaan penggantian password ini bukan dari Anda, atau jika Anda merasa akun
-				Anda sedang diretas, silahkan laporkan ke polaku.digital@gmail.com</p>
+				<p style="margin:10px 0px 10px 0px;">Jika permintaan penggantian password ini bukan dari Anda, atau jika Anda merasa akun Anda sedang diretas, silahkan laporkan ke polaku.digital@gmail.com</p>
 				
 				<div style="border-top:1px solid #aaa;font-size:0;margin:8px auto;"></div>
 				<div style="text-align:center;font-size: small;">
@@ -1682,7 +1681,6 @@ class user {
 
   static async resetPassword(req, res) {
     try {
-      console.log("MASUK", req.body)
       let user = await tbl_users.findOne({ where: { new_password_key: req.params.token } });
 
       if (user) {
