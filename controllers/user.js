@@ -87,6 +87,7 @@ class user {
           }]
         })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -213,6 +214,7 @@ class user {
           }]
         })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
 
         let company = await tbl_companys.findByPk(req.body.company_id)
@@ -310,6 +312,7 @@ class user {
             let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
 
 
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({
               message: "Success",
               token,
@@ -518,6 +521,7 @@ class user {
 
         if (req.query.page) data = data.slice((req.query.page * (req.query.limit)), ((+req.query.page + 1) * (req.query.limit)))
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", totalRecord: allData.length, data })
       })
       .catch(err => {
@@ -552,6 +556,7 @@ class user {
 
         let dataReturning = await tbl_users.findByPk(req.user.user_id)
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
 
       } catch (err) {
@@ -599,6 +604,7 @@ class user {
           ]
         })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, bawahan })
       })
       .catch(err => {
@@ -684,6 +690,7 @@ class user {
 
           let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
 
+          res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({
             message: 'Oke',
             username: userFound.username,
@@ -739,6 +746,7 @@ class user {
 
         let dataReturning = await tbl_users.findByPk(req.user.user_id)
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
 
       } catch (err) {
@@ -793,6 +801,7 @@ class user {
         }]
       })
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data: dataReturning })
 
     } catch (err) {
@@ -847,6 +856,7 @@ class user {
         }]
       })
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data: dataReturning })
 
       if (req.body.password) {
@@ -908,6 +918,7 @@ class user {
           }]
         })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -935,6 +946,7 @@ class user {
     //       where: { user_id: username.user_id }
     //     })
 
+    //     res.setHeader('Cache-Control', 'no-cache');
     //     res.status(200).json({ message: "Success" })
 
     //   } catch (err) {
@@ -1092,6 +1104,8 @@ class user {
 
         })
       }
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -1121,6 +1135,8 @@ class user {
           await tbl_account_details.update({ nik: tempNIK, updatedAt: createDateAsUTC(new Date()) }, { where: { user_id: user.user_id } })
         }
       })
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {
@@ -1241,6 +1257,7 @@ class user {
         }]
       })
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data: dataReturning })
 
       let company = await tbl_companys.findByPk(req.body.company_id)
@@ -1486,6 +1503,8 @@ class user {
           }
         })
       }
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -1526,6 +1545,8 @@ class user {
       } else {
         data = await tbl_log_employees.findAll({ order: [['createdAt', 'DESC']] })
       }
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
@@ -1547,6 +1568,7 @@ class user {
       //   last_login: createDateAsUTC(new Date())
       // }, { where: { ip: req.headers.ip, status: 1 } })
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -1608,6 +1630,7 @@ class user {
 
     })
       .then(async (data) => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total: data.length, data })
       })
       .catch(err => {
@@ -1667,6 +1690,7 @@ class user {
             console.log(error);
             res.status(400).json({ message: 'failed' });
           } else {
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: 'success' });
             console.log('Berhasil');
           }
@@ -1690,6 +1714,7 @@ class user {
           await tbl_users.update({ new_password_key: null, password: hash(req.body.password) }, { where: { user_id: user.user_id } });
           let token = sign({ user_id: user.user_id })
 
+          res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({ message: 'success', token })
         } else {
           await tbl_users.update({ new_password_key: null }, { where: { user_id: user.user_id } });

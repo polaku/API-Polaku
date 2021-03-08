@@ -84,7 +84,9 @@ class tal {
 
             let atasanUser = await tbl_users.findByPk(bawahanUser.tbl_account_detail.name_evaluator_1)
 
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: 'Success', data: tal })
+
             if (atasanUser) {
               mailOptions.subject = "Notification!"
               mailOptions.to = atasanUser.email
@@ -107,6 +109,7 @@ class tal {
             }
 
           } else {
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: 'Success', data: tal })
           }
         })
@@ -164,6 +167,7 @@ class tal {
           counterDate += 7 //loop hari
         }
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: 'Success', data: dataReturn })
       } catch (err) {
         console.log(err)
@@ -262,6 +266,7 @@ class tal {
         })
         await data.sort(sortByUserId)
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data: data })
       })
       .catch(err => {
@@ -286,7 +291,8 @@ class tal {
           indicator_tal: req.body.indicator_tal
         }, { where: { tal_id: req.params.id } })
 
-        if (updateTAL) res.status(200).json({ message: "Success", data })
+        res.setHeader('Cache-Control', 'no-cache');
+        res.status(200).json({ message: "Success", data })
 
       } else {
         let talScore = await tbl_tal_scores.findByPk(req.params.id)
@@ -334,7 +340,8 @@ class tal {
             await inputNilaiKPIMTeam(updateScoreTAL.user_id, updateScoreTAL.year, talScore.month)
           }
 
-          if (updateTAL) res.status(200).json({ message: "Success", data: updateTAL })
+          res.setHeader('Cache-Control', 'no-cache');
+          res.status(200).json({ message: "Success", data: updateTAL })
 
         } else {
           throw { Error: "Total bobot lebih dari 100%" }
@@ -364,6 +371,7 @@ class tal {
               await tbl_tals.destroy({ where: { tal_id: talScoreSelected.tal_id } })
             }
 
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: "Success", idDeleted: req.params.id })
           }
         }
@@ -371,6 +379,8 @@ class tal {
         let deleteTALs = await tbl_tals.destroy({ where: { tal_id: req.params.id } })
         if (deleteTALs) {
           await tbl_tal_scores.destroy({ where: { tal_id: req.params.id } })
+
+          res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({ message: "Success", idDeleted: req.params.id })
         }
       }

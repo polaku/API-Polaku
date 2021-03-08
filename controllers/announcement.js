@@ -84,6 +84,8 @@ class announcement {
           tbl_announcements.create(newData)
             .then(async data => {
               let findNew = await tbl_announcements.findByPk(data.null)
+
+              res.setHeader('Cache-Control', 'no-cache');
               res.status(201).json({ message: "Success", data: findNew })
             })
             .catch(err => {
@@ -134,6 +136,7 @@ class announcement {
           ]
         })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, dataPilihan })
       })
       .catch(err => {
@@ -161,6 +164,7 @@ class announcement {
       }]
     })
       .then(async data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -182,6 +186,7 @@ class announcement {
       { where: { announcements_id: req.params.id } }
     )
       .then(() => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -290,6 +295,7 @@ class announcement {
                 }]
               })
 
+              res.setHeader('Cache-Control', 'no-cache');
               res.status(200).json({ message: "Success", data: dataReturning })
             })
             .catch(err => {

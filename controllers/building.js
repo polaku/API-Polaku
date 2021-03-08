@@ -5,6 +5,8 @@ class building {
   static async findAll(req, res) {
     try {
       let data = await tbl_buildings.findAll()
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {

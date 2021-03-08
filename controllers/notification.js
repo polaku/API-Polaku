@@ -19,6 +19,7 @@ class notification {
       ],
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -41,6 +42,8 @@ class notification {
       req.body.notifications_id.forEach(async element => {
         await tbl_notifications.update({ read_inline: 1 }, { where: { notifications_id: element } })
       });
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {
@@ -60,6 +63,7 @@ class notification {
 
     tbl_notifications.update({ read: req.body.read }, { where: { notifications_id: req.params.id } })
       .then(() => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", notifications_id: req.params.id })
       })
       .catch(err => {

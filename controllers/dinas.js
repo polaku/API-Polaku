@@ -54,6 +54,7 @@ class dinas {
         }
       }
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: "Success" })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
@@ -164,6 +165,7 @@ class dinas {
         else if ((user.tbl_account_detail && user.tbl_account_detail.status_employee !== null && user.tbl_account_detail.status_employee.toLowerCase() === 'berhenti') || !user.activated) berhenti++
       })
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", totalRecord: dataSelected.length, allUser: allData.length, tetap, kontrak, probation, berhenti, data })
     } catch (err) {
       console.log(err);
@@ -217,8 +219,9 @@ class dinas {
           })
         }
       }
-      res.status(201).json({ message: "Success" })
 
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: "Success" })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
       let userCreate = await tbl_account_details.findOne({ where: { user_id: req.body.userId } })
@@ -271,6 +274,8 @@ class dinas {
       })
 
       await tbl_dinas.destroy({ where: { id: req.params.id } })
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
 
       let company = await tbl_companys.findByPk(checkDinas.company_id)
@@ -302,6 +307,9 @@ class dinas {
     try {
       let arrayDinas = await tbl_dinas.findAll({ where: { user_id: req.params.userId } })
       await tbl_dinas.destroy({ where: { user_id: req.params.userId } })
+
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
 
       arrayDinas.forEach(async (el) => {
@@ -356,6 +364,8 @@ class dinas {
       } else {
         data = await tbl_log_dinas.findAll({ order: [['createdAt', 'DESC']] })
       }
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
@@ -397,6 +407,7 @@ class dinas {
           }]
       })
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       console.log(err);

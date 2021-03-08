@@ -99,6 +99,8 @@ class address {
         }
         await tbl_recess.create(newHour)
       }
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: "Success" })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
@@ -212,7 +214,8 @@ class address {
 
         address.dataValues.totalEmployee = userInAddress.length || 0
       })
-      
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", totalData: allData.length, data })
     } catch (err) {
       console.log(err)
@@ -317,7 +320,9 @@ class address {
         }
         await tbl_recess.create(newHour)
       }
-      res.status(201).json({ message: "Success" })
+
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: "Success" })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
@@ -347,6 +352,8 @@ class address {
       let address = await tbl_address_companies.findByPk(req.params.id)
 
       await tbl_address_companies.destroy({ where: { id: req.params.id } })
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
 
       let company = await tbl_companys.findByPk(address.company_id)
@@ -397,6 +404,7 @@ class address {
       } else {
         data = await tbl_log_addresses.findAll({ order: [['createdAt', 'DESC']] })
       }
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {

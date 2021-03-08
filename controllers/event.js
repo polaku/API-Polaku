@@ -61,6 +61,8 @@ class event {
         tbl_events.create(newData)
           .then(async (data) => {
             let findNew = await tbl_events.findByPk(data.null)
+
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: findNew })
 
             let newData = {
@@ -207,6 +209,7 @@ class event {
       ],
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
@@ -242,6 +245,7 @@ class event {
       ],
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
@@ -282,6 +286,8 @@ class event {
               }]
             }]
         })
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, eventInvited })
       })
       .catch(err => {
@@ -310,6 +316,7 @@ class event {
         { where: { event_id: req.params.id } }
       )
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
     } catch (err) {
       let error = {
@@ -388,6 +395,7 @@ class event {
               }],
             })
 
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: "Success", data: dataReturning })
           })
           .catch(err => {
@@ -439,6 +447,8 @@ class event {
             }]
           }]
         })
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, dataFollowing: datas })
       })
       .catch(err => {
@@ -482,6 +492,7 @@ class event {
             .then(async () => {
               let findNew = await tbl_events.findByPk(req.body.event_id)
 
+              res.setHeader('Cache-Control', 'no-cache');
               res.status(200).json({ message: "Success Change", data: findNew })
             })
         } else {
@@ -494,6 +505,8 @@ class event {
             tbl_event_responses.create(newData)
               .then(async data => {
                 let findNew = await tbl_event_responses.findByPk(data.null)
+
+                res.setHeader('Cache-Control', 'no-cache');
                 res.status(201).json({ message: "Success Create", data: findNew })
               })
           }
@@ -523,6 +536,7 @@ class event {
         let creator = await tbl_events.findByPk(req.params.id)
         let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success Change", data: creator })
 
         // if (dataEventInvite[0].option === 'company') {
@@ -693,6 +707,8 @@ class event {
         tbl_master_creators.create(newData)
           .then(async data => {
             let findNew = await tbl_master_creators.findByPk(data.null)
+
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: findNew })
           })
 
@@ -733,6 +749,7 @@ class event {
       ]
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -754,6 +771,7 @@ class event {
       { where: { master_creator_id: req.params.id } }
     )
       .then(() => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {

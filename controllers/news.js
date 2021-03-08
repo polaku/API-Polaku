@@ -37,6 +37,8 @@ class news {
       tbl_polanews.create(newData)
         .then(async data => {
           let findNew = await tbl_polanews.findByPk(data.null)
+
+          res.setHeader('Cache-Control', 'no-cache');
           res.status(201).json({ message: "Success", data: findNew })
         })
         .catch(err => {
@@ -67,6 +69,7 @@ class news {
       ],
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -93,6 +96,7 @@ class news {
       }]
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -114,6 +118,7 @@ class news {
       { where: { polanews_id: req.params.id } }
     )
       .then(() => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -155,6 +160,7 @@ class news {
       .then(async () => {
         let dataReturning = await tbl_polanews.findByPk(req.params.id, { include: [{ model: tbl_users }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {

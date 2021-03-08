@@ -52,6 +52,8 @@ class contact {
     tbl_contacts.create(newData)
       .then(async data => {
         let findNew = await tbl_contacts.findByPk(data.null)
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -121,6 +123,8 @@ class contact {
             newData.push(element)
           }
         });
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", length: data.length, data: newData })
       })
       .catch(err => {
@@ -147,6 +151,7 @@ class contact {
         { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] }]
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -168,6 +173,7 @@ class contact {
       { where: { contact_id: req.params.id } }
     )
       .then(() => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -216,6 +222,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -246,6 +253,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -274,6 +282,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -303,6 +312,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -330,6 +340,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -358,6 +369,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -377,6 +389,7 @@ class contact {
   static findAllCategoris(req, res) {
     tbl_categoris.findAll()
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -569,13 +582,14 @@ class contact {
       ],
     })
       .then(async (data) => {
-        console.log(data.length)
+        // console.log(data.length)
 
         // let allData = await tbl_contacts.findAll({
         //   where: condition,
         // })
 
         // res.status(200).json({ message: "Success", data, totalData: allData.length })
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -619,6 +633,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -646,6 +661,7 @@ class contact {
       .then(async () => {
         let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -674,6 +690,7 @@ class contact {
       order: [['created_at', 'DESC']]
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -699,6 +716,7 @@ class contact {
 
     tbl_contact_comments.create(newData)
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {

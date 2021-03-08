@@ -39,6 +39,7 @@ class designation {
         await tbl_admin_companies.create({ user_id: req.body.userId, company_id: req.body.companyId, PIC: 0, designations_id: designation_id })
       }
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: 'Success' })
 
       let userAdmin = await tbl_account_details.findOne({ where: { user_id: req.body.userId }, include: [{ as: 'tbl_company', model: tbl_companys }] })
@@ -199,6 +200,7 @@ class designation {
         })
       }
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", totalRecord: dataSelected.length, data })
     } catch (err) {
       console.log(err);
@@ -242,6 +244,8 @@ class designation {
     try {
       await tbl_designations.destroy({ where: { designations_id: req.params.id } })
       await tbl_user_roles.destroy({ where: { designations_id: req.params.id } })
+      
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
     } catch (err) {
       let error = {
@@ -263,6 +267,7 @@ class designation {
 
       await tbl_admin_companies.destroy({ where: { user_id: req.params.id, PIC: 0 } })
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
 
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
@@ -322,6 +327,8 @@ class designation {
       } else {
         data = await tbl_log_admins.findAll({ order: [['createdAt', 'DESC']] })
       }
+
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {

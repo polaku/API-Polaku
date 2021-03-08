@@ -171,6 +171,8 @@ class bookingRoom {
                   tbl_room_bookings.create(newData)
                     .then(async data => {
                       let findNew = await tbl_room_bookings.findByPk(data.null)
+
+                      res.setHeader('Cache-Control', 'no-cache');
                       res.status(201).json({ message: "Success", data: findNew })
 
                       let room = await tbl_rooms.findByPk(req.body.room_id, { include: [{ model: tbl_buildings }] })
@@ -373,10 +375,13 @@ class bookingRoom {
               eventResponses.push(eventRespon)
             }
             counter++
-            if (counter === data.length) res.status(200).json({ message: "Success", data, eventResponses })
-
+            if (counter === data.length) {
+              res.setHeader('Cache-Control', 'no-cache');
+              res.status(200).json({ message: "Success", data, eventResponses })
+            }
           })
         } else {
+          res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({ message: "Success", data, eventResponses })
         }
       })
@@ -414,6 +419,7 @@ class bookingRoom {
       ],
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -461,6 +467,7 @@ class bookingRoom {
           })
         }
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, eventResponses })
       })
       .catch(err => {
@@ -534,6 +541,7 @@ class bookingRoom {
           ],
         })
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id, data: dataReturn })
       })
       .catch(err => {
@@ -695,6 +703,7 @@ class bookingRoom {
                 .then(async () => {
                   let dataReturning = await tbl_room_bookings.findByPk(req.params.id)
 
+                  res.setHeader('Cache-Control', 'no-cache');
                   res.status(200).json({ message: "Success", data: dataReturning })
                 })
                 .catch(err => {
@@ -750,6 +759,7 @@ class bookingRoom {
             temp.push(element)
           }
         });
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: temp })
       })
       .catch(err => {
@@ -785,6 +795,8 @@ class bookingRoom {
             temp.push(element)
           }
         });
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: temp })
       })
       .catch(err => {
@@ -830,6 +842,8 @@ class bookingRoom {
         tbl_master_rooms.create(newData)
           .then(async data => {
             let findNew = await tbl_master_rooms.findByPk(data.null)
+
+            res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: findNew })
           })
 
@@ -864,6 +878,8 @@ class bookingRoom {
     })
       .then(async data => {
         let dataCompany = await tbl_companys.findAll()
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, dataCompany })
       })
       .catch(err => {
@@ -885,6 +901,7 @@ class bookingRoom {
       { where: { master_room_id: req.params.id } }
     )
       .then(() => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -912,6 +929,7 @@ class bookingRoom {
       .then(async () => {
         let data = await tbl_master_rooms.findByPk(req.params.id)
 
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -991,6 +1009,7 @@ class bookingRoom {
       ]
     })
       .then(async data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -1016,6 +1035,8 @@ class bookingRoom {
     tbl_buildings.create(newData)
       .then(async data => {
         let findNew = await tbl_buildings.findByPk(data.null)
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -1035,6 +1056,7 @@ class bookingRoom {
   static deleteBuilding(req, res) {
     tbl_buildings.destroy({ where: { building_id: req.params.id } })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: 'Success', data })
       })
       .catch(err => {
@@ -1057,6 +1079,7 @@ class bookingRoom {
     }
     tbl_buildings.update(newData, { where: { building_id: req.params.id } })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: 'Success', data })
       })
       .catch(err => {
@@ -1145,6 +1168,7 @@ class bookingRoom {
       ],
     })
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -1183,6 +1207,8 @@ class bookingRoom {
     tbl_rooms.create(newData)
       .then(async data => {
         let findNew = await tbl_rooms.findByPk(data.null)
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -1204,6 +1230,7 @@ class bookingRoom {
       { where: { room_id: req.params.id } }
     )
       .then(() => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -1243,6 +1270,8 @@ class bookingRoom {
     )
       .then(async () => {
         let data = await tbl_rooms.findByPk(req.params.id)
+
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {

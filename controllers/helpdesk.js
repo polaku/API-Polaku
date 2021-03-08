@@ -16,6 +16,7 @@ class helpdesk {
 
       let data = await tbl_topics_helpdesks.create(newData)
 
+      res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: 'Success', data })
     } catch (err) {
       let error = {
@@ -108,7 +109,8 @@ class helpdesk {
         where: condition
       })
 
-      res.status(201).json({ message: 'Success', data })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success', data })
 
     } catch (err) {
       let error = {
@@ -151,7 +153,8 @@ class helpdesk {
         ],
       })
 
-      res.status(201).json({ message: 'Success', data })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success', data })
 
     } catch (err) {
       let error = {
@@ -178,7 +181,8 @@ class helpdesk {
 
       let data = await tbl_topics_helpdesks.update(newData, { where: { id: req.params.id } })
 
-      res.status(201).json({ message: 'Success', data })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success', data })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/topics/${req.params.id}`,
@@ -197,7 +201,8 @@ class helpdesk {
     try {
       await tbl_topics_helpdesks.destroy({ where: { id: req.params.id } })
 
-      res.status(201).json({ message: 'Success' })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/topics/${req.params.id}`,
@@ -226,7 +231,8 @@ class helpdesk {
     try {
       let data = await tbl_sub_topics_helpdesks.update({ sub_topics: req.body.subTopics }, { where: { id: req.params.id } })
 
-      res.status(201).json({ message: 'Success', data })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success', data })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/sub-topics/${req.params.id}`,
@@ -245,7 +251,8 @@ class helpdesk {
     try {
       await tbl_sub_topics_helpdesks.destroy({ where: { id: req.params.id } })
 
-      res.status(201).json({ message: 'Success' })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/topics/${req.params.id}`,
@@ -271,7 +278,8 @@ class helpdesk {
       await tbl_sub_topics_helpdesks.update({ order: newOrder }, { where: { id: req.params.id } })
       await tbl_sub_topics_helpdesks.update({ order: oldOrder }, { where: { id: subTopicsForChangeOrder.id } })
 
-      res.status(201).json({ message: 'Success' })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/sub-topics/${req.params.id}`,
@@ -358,7 +366,8 @@ class helpdesk {
         });
       }
 
-      res.status(201).json({ message: 'Success', data: dataQuestionHelpdesk })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success', data: dataQuestionHelpdesk })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/question`,
@@ -475,8 +484,8 @@ class helpdesk {
         }
       }
 
-
-      res.status(201).json({ message: 'Success' })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/question/${req.params.id}`,
@@ -495,7 +504,8 @@ class helpdesk {
     try {
       await tbl_question_helpdesks.destroy({ where: { id: req.params.id } })
 
-      res.status(201).json({ message: 'Success' })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/question/${req.params.id}`,
@@ -523,7 +533,8 @@ class helpdesk {
         await tbl_question_likes.create({ question_id: req.params.id, like: req.body.like, unlike: req.body.unlike, user_id: req.user.user_id })
       }
 
-      res.status(201).json({ message: 'Success' })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/question/like/${req.params.id}`,
@@ -542,7 +553,8 @@ class helpdesk {
     try {
       let questionLike = await tbl_question_likes.findOne({ where: { question_id: req.params.id, user_id: req.user.user_id } })
 
-      res.status(201).json({ message: 'Success', data: questionLike })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success', data: questionLike })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/question/like/${req.params.id}`,
@@ -565,12 +577,13 @@ class helpdesk {
 
       let questionForChangeOrder = await tbl_question_helpdesks.findOne({ where: { sub_topics_id: +req.body.sub_topics_id, order: newOrder } })
 
-      if(questionForChangeOrder){
+      if (questionForChangeOrder) {
         await tbl_question_helpdesks.update({ order: newOrder }, { where: { id: req.params.id } })
         await tbl_question_helpdesks.update({ order: oldOrder }, { where: { id: questionForChangeOrder.id } })
       }
 
-      res.status(201).json({ message: 'Success' })
+      res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
         uri: `http://api.polagroup.co.id/helpdesk/sub-topics/${req.params.id}`,

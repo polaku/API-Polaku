@@ -5,6 +5,7 @@ class department {
   static findAll(req, res) {
     tbl_departments.findAll()
       .then(data => {
+        res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
