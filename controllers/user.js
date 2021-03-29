@@ -27,8 +27,8 @@ class user {
       newUser.password = hash(req.body.password)
     } else {
       if (req.body.dateOfBirth) {
-        dateBirth = new Date(req.body.dateOfBirth).getDate()
-        monthBirth = new Date(req.body.dateOfBirth).getMonth() + 1
+        let dateBirth = new Date(req.body.dateOfBirth).getDate()
+        let monthBirth = new Date(req.body.dateOfBirth).getMonth() + 1
         if (dateBirth < 10) dateBirth = `0${dateBirth}`
         if (monthBirth < 10) monthBirth = `0${monthBirth}`
         newUser.password = hash(`${dateBirth}${monthBirth}${new Date(req.body.dateOfBirth).getFullYear()}`)
@@ -134,8 +134,8 @@ class user {
       newUser.password = hash(req.body.password)
     } else {
       if (req.body.dateOfBirth) {
-        dateBirth = new Date(req.body.dateOfBirth).getDate()
-        monthBirth = new Date(req.body.dateOfBirth).getMonth() + 1
+        let dateBirth = new Date(req.body.dateOfBirth).getDate()
+        let monthBirth = new Date(req.body.dateOfBirth).getMonth() + 1
         if (dateBirth < 10) dateBirth = `0${dateBirth}`
         if (monthBirth < 10) monthBirth = `0${monthBirth}`
         newUser.password = hash(`${dateBirth}${monthBirth}${new Date(req.body.dateOfBirth).getFullYear()}`)
