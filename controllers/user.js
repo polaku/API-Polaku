@@ -248,7 +248,7 @@ class user {
         res.status(201).json({ message: "Success", data: findNew })
 
         let company = await tbl_companys.findByPk(req.body.company_id)
-        let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id }, attributes: ['account_detail_id', 'user_id', 'fullname'] })
+        let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id }, attributes: ['account_details_id', 'user_id', 'fullname'] })
 
         await tbl_log_employees.create({
           employee: req.body.fullname,
