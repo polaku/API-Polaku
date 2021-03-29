@@ -143,7 +143,7 @@ class user {
         newUser.password = hash(`${req.body.nik}`)
       }
     }
-    
+
     tbl_users.create(newUser)
       .then(async data => {
         let building = await tbl_buildings.findByPk(req.body.building_id)
@@ -192,23 +192,25 @@ class user {
         }
         newAccountDetail.nik = tempNIK
 
-        let listDivisi = JSON.parse(req.body.list_divisi)
-        listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
-          if (divisi.divisi && divisi.peran) {
-            let checkDepartment = await tbl_structure_departments.findOne({
-              where: { company_id: req.body.company_id, departments_id: divisi.divisi }
-            })
+        if (req.body.list_divisi) {
+          let listDivisi = JSON.parse(req.body.list_divisi)
+          listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
+            if (divisi.divisi && divisi.peran) {
+              let checkDepartment = await tbl_structure_departments.findOne({
+                where: { company_id: req.body.company_id, departments_id: divisi.divisi }
+              })
 
-            if (checkDepartment) {
-              let newPosition = {
-                position_id: divisi.peran,
-                structure_department_id: checkDepartment.id,
-                user_id: userId
+              if (checkDepartment) {
+                let newPosition = {
+                  position_id: divisi.peran,
+                  structure_department_id: checkDepartment.id,
+                  user_id: userId
+                }
+                await tbl_department_positions.create(newPosition)
               }
-              await tbl_department_positions.create(newPosition)
             }
-          }
-        })
+          })
+        }
 
         if (req.body.list_divisi_dinas) {
           let listDivisiDinas = JSON.parse(req.body.list_divisi_dinas)
@@ -716,17 +718,17 @@ class user {
             include:
               [
                 {
-                  as: "idEvaluator1", 
+                  as: "idEvaluator1",
                   model: tbl_users,
                   attributes: {
                     exclude: ['password']
                   },
-                   include: [{
+                  include: [{
                     model: tbl_account_details
                   }]
                 },
                 {
-                  as: "idEvaluator2", 
+                  as: "idEvaluator2",
                   model: tbl_users,
                   attributes: {
                     exclude: ['password']
