@@ -22,6 +22,7 @@ const dinas = require('./dinas')
 const designation = require('./designation')
 const security = require('./security')
 const helpdesk = require('./helpdesk')
+const onboarding = require('./onboarding')
 
 router.get('/', (req, res) => {
     res.send('Welcome to server polaku-react')
@@ -48,5 +49,6 @@ router.use('/dinas', dinas)
 router.use('/designation', designation)
 router.use('/security', security)
 router.use('/helpdesk', helpdesk)
+router.use('/onboarding', onboarding)
 
 module.exports = router

@@ -4,6 +4,9 @@ const logError = require('../helpers/logError')
 class security {
   static findAllLogin(req, res) {
     tbl_users.findAll({
+      attributes: {
+        exclude: ['password']
+      },
       include: [
         {
           // as: "tbl_account_detail", 
@@ -13,7 +16,7 @@ class security {
       ]
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {

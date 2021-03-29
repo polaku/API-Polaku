@@ -53,7 +53,7 @@ class contact {
       .then(async data => {
         let findNew = await tbl_contacts.findByPk(data.null)
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -87,17 +87,31 @@ class contact {
       },
       include: [
         {
-          model: tbl_users, include: [{
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details
           }]
         },
         { model: tbl_companys },
         {
-          model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }]
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: "evaluator1",
+          include: [{ model: tbl_account_details }]
         },
         {
-          model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }]
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: "evaluator2",
+          include: [{ model: tbl_account_details }]
         },
         { model: tbl_contact_categories },
         { model: tbl_categoris }],
@@ -124,7 +138,7 @@ class contact {
           }
         });
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", length: data.length, data: newData })
       })
       .catch(err => {
@@ -144,14 +158,33 @@ class contact {
   static findOne(req, res) {
     tbl_contacts.findByPk(req.params.id, {
       include: [
-        { model: tbl_users },
+        {
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+        },
         { model: tbl_contact_categories },
         { model: tbl_categoris },
-        { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
-        { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] }]
+        {
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: "evaluator1",
+          include: [{ model: tbl_account_details }]
+        },
+        {
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: "evaluator2",
+          include: [{ model: tbl_account_details }]
+        }]
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -173,7 +206,7 @@ class contact {
       { where: { contact_id: req.params.id } }
     )
       .then(() => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -220,9 +253,16 @@ class contact {
     }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -251,9 +291,16 @@ class contact {
     }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -280,9 +327,16 @@ class contact {
     }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -310,9 +364,16 @@ class contact {
     }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -338,9 +399,16 @@ class contact {
     }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -367,9 +435,16 @@ class contact {
       where: { contact_id: req.params.id }
     })
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -389,7 +464,7 @@ class contact {
   static findAllCategoris(req, res) {
     tbl_categoris.findAll()
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -479,7 +554,9 @@ class contact {
       let conditionCompany = []
 
       if (req.user.user_id !== 1) {
-        let userDetail = await tbl_account_details.findAll({ where: { user_id: req.user.user_id } })
+        let userDetail = await tbl_account_details.findAll({ where: { user_id: req.user.user_id }, attributes: {
+          exclude: ['password']
+        }, })
         let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
         let idCompany = []
@@ -557,6 +634,9 @@ class contact {
       include: [
         {
           model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
           include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details
@@ -568,8 +648,22 @@ class contact {
         { model: tbl_companys },
         { model: tbl_contact_categories },
         { model: tbl_categoris },
-        { model: tbl_users, as: "evaluator1", include: [{ model: tbl_account_details }] },
-        { model: tbl_users, as: "evaluator2", include: [{ model: tbl_account_details }] }
+        {
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: "evaluator1", 
+          include: [{ model: tbl_account_details }]
+        },
+        {
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          }, 
+          as: "evaluator2", 
+          include: [{ model: tbl_account_details }]
+        }
       ],
       order: [
         ['created_at', 'DESC'],
@@ -589,7 +683,7 @@ class contact {
         // })
 
         // res.status(200).json({ message: "Success", data, totalData: allData.length })
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -631,9 +725,16 @@ class contact {
       where: { contact_id: req.params.id }
     })
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -659,9 +760,16 @@ class contact {
     }
     )
       .then(async () => {
-        let dataReturning = await tbl_contacts.findByPk(req.params.id, { include: [{ model: tbl_users }, { model: tbl_contact_categories }, { model: tbl_categoris }] })
+        let dataReturning = await tbl_contacts.findByPk(req.params.id, {
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }, { model: tbl_contact_categories }, { model: tbl_categoris }]
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -682,7 +790,11 @@ class contact {
     tbl_contact_comments.findAll({
       where: { contact_id: req.params.id },
       include: [{
-        model: tbl_users, include: [{
+        model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
+        include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
         }]
@@ -690,7 +802,7 @@ class contact {
       order: [['created_at', 'DESC']]
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -716,7 +828,7 @@ class contact {
 
     tbl_contact_comments.create(newData)
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {

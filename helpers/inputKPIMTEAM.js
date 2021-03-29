@@ -6,12 +6,12 @@ module.exports = async function inputNilaiKPIMTeam(userId, year, month, isAtasan
   if (isAtasan) {
     idAtasan = userId
   } else {
-    let userDetail = await tbl_account_details.findOne({ where: { user_id: userId } })
+    let userDetail = await tbl_account_details.findOne({ where: { user_id: userId }, attributes: ['account_details_id', 'fullname', 'user_id', 'name_evaluator_1'] })
 
     idAtasan = userDetail.name_evaluator_1
   }
 
-  let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: idAtasan } })
+  let bawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: idAtasan }, attributes: ['account_details_id', 'fullname', 'user_id'] })
   let allKPIM = await tbl_kpims.findAll({ where: { year }, include: [{ model: tbl_kpim_scores, where: { month } }] })
 
   bawahan && await bawahan.forEach(async element => { //fetch kpim per user

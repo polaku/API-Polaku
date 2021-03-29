@@ -32,7 +32,7 @@ class pic {
         }
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: "Success", data })
     } catch (err) {
       let error = {
@@ -56,6 +56,9 @@ class pic {
           model: tbl_PICs,
           include: [{
             model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
             include: [{
               // as: "tbl_account_detail", 
               model: tbl_account_details
@@ -64,7 +67,7 @@ class pic {
         }]
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
@@ -104,7 +107,7 @@ class pic {
         }
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {
@@ -127,7 +130,7 @@ class pic {
       await tbl_PICs.destroy({ where: { id: req.params.id } })
       await tbl_admin_companies.destroy({ where: { user_id: PIC_deleted.user_id, company_id: PIC_deleted.company_id, PIC: 1 } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {

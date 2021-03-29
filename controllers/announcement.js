@@ -85,7 +85,7 @@ class announcement {
             .then(async data => {
               let findNew = await tbl_announcements.findByPk(data.null)
 
-              res.setHeader('Cache-Control', 'no-cache');
+              // res.setHeader('Cache-Control', 'no-cache');
               res.status(201).json({ message: "Success", data: findNew })
             })
             .catch(err => {
@@ -109,9 +109,13 @@ class announcement {
     tbl_announcements.findAll({
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail", 
-          model: tbl_account_details
+          model: tbl_account_details,
+          attributes: ['account_details_id', 'fullname', 'user_id', 'company_id', 'building_id']
         }]
       }],
       order: [
@@ -126,9 +130,11 @@ class announcement {
           where: { highlight: 1 },
           include: [{
             model: tbl_users,
+            attributes: ['user_id', 'email', 'username', 'role_id', 'activated'],
             include: [{
               //  as: "tbl_account_detail", 
-              model: tbl_account_details
+              model: tbl_account_details,
+              attributes: ['account_details_id', 'fullname', 'user_id', 'company_id', 'building_id']
             }]
           }],
           order: [
@@ -136,7 +142,7 @@ class announcement {
           ]
         })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, dataPilihan })
       })
       .catch(err => {
@@ -157,14 +163,18 @@ class announcement {
     tbl_announcements.findByPk(req.params.id, {
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
-          model: tbl_account_details
+          model: tbl_account_details,
+          attributes: ['account_details_id', 'fullname', 'user_id', 'company_id', 'building_id']
         }]
       }]
     })
       .then(async data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -186,7 +196,7 @@ class announcement {
       { where: { announcements_id: req.params.id } }
     )
       .then(() => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -288,14 +298,18 @@ class announcement {
               let dataReturning = await tbl_announcements.findByPk(req.params.id, {
                 include: [{
                   model: tbl_users,
+                  attributes: {
+                    exclude: ['password']
+                  },
                   include: [{
                     // as: "tbl_account_detail",
-                    model: tbl_account_details
+                    model: tbl_account_details,
+                    attributes: ['account_details_id', 'fullname', 'user_id', 'company_id', 'building_id']
                   }]
                 }]
               })
 
-              res.setHeader('Cache-Control', 'no-cache');
+              // res.setHeader('Cache-Control', 'no-cache');
               res.status(200).json({ message: "Success", data: dataReturning })
             })
             .catch(err => {

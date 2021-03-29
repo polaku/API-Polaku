@@ -69,7 +69,7 @@ class department {
         });
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: 'Success' })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
@@ -127,18 +127,33 @@ class department {
           {
             model: tbl_department_positions,
             include: [
-              { model: tbl_users },
+              {
+                model: tbl_users,
+                attributes: {
+                  exclude: ['password']
+                },
+              },
               { model: tbl_positions }
             ]
           },
           {
             model: tbl_department_teams,
             include: [
-              { model: tbl_users },
+              {
+                model: tbl_users,
+                attributes: {
+                  exclude: ['password']
+                },
+              },
               {
                 model: tbl_team_positions,
                 include: [
-                  { model: tbl_users },
+                  {
+                    model: tbl_users,
+                    attributes: {
+                      exclude: ['password']
+                    },
+                  },
                   { model: tbl_positions }
                 ]
               }
@@ -151,7 +166,7 @@ class department {
         where: { ...condition, ...conditionCompany }
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', totalData: allData.length, data })
     } catch (err) {
       console.log(err)
@@ -167,14 +182,19 @@ class department {
           {
             model: tbl_department_positions,
             include: [
-              { model: tbl_users },
+              {
+                model: tbl_users,
+                attributes: {
+                  exclude: ['password']
+                },
+              },
               { model: tbl_positions }
             ]
           }
         ]
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', data })
     } catch (err) {
       console.log(err)
@@ -248,7 +268,7 @@ class department {
         })
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
@@ -277,7 +297,7 @@ class department {
       await tbl_department_positions.destroy({ where: { structure_department_id: req.params.id } })
       await tbl_department_teams.destroy({ where: { structure_department_id: req.params.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', id_deleted: req.params.id })
 
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
@@ -321,7 +341,7 @@ class department {
         data = await tbl_log_structures.findAll({ order: [['createdAt', 'DESC']] })
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {

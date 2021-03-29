@@ -47,7 +47,7 @@ class kpim {
 
             await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: dataReturn })
           } else if (req.body.month < talMonth.tbl_kpim_scores[0].month) {
             for (let i = req.body.month; i < talMonth.tbl_kpim_scores[0].month; i++) {
@@ -68,7 +68,7 @@ class kpim {
 
             await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: dataReturn })
           } else {
             res.status(400).json({ message: "Error" })
@@ -112,7 +112,7 @@ class kpim {
 
             createKPIM.kpim_id = createKPIM.null
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: createKPIM })
           }
         }
@@ -139,7 +139,7 @@ class kpim {
 
           await inputNilaiKPIMTeam(req.body.user_id, req.body.year, req.body.month)
 
-          res.setHeader('Cache-Control', 'no-cache');
+          // res.setHeader('Cache-Control', 'no-cache');
           res.status(201).json({ message: "Success", data: tal })
 
         } else {
@@ -170,7 +170,7 @@ class kpim {
 
             createKPIM.kpim_id = createKPIM.null
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: createKPIM })
           }
         }
@@ -361,11 +361,17 @@ class kpim {
         include: [
           {
             model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
             include: [{
               // as: "tbl_account_detail",
               model: tbl_account_details,
               include: [{
                 model: tbl_users,
+                attributes: {
+                  exclude: ['password']
+                },
                 as: "idEvaluator1",
                 include: [{
                   // as: "tbl_account_detail",
@@ -385,11 +391,17 @@ class kpim {
       situationKPIM = {
         include: [{
           model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
           include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details,
             include: [{
               model: tbl_users,
+              attributes: {
+                exclude: ['password']
+              },
               as: "idEvaluator1",
               include: [{
                 // as: "tbl_account_detail",
@@ -470,7 +482,7 @@ class kpim {
           });
         }
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
@@ -499,7 +511,7 @@ class kpim {
         })
         data.dataValues.kpimScore = kpimScore
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
@@ -588,7 +600,7 @@ class kpim {
 
             inputNilaiKPIMTeam(kpimSelected.user_id, kpimSelected.year, kpimMonth.month, 'atas')
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: "Success", data: updateKPIMScore })
           }
         } else {
@@ -647,7 +659,7 @@ class kpim {
           await inputNilaiKPIMTeam(kpimSelected.user_id, kpimSelected.year, req.body.month)
         }
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: updateKPIM })
       }
     } catch (err) {
@@ -672,7 +684,7 @@ class kpim {
               await tbl_kpims.destroy({ where: { kpim_id: kpimScoreSelected.kpim_id } })
             }
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: "Success", idDeleted: req.params.id })
           }
         }
@@ -681,7 +693,7 @@ class kpim {
         if (deleteKPIM) {
           await tbl_kpim_scores.destroy({ where: { kpim_id: req.params.id } })
 
-          res.setHeader('Cache-Control', 'no-cache');
+          // res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({ message: "Success", idDeleted: req.params.id })
         }
       }
@@ -727,7 +739,7 @@ class kpim {
         })
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -739,7 +751,7 @@ class kpim {
     try {
       await inputNilaiKPIMTeam(req.user.user_id, req.body.year, req.body.month)
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -758,7 +770,7 @@ class kpim {
         })
         await tbl_tal_scores.update({ hasConfirm: 1 }, { where: { year: req.query.year } })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success" })
       } else {
         res.status(400).json({ message: "Not Authorize" })

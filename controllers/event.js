@@ -62,7 +62,7 @@ class event {
           .then(async (data) => {
             let findNew = await tbl_events.findByPk(data.null)
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: findNew })
 
             let newData = {
@@ -194,6 +194,9 @@ class event {
       },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -209,7 +212,7 @@ class event {
       ],
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
@@ -234,6 +237,9 @@ class event {
       },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -245,7 +251,7 @@ class event {
       ],
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data })
       })
       .catch(err => {
@@ -266,6 +272,9 @@ class event {
     tbl_events.findByPk(req.params.id, {
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -280,6 +289,9 @@ class event {
             { model: tbl_departments },
             {
               model: tbl_users,
+              attributes: {
+                exclude: ['password']
+              },
               include: [{
                 // as: "tbl_account_detail",
                 model: tbl_account_details
@@ -287,7 +299,7 @@ class event {
             }]
         })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, eventInvited })
       })
       .catch(err => {
@@ -316,7 +328,7 @@ class event {
         { where: { event_id: req.params.id } }
       )
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
     } catch (err) {
       let error = {
@@ -388,6 +400,9 @@ class event {
             let dataReturning = await tbl_events.findByPk(req.params.id, {
               include: [{
                 model: tbl_users,
+                attributes: {
+                  exclude: ['password']
+                },
                 include: [{
                   // as: "tbl_account_detail",
                   model: tbl_account_details
@@ -395,7 +410,7 @@ class event {
               }],
             })
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: "Success", data: dataReturning })
           })
           .catch(err => {
@@ -419,6 +434,9 @@ class event {
       where: { user_id: req.user.user_id, status: 1 },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -441,6 +459,9 @@ class event {
             }
           }, {
             model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
             include: [{
               // as: "tbl_account_detail",
               model: tbl_account_details
@@ -448,7 +469,7 @@ class event {
           }]
         })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, dataFollowing: datas })
       })
       .catch(err => {
@@ -492,7 +513,7 @@ class event {
             .then(async () => {
               let findNew = await tbl_events.findByPk(req.body.event_id)
 
-              res.setHeader('Cache-Control', 'no-cache');
+              // res.setHeader('Cache-Control', 'no-cache');
               res.status(200).json({ message: "Success Change", data: findNew })
             })
         } else {
@@ -506,7 +527,7 @@ class event {
               .then(async data => {
                 let findNew = await tbl_event_responses.findByPk(data.null)
 
-                res.setHeader('Cache-Control', 'no-cache');
+                // res.setHeader('Cache-Control', 'no-cache');
                 res.status(201).json({ message: "Success Create", data: findNew })
               })
           }
@@ -536,7 +557,7 @@ class event {
         let creator = await tbl_events.findByPk(req.params.id)
         let dataEventInvite = await tbl_event_invites.findAll({ where: { event_id: req.params.id } })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success Change", data: creator })
 
         // if (dataEventInvite[0].option === 'company') {
@@ -708,7 +729,7 @@ class event {
           .then(async data => {
             let findNew = await tbl_master_creators.findByPk(data.null)
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: findNew })
           })
 
@@ -732,12 +753,18 @@ class event {
       where: { chief: req.user.user_id },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail", 
           model: tbl_account_details,
         }]
       }, {
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         as: 'idChief',
         include: [{
           // as: "tbl_account_detail", 
@@ -749,7 +776,7 @@ class event {
       ]
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -771,7 +798,7 @@ class event {
       { where: { master_creator_id: req.params.id } }
     )
       .then(() => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -798,7 +825,12 @@ async function sendEmail(eventName, option, data, createdBy) {
       let paraPegawai = await tbl_department_positions.findAll({
         include: [
           { model: tbl_structure_departments, where: { company_id: element } },
-          { model: tbl_users }]
+          {
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }]
       })
 
       await paraPegawai.forEach(async pegawai => {
@@ -833,7 +865,12 @@ async function sendEmail(eventName, option, data, createdBy) {
       let paraPegawai = await tbl_department_positions.findAll({
         include: [
           { model: tbl_structure_departments, where: { departments_id: element } },
-          { model: tbl_users }]
+          {
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+          }]
       })
 
       await paraPegawai.forEach(async pegawai => {
@@ -864,7 +901,11 @@ async function sendEmail(eventName, option, data, createdBy) {
     });
   } else if (option === 'user') { //
     data.forEach(async element => {
-      await tbl_users.findByPk(element.user_id)
+      await tbl_users.findByPk(element.user_id, {
+        attributes: {
+          exclude: ['password']
+        },
+      })
         .then(async ({ dataValues }) => {
           if (dataValues.email !== '-' && dataValues.email) {
             mailOptions.subject = "There's new Event!"
@@ -889,7 +930,11 @@ async function sendEmail(eventName, option, data, createdBy) {
         })
     });
   } else if (option === 'all') { //
-    let paraPegawai = await tbl_users.findAll()
+    let paraPegawai = await tbl_users.findAll({
+      attributes: {
+        exclude: ['password']
+      },
+    })
     paraPegawai.forEach(async element => {
       if (element.email !== '-' && element.email) {
         mailOptions.subject = "There's new Event!"

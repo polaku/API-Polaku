@@ -38,7 +38,7 @@ class news {
         .then(async data => {
           let findNew = await tbl_polanews.findByPk(data.null)
 
-          res.setHeader('Cache-Control', 'no-cache');
+          // res.setHeader('Cache-Control', 'no-cache');
           res.status(201).json({ message: "Success", data: findNew })
         })
         .catch(err => {
@@ -59,7 +59,11 @@ class news {
   static findAll(req, res) {
     tbl_polanews.findAll({
       include: [{
-        model: tbl_users, include: [{
+        model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
+        include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
         }]
@@ -69,7 +73,7 @@ class news {
       ],
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -89,14 +93,18 @@ class news {
   static findOne(req, res) {
     tbl_polanews.findByPk(req.params.id, {
       include: [{
-        model: tbl_users, include: [{
+        model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
+        include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
         }]
       }]
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -118,7 +126,7 @@ class news {
       { where: { polanews_id: req.params.id } }
     )
       .then(() => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ info: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -160,7 +168,7 @@ class news {
       .then(async () => {
         let dataReturning = await tbl_polanews.findByPk(req.params.id, { include: [{ model: tbl_users }] })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {

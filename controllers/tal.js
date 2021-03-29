@@ -76,15 +76,22 @@ class tal {
 
           if (req.user.user_id === req.body.user_id) {
             let bawahanUser = await tbl_users.findByPk(req.body.user_id, {
+              attributes: {
+                exclude: ['password']
+              },
               include: [{
                 // as: "tbl_account_detail",
                 model: tbl_account_details
               }]
             })
 
-            let atasanUser = await tbl_users.findByPk(bawahanUser.tbl_account_detail.name_evaluator_1)
+            let atasanUser = await tbl_users.findByPk(bawahanUser.tbl_account_detail.name_evaluator_1, {
+              attributes: {
+                exclude: ['password']
+              },
+            })
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: 'Success', data: tal })
 
             if (atasanUser) {
@@ -109,7 +116,7 @@ class tal {
             }
 
           } else {
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: 'Success', data: tal })
           }
         })
@@ -167,7 +174,7 @@ class tal {
           counterDate += 7 //loop hari
         }
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: 'Success', data: dataReturn })
       } catch (err) {
         console.log(err)
@@ -266,7 +273,7 @@ class tal {
         })
         await data.sort(sortByUserId)
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total_record: data.length, data: data })
       })
       .catch(err => {
@@ -291,7 +298,7 @@ class tal {
           indicator_tal: req.body.indicator_tal
         }, { where: { tal_id: req.params.id } })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
 
       } else {
@@ -340,7 +347,7 @@ class tal {
             await inputNilaiKPIMTeam(updateScoreTAL.user_id, updateScoreTAL.year, talScore.month)
           }
 
-          res.setHeader('Cache-Control', 'no-cache');
+          // res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({ message: "Success", data: updateTAL })
 
         } else {
@@ -371,7 +378,7 @@ class tal {
               await tbl_tals.destroy({ where: { tal_id: talScoreSelected.tal_id } })
             }
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: "Success", idDeleted: req.params.id })
           }
         }
@@ -380,7 +387,7 @@ class tal {
         if (deleteTALs) {
           await tbl_tal_scores.destroy({ where: { tal_id: req.params.id } })
 
-          res.setHeader('Cache-Control', 'no-cache');
+          // res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({ message: "Success", idDeleted: req.params.id })
         }
       }

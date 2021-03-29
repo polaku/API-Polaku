@@ -13,7 +13,7 @@ class bookingRoom {
     if (req.body.count) countPartisipan = req.body.count
 
     room = await tbl_rooms.findByPk(req.body.room_id)
-    created = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+    created = await tbl_account_details.findOne({ where: { user_id: req.user.user_id }, attributes: ['account_details_id', 'fullname', 'user_id'] })
 
     if (!req.body.room_id || !req.body.date_in || !req.body.time_in || !req.body.time_out || !req.body.subject) {
       let error = {
@@ -172,7 +172,7 @@ class bookingRoom {
                     .then(async data => {
                       let findNew = await tbl_room_bookings.findByPk(data.null)
 
-                      res.setHeader('Cache-Control', 'no-cache');
+                      // res.setHeader('Cache-Control', 'no-cache');
                       res.status(201).json({ message: "Success", data: findNew })
 
                       let room = await tbl_rooms.findByPk(req.body.room_id, { include: [{ model: tbl_buildings }] })
@@ -224,7 +224,11 @@ class bookingRoom {
                               }
                               await tbl_event_responses.create(newDataEventResponse)
                             }
-                            tbl_users.findByPk(el)
+                            tbl_users.findByPk(el, {
+                              attributes: {
+                                exclude: ['password']
+                              },
+                            })
                               .then(async ({ dataValues }) => {
                                 let newDes = req.body.subject.split(" ")
                                 if (newDes.length > 3) {
@@ -340,6 +344,9 @@ class bookingRoom {
       where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -366,6 +373,9 @@ class bookingRoom {
                 include: [
                   {
                     model: tbl_users,
+                    attributes: {
+                      exclude: ['password']
+                    },
                     include: [{
                       // as: "tbl_account_detail",
                       model: tbl_account_details
@@ -404,6 +414,9 @@ class bookingRoom {
       where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` }, user_id: req.user.user_id },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -440,6 +453,9 @@ class bookingRoom {
     tbl_room_bookings.findByPk(req.params.id, {
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -459,6 +475,9 @@ class bookingRoom {
             include: [
               {
                 model: tbl_users,
+                attributes: {
+                  exclude: ['password']
+                },
                 include: [{
                   // as: "tbl_account_detail",
                   model: tbl_account_details
@@ -492,7 +511,9 @@ class bookingRoom {
     )
       .then(async () => {
         if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
-          let accountCreator = await tbl_account_details.findOne({ where: { user_id: dataWillDelete.user_id } })
+          let accountCreator = await tbl_users.findOne({ where: { user_id: dataWillDelete.user_id }, attributes: {
+            exclude: ['password']
+          } })
           let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 
           mailOptions.subject = "Your meeting room had cancelled"
@@ -526,6 +547,9 @@ class bookingRoom {
           where: { date_in: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}` } },
           include: [{
             model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
             include: [{
               // as: "tbl_account_detail",
               model: tbl_account_details
@@ -741,6 +765,9 @@ class bookingRoom {
       where: { room_id: req.params.idRoom },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -781,6 +808,9 @@ class bookingRoom {
       where: { room_id: req.params.idRoom, user_id: req.user.user_id },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -843,7 +873,7 @@ class bookingRoom {
           .then(async data => {
             let findNew = await tbl_master_rooms.findByPk(data.null)
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(201).json({ message: "Success", data: findNew })
           })
 
@@ -867,6 +897,9 @@ class bookingRoom {
       where: { chief: req.user.user_id },
       include: [{
         model: tbl_users,
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details
@@ -879,7 +912,7 @@ class bookingRoom {
       .then(async data => {
         let dataCompany = await tbl_companys.findAll()
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, dataCompany })
       })
       .catch(err => {
@@ -901,7 +934,7 @@ class bookingRoom {
       { where: { master_room_id: req.params.id } }
     )
       .then(() => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -929,7 +962,7 @@ class bookingRoom {
       .then(async () => {
         let data = await tbl_master_rooms.findByPk(req.params.id)
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -1009,7 +1042,7 @@ class bookingRoom {
       ]
     })
       .then(async data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -1036,7 +1069,7 @@ class bookingRoom {
       .then(async data => {
         let findNew = await tbl_buildings.findByPk(data.null)
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -1056,7 +1089,7 @@ class bookingRoom {
   static deleteBuilding(req, res) {
     tbl_buildings.destroy({ where: { building_id: req.params.id } })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: 'Success', data })
       })
       .catch(err => {
@@ -1079,7 +1112,7 @@ class bookingRoom {
     }
     tbl_buildings.update(newData, { where: { building_id: req.params.id } })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: 'Success', data })
       })
       .catch(err => {
@@ -1168,7 +1201,7 @@ class bookingRoom {
       ],
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -1208,7 +1241,7 @@ class bookingRoom {
       .then(async data => {
         let findNew = await tbl_rooms.findByPk(data.null)
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -1230,7 +1263,7 @@ class bookingRoom {
       { where: { room_id: req.params.id } }
     )
       .then(() => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
       })
       .catch(err => {
@@ -1271,7 +1304,7 @@ class bookingRoom {
       .then(async () => {
         let data = await tbl_rooms.findByPk(req.params.id)
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {

@@ -11,7 +11,10 @@ function authentication(req, res, next) {
 
   let decoded = verify(req.headers.token);
 
-  tbl_users.findByPk(Number(decoded.user_id), { where: { activated: 1 } })
+  tbl_users.findByPk(Number(decoded.user_id), {
+    where: { activated: 1 },
+    attributes: ['user_id', 'email', 'password']
+  })
     .then(userFound => {
       if (userFound) {
         req.user = userFound

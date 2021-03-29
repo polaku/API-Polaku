@@ -11,15 +11,27 @@ class notification {
         // [Op.or]: [{ read: 0, read_inline: 0 }, { read: 0, urgent: 1 }]
       },
       include: [
-        { model: tbl_users, as: 'from_user' },
-        { model: tbl_users, as: 'to_user' }
+        {
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: 'from_user'
+        },
+        {
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: 'to_user'
+        }
       ],
       order: [
         ['created_at', 'DESC']
       ],
     })
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {
@@ -43,7 +55,7 @@ class notification {
         await tbl_notifications.update({ read_inline: 1 }, { where: { notifications_id: element } })
       });
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {
@@ -63,7 +75,7 @@ class notification {
 
     tbl_notifications.update({ read: req.body.read }, { where: { notifications_id: req.params.id } })
       .then(() => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", notifications_id: req.params.id })
       })
       .catch(err => {

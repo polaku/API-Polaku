@@ -1,4 +1,4 @@
-const { tbl_topics_helpdesks, tbl_sub_topics_helpdesks, tbl_question_helpdesks, tbl_question_fors, tbl_question_likes, tbl_companys, tbl_department_positions, tbl_structure_departments, tbl_users, tbl_account_details, tbl_s } = require('../models')
+const { tbl_topics_helpdesks, tbl_sub_topics_helpdesks, tbl_question_helpdesks, tbl_question_fors, tbl_question_likes, tbl_companys, tbl_department_positions, tbl_structure_departments, tbl_account_details, tbl_s } = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const logError = require('../helpers/logError')
@@ -16,7 +16,7 @@ class helpdesk {
 
       let data = await tbl_topics_helpdesks.create(newData)
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: 'Success', data })
     } catch (err) {
       let error = {
@@ -109,7 +109,7 @@ class helpdesk {
         where: condition
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', data })
 
     } catch (err) {
@@ -153,7 +153,7 @@ class helpdesk {
         ],
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', data })
 
     } catch (err) {
@@ -181,7 +181,7 @@ class helpdesk {
 
       let data = await tbl_topics_helpdesks.update(newData, { where: { id: req.params.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', data })
     } catch (err) {
       let error = {
@@ -201,7 +201,7 @@ class helpdesk {
     try {
       await tbl_topics_helpdesks.destroy({ where: { id: req.params.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
@@ -231,7 +231,7 @@ class helpdesk {
     try {
       let data = await tbl_sub_topics_helpdesks.update({ sub_topics: req.body.subTopics }, { where: { id: req.params.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', data })
     } catch (err) {
       let error = {
@@ -251,7 +251,7 @@ class helpdesk {
     try {
       await tbl_sub_topics_helpdesks.destroy({ where: { id: req.params.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
@@ -278,7 +278,7 @@ class helpdesk {
       await tbl_sub_topics_helpdesks.update({ order: newOrder }, { where: { id: req.params.id } })
       await tbl_sub_topics_helpdesks.update({ order: oldOrder }, { where: { id: subTopicsForChangeOrder.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
@@ -366,7 +366,7 @@ class helpdesk {
         });
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', data: dataQuestionHelpdesk })
     } catch (err) {
       let error = {
@@ -484,7 +484,7 @@ class helpdesk {
         }
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
@@ -504,7 +504,7 @@ class helpdesk {
     try {
       await tbl_question_helpdesks.destroy({ where: { id: req.params.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
@@ -533,7 +533,7 @@ class helpdesk {
         await tbl_question_likes.create({ question_id: req.params.id, like: req.body.like, unlike: req.body.unlike, user_id: req.user.user_id })
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {
@@ -553,7 +553,7 @@ class helpdesk {
     try {
       let questionLike = await tbl_question_likes.findOne({ where: { question_id: req.params.id, user_id: req.user.user_id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success', data: questionLike })
     } catch (err) {
       let error = {
@@ -582,7 +582,7 @@ class helpdesk {
         await tbl_question_helpdesks.update({ order: oldOrder }, { where: { id: questionForChangeOrder.id } })
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: 'Success' })
     } catch (err) {
       let error = {

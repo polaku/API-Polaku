@@ -17,11 +17,24 @@ class user {
     // //nik, address, initial, date_of_birth
     let newUser = {
       username: req.body.username,
-      password: hash(req.body.password),
       email: req.body.email,
       permission: "all",
       role_id: req.body.role || 3,
       activated: 1,
+    }
+
+    if (req.body.password) {
+      newUser.password = hash(req.body.password)
+    } else {
+      if (req.body.dateOfBirth) {
+        dateBirth = new Date(req.body.dateOfBirth).getDate()
+        monthBirth = new Date(req.body.dateOfBirth).getMonth() + 1
+        if (dateBirth < 10) dateBirth = `0${dateBirth}`
+        if (monthBirth < 10) monthBirth = `0${monthBirth}`
+        newUser.password = hash(`${dateBirth}${monthBirth}${new Date(req.body.dateOfBirth).getFullYear()}`)
+      } else {
+        newUser.password = hash(`${req.body.nik}`)
+      }
     }
 
     tbl_users.create(newUser)
@@ -81,13 +94,14 @@ class user {
         let createAccountDetail = await tbl_account_details.create(newAccountDetail)
 
         let findNew = await tbl_users.findByPk(createAccountDetail.user_id, {
+          attributes: ['user_id', 'email', 'username', 'role_id', 'activated'],
           include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details
           }]
         })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
       })
       .catch(err => {
@@ -110,13 +124,26 @@ class user {
     // //nik, address, initial, date_of_birth
     let newUser = {
       username: req.body.username,
-      password: hash(req.body.password),
       email: req.body.email,
       permission: "all",
       role_id: req.body.role || 3,
       activated: 1,
     }
 
+    if (req.body.password) {
+      newUser.password = hash(req.body.password)
+    } else {
+      if (req.body.dateOfBirth) {
+        dateBirth = new Date(req.body.dateOfBirth).getDate()
+        monthBirth = new Date(req.body.dateOfBirth).getMonth() + 1
+        if (dateBirth < 10) dateBirth = `0${dateBirth}`
+        if (monthBirth < 10) monthBirth = `0${monthBirth}`
+        newUser.password = hash(`${dateBirth}${monthBirth}${new Date(req.body.dateOfBirth).getFullYear()}`)
+      } else {
+        newUser.password = hash(`${req.body.nik}`)
+      }
+    }
+    
     tbl_users.create(newUser)
       .then(async data => {
         let building = await tbl_buildings.findByPk(req.body.building_id)
@@ -208,17 +235,18 @@ class user {
         let createAccountDetail = await tbl_account_details.create(newAccountDetail)
 
         let findNew = await tbl_users.findByPk(createAccountDetail.user_id, {
+          attributes: ['user_id', 'email', 'username', 'role_id', 'activated'],
           include: [{
             // as: "tbl_account_detail", 
             model: tbl_account_details
           }]
         })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data: findNew })
 
         let company = await tbl_companys.findByPk(req.body.company_id)
-        let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
+        let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id }, attributes: ['account_detail_id', 'user_id', 'fullname'] })
 
         await tbl_log_employees.create({
           employee: req.body.fullname,
@@ -245,8 +273,12 @@ class user {
 
   static signin(req, res) {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1, evaluator2
-    tbl_users.findOne({ where: { activated: 1, username: req.body.username }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }] })
+    tbl_users.findOne({
+      where: { activated: 1, username: req.body.username },
+      attributes: ['user_id', 'email', 'username', 'role_id', 'activated', 'password'], include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }]
+    })
       .then(async userFound => {
+        console.log(req.body.password, userFound.password)
         if (userFound) {
           if (compare(req.body.password, userFound.password)) {
             let token = sign({ user_id: userFound.user_id })
@@ -255,8 +287,20 @@ class user {
               where: { user_id: userFound.user_id },
               include:
                 [
-                  { as: "idEvaluator1", model: tbl_users, include: [{ model: tbl_account_details }] },
-                  { as: "idEvaluator2", model: tbl_users, include: [{ model: tbl_account_details }] },
+                  {
+                    as: "idEvaluator1", model: tbl_users,
+                    attributes: {
+                      exclude: ['password']
+                    },
+                    include: [{ model: tbl_account_details }]
+                  },
+                  {
+                    as: "idEvaluator2", model: tbl_users,
+                    attributes: {
+                      exclude: ['password']
+                    },
+                    include: [{ model: tbl_account_details }]
+                  },
                   { model: tbl_designations, include: [{ model: tbl_user_roles }] }
                 ]
             })
@@ -280,7 +324,13 @@ class user {
               where: { name_evaluator_1: userFound.user_id, },
               include: [
                 { as: 'tbl_company', model: tbl_companys },
-                { model: tbl_users, as: "userId", where: { activated: 1 } }
+                {
+                  model: tbl_users,
+                  attributes: {
+                    exclude: ['password']
+                  },
+                  as: "userId", where: { activated: 1 }
+                }
               ]
             })
 
@@ -312,7 +362,7 @@ class user {
             let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
 
 
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({
               message: "Success",
               token,
@@ -467,6 +517,9 @@ class user {
 
     tbl_users.findAll({
       // where: { activated: 1, user_id: { [Op.ne]: 1 } },
+      attributes: {
+        exclude: ['password']
+      },
       where: {
         user_id: { [Op.ne]: 1 },
         ...condition
@@ -478,9 +531,19 @@ class user {
         // where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
         where: { ...conditionStatus, ...conditionSearch },
         include: [{
-          model: tbl_users, as: "idEvaluator1", include: [{ model: tbl_account_details }]
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: "idEvaluator1",
+          include: [{ model: tbl_account_details }]
         }, {
-          model: tbl_users, as: "idEvaluator2", include: [{ model: tbl_account_details }]
+          model: tbl_users,
+          attributes: {
+            exclude: ['password']
+          },
+          as: "idEvaluator2",
+          include: [{ model: tbl_account_details }]
         }, {
           as: 'tbl_company',
           model: tbl_companys
@@ -505,6 +568,9 @@ class user {
     })
       .then(async (data) => {
         let allData = await tbl_users.findAll({
+          attributes: {
+            exclude: ['password']
+          },
           include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details,
@@ -521,7 +587,7 @@ class user {
 
         if (req.query.page) data = data.slice((req.query.page * (req.query.limit)), ((+req.query.page + 1) * (req.query.limit)))
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", totalRecord: allData.length, data })
       })
       .catch(err => {
@@ -554,9 +620,13 @@ class user {
           where: { user_id: req.user.user_id }
         })
 
-        let dataReturning = await tbl_users.findByPk(req.user.user_id)
+        let dataReturning = await tbl_users.findByPk(req.user.user_id, {
+          attributes: {
+            exclude: ['password']
+          },
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
 
       } catch (err) {
@@ -600,11 +670,18 @@ class user {
           include: [
             { as: 'tbl_company', model: tbl_companys },
             // as: "userId",  =>  as: "tbl_account_detail",  
-            { model: tbl_users, as: "userId", where: { activated: 1 } }
+            {
+              model: tbl_users,
+              attributes: {
+                exclude: ['password']
+              },
+              as: "userId",
+              where: { activated: 1 }
+            }
           ]
         })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data, bawahan })
       })
       .catch(err => {
@@ -624,7 +701,13 @@ class user {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1 = null, evaluator2 = null
     let decoded = verify(req.headers.token);
 
-    tbl_users.findOne({ where: { user_id: decoded.user_id, activated: 1 }, include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }] })
+    tbl_users.findOne({
+      where: { user_id: decoded.user_id, activated: 1 },
+      attributes: {
+        exclude: ['password']
+      },
+      include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }]
+    })
       .then(async userFound => {
         if (userFound) {
           req.user = userFound
@@ -633,12 +716,22 @@ class user {
             include:
               [
                 {
-                  as: "idEvaluator1", model: tbl_users, include: [{
+                  as: "idEvaluator1", 
+                  model: tbl_users,
+                  attributes: {
+                    exclude: ['password']
+                  },
+                   include: [{
                     model: tbl_account_details
                   }]
                 },
                 {
-                  as: "idEvaluator2", model: tbl_users, include: [{
+                  as: "idEvaluator2", 
+                  model: tbl_users,
+                  attributes: {
+                    exclude: ['password']
+                  },
+                  include: [{
                     model: tbl_account_details
                   }]
                 },
@@ -669,7 +762,12 @@ class user {
                 model: tbl_companys
               }, {
                 // as: "userId",  =>  as: "tbl_account_detail",  
-                model: tbl_users, as: "userId", where: { activated: 1 }
+                model: tbl_users,
+                attributes: {
+                  exclude: ['password']
+                },
+                as: "userId",
+                where: { activated: 1 }
               }
             ]
           })
@@ -690,7 +788,7 @@ class user {
 
           let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
 
-          res.setHeader('Cache-Control', 'no-cache');
+          // res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({
             message: 'Oke',
             username: userFound.username,
@@ -744,9 +842,13 @@ class user {
           where: { user_id: req.user.user_id }
         })
 
-        let dataReturning = await tbl_users.findByPk(req.user.user_id)
+        let dataReturning = await tbl_users.findByPk(req.user.user_id, {
+          attributes: {
+            exclude: ['password']
+          },
+        })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
 
       } catch (err) {
@@ -795,13 +897,16 @@ class user {
       })
 
       let dataReturning = await tbl_users.findByPk(req.user.user_id, {
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details,
         }]
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data: dataReturning })
 
     } catch (err) {
@@ -850,13 +955,16 @@ class user {
       })
 
       let dataReturning = await tbl_users.findByPk(req.params.id, {
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details,
         }]
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data: dataReturning })
 
       if (req.body.password) {
@@ -912,13 +1020,16 @@ class user {
     })
       .then(async () => {
         let dataReturning = await tbl_users.findByPk(req.user.user_id, {
+          attributes: {
+            exclude: ['password']
+          },
           include: [{
             // as: "tbl_account_detail",
             model: tbl_account_details,
           }]
         })
 
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data: dataReturning })
       })
       .catch(err => {
@@ -946,7 +1057,7 @@ class user {
     //       where: { user_id: username.user_id }
     //     })
 
-    //     res.setHeader('Cache-Control', 'no-cache');
+    //     // res.setHeader('Cache-Control', 'no-cache');
     //     res.status(200).json({ message: "Success" })
 
     //   } catch (err) {
@@ -1105,7 +1216,7 @@ class user {
         })
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -1136,7 +1247,7 @@ class user {
         }
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       let error = {
@@ -1251,13 +1362,16 @@ class user {
       })
 
       let dataReturning = await tbl_users.findByPk(req.params.id, {
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           // as: "tbl_account_detail",
           model: tbl_account_details,
         }]
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data: dataReturning })
 
       let company = await tbl_companys.findByPk(req.body.company_id)
@@ -1333,7 +1447,12 @@ class user {
 
           if (perusahaan) query = { company_id: perusahaan.company_id }
           let checkEmpolyee = await tbl_account_details.findOne({ where: { nik: el.nik, ...query } })
-          let checkUser = await tbl_users.findOne({ where: { username: el.username } })
+          let checkUser = await tbl_users.findOne({
+            where: { username: el.username },
+            attributes: {
+              exclude: ['password']
+            },
+          })
 
           if (!checkEmpolyee && !checkUser) {
             let gedung = el.building ? await building.find(building => building.building === el.building) : null
@@ -1504,7 +1623,7 @@ class user {
         })
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -1546,7 +1665,7 @@ class user {
         data = await tbl_log_employees.findAll({ order: [['createdAt', 'DESC']] })
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
@@ -1568,7 +1687,7 @@ class user {
       //   last_login: createDateAsUTC(new Date())
       // }, { where: { ip: req.headers.ip, status: 1 } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
     } catch (err) {
       console.log(err)
@@ -1630,7 +1749,7 @@ class user {
 
     })
       .then(async (data) => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", total: data.length, data })
       })
       .catch(err => {
@@ -1649,7 +1768,12 @@ class user {
 
   static async forgetPassword(req, res) {
     try {
-      let user = await tbl_users.findOne({ where: { email: req.query.email }, include: [{ model: tbl_account_details }] });
+      let user = await tbl_users.findOne({
+        where: { email: req.query.email },
+        attributes: {
+          exclude: ['password']
+        }, include: [{ model: tbl_account_details }]
+      });
 
       if (user) {
         let randomNumber = Math.floor(Math.random() * 10);
@@ -1690,7 +1814,7 @@ class user {
             console.log(error);
             res.status(400).json({ message: 'failed' });
           } else {
-            res.setHeader('Cache-Control', 'no-cache');
+            // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: 'success' });
             console.log('Berhasil');
           }
@@ -1707,14 +1831,19 @@ class user {
 
   static async resetPassword(req, res) {
     try {
-      let user = await tbl_users.findOne({ where: { new_password_key: req.params.token } });
+      let user = await tbl_users.findOne({
+        where: { new_password_key: req.params.token },
+        attributes: {
+          exclude: ['password']
+        },
+      });
 
       if (user) {
         if (user.new_password_requested.setDate(user.new_password_requested.getDate() + 1) > createDateAsUTC(new Date())) {
           await tbl_users.update({ new_password_key: null, password: hash(req.body.password) }, { where: { user_id: user.user_id } });
           let token = sign({ user_id: user.user_id })
 
-          res.setHeader('Cache-Control', 'no-cache');
+          // res.setHeader('Cache-Control', 'no-cache');
           res.status(200).json({ message: 'success', token })
         } else {
           await tbl_users.update({ new_password_key: null }, { where: { user_id: user.user_id } });

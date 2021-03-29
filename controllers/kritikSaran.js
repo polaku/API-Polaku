@@ -12,7 +12,7 @@ class kritikSaran {
 
     tbl_kritik_sarans.create(newData)
       .then(async data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(201).json({ message: "Success", data })
       })
       .catch(err => {
@@ -32,7 +32,7 @@ class kritikSaran {
   static findAll(req, res) {
     tbl_kritik_sarans.findAll()
       .then(data => {
-        res.setHeader('Cache-Control', 'no-cache');
+        // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", data })
       })
       .catch(err => {

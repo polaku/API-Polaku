@@ -54,7 +54,7 @@ class dinas {
         }
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(201).json({ message: "Success" })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
@@ -105,6 +105,9 @@ class dinas {
 
       let data = await tbl_users.findAll({
         ...query,
+        attributes: {
+          exclude: ['password']
+        },
         include: [
           {
             required: true,
@@ -117,6 +120,9 @@ class dinas {
             }, {
               as: 'evaluator',
               model: tbl_users,
+              attributes: {
+                exclude: ['password']
+              },
               include: [{
                 // as: "tbl_account_detail", 
                 model: tbl_account_details,
@@ -135,6 +141,9 @@ class dinas {
 
       let dataSelected = await tbl_users.findAll({
         where: { user_id: { [Op.ne]: 1 } },
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           required: true,
           as: 'dinas',
@@ -149,6 +158,9 @@ class dinas {
 
       let allData = await tbl_users.findAll({
         where: { user_id: { [Op.ne]: 1 } },
+        attributes: {
+          exclude: ['password']
+        },
         include: [{
           required: true,
           // as: "tbl_account_detail", 
@@ -165,7 +177,7 @@ class dinas {
         else if ((user.tbl_account_detail && user.tbl_account_detail.status_employee !== null && user.tbl_account_detail.status_employee.toLowerCase() === 'berhenti') || !user.activated) berhenti++
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", totalRecord: dataSelected.length, allUser: allData.length, tetap, kontrak, probation, berhenti, data })
     } catch (err) {
       console.log(err);
@@ -220,7 +232,7 @@ class dinas {
         }
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success" })
 
       let company = await tbl_companys.findByPk(req.body.companyId)
@@ -275,7 +287,7 @@ class dinas {
 
       await tbl_dinas.destroy({ where: { id: req.params.id } })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Delete Success", id_deleted: req.params.id })
 
       let company = await tbl_companys.findByPk(checkDinas.company_id)
@@ -309,7 +321,7 @@ class dinas {
       await tbl_dinas.destroy({ where: { user_id: req.params.userId } })
 
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Delete Success", userId_deleted: req.params.id })
 
       arrayDinas.forEach(async (el) => {
@@ -365,7 +377,7 @@ class dinas {
         data = await tbl_log_dinas.findAll({ order: [['createdAt', 'DESC']] })
       }
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       let error = {
@@ -384,6 +396,9 @@ class dinas {
     try {
       let data = await tbl_users.findOne({
         where: { user_id: req.params.userId },
+        attributes: {
+          exclude: ['password']
+        },
         include: [
           {
             as: 'dinas',
@@ -393,21 +408,23 @@ class dinas {
             }, {
               as: 'evaluator',
               model: tbl_users,
+              attributes: {
+                exclude: ['password']
+              },
               include: [{
                 model: tbl_account_details,
               }]
             }],
             order: [['id', 'ASC']]
           }, {
-            model: tbl_account_details,
-            attributes: ['fullname', 'status_employee', 'nik', 'company_id', 'building_id', 'name_evaluator_1', 'name_evaluator_2', 'company_KPI', 'company_HRD']
+            model: tbl_account_details
           }, {
             model: tbl_department_positions,
             include: [{ model: tbl_structure_departments }]
           }]
       })
 
-      res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Cache-Control', 'no-cache');
       res.status(200).json({ message: "Success", data })
     } catch (err) {
       console.log(err);
