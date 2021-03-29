@@ -16,7 +16,7 @@ class user {
 
     // //nik, address, initial, date_of_birth
     let newUser = {
-      username: req.body.username,
+      username: req.body.username || req.body.nik,
       email: req.body.email,
       permission: "all",
       role_id: req.body.role || 3,
@@ -123,7 +123,7 @@ class user {
 
     // //nik, address, initial, date_of_birth
     let newUser = {
-      username: req.body.username,
+      username: req.body.username || req.body.nik,
       email: req.body.email,
       permission: "all",
       role_id: req.body.role || 3,
@@ -926,7 +926,7 @@ class user {
     let newData1, newData2
 
     newData1 = {
-      username: req.body.username,
+      username: req.body.username || req.body.nik,
       email: req.body.email,
       activated: req.body.isActive
     }
@@ -1266,7 +1266,7 @@ class user {
     let newData1, newData2
 
     newData1 = {
-      username: req.body.username,
+      username: req.body.username || req.body.nik,
       email: req.body.email,
       activated: req.body.isActive
     }
