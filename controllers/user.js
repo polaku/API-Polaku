@@ -192,44 +192,44 @@ class user {
         }
         newAccountDetail.nik = tempNIK
 
-        if (req.body.list_divisi) {
-          let listDivisi = JSON.parse(req.body.list_divisi)
-          listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
-            if (divisi.divisi && divisi.peran) {
-              let checkDepartment = await tbl_structure_departments.findOne({
-                where: { company_id: req.body.company_id, departments_id: divisi.divisi }
-              })
+        // if (req.body.list_divisi) {
+        //   let listDivisi = JSON.parse(req.body.list_divisi)
+        //   listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
+        //     if (divisi.divisi && divisi.peran) {
+        //       let checkDepartment = await tbl_structure_departments.findOne({
+        //         where: { company_id: req.body.company_id, departments_id: divisi.divisi }
+        //       })
 
-              if (checkDepartment) {
-                let newPosition = {
-                  position_id: divisi.peran,
-                  structure_department_id: checkDepartment.id,
-                  user_id: userId
-                }
-                await tbl_department_positions.create(newPosition)
-              }
-            }
-          })
-        }
+        //       if (checkDepartment) {
+        //         let newPosition = {
+        //           position_id: divisi.peran,
+        //           structure_department_id: checkDepartment.id,
+        //           user_id: userId
+        //         }
+        //         await tbl_department_positions.create(newPosition)
+        //       }
+        //     }
+        //   })
+        // }
 
-        if (req.body.list_divisi_dinas) {
-          let listDivisiDinas = JSON.parse(req.body.list_divisi_dinas)
-          listDivisiDinas && listDivisiDinas.length > 0 && await listDivisiDinas.forEach(async (divisi) => {
-            let checkDepartment = await tbl_structure_departments.findOne({
-              where: { company_id: req.body.dinasId, departments_id: divisi.divisi }
-            })
+        // if (req.body.list_divisi_dinas) {
+        //   let listDivisiDinas = JSON.parse(req.body.list_divisi_dinas)
+        //   listDivisiDinas && listDivisiDinas.length > 0 && await listDivisiDinas.forEach(async (divisi) => {
+        //     let checkDepartment = await tbl_structure_departments.findOne({
+        //       where: { company_id: req.body.dinasId, departments_id: divisi.divisi }
+        //     })
 
-            if (checkDepartment) {
-              let newPosition = {
-                position_id: divisi.peran,
-                structure_department_id: checkDepartment.id,
-                user_id: userId
-              }
-              await tbl_department_positions.create(newPosition)
-            }
+        //     if (checkDepartment) {
+        //       let newPosition = {
+        //         position_id: divisi.peran,
+        //         structure_department_id: checkDepartment.id,
+        //         user_id: userId
+        //       }
+        //       await tbl_department_positions.create(newPosition)
+        //     }
 
-          })
-        }
+        //   })
+        // }
 
         // if (req.file) newAccountDetail.avatar = `http://api.polagroup.co.id/${req.file.path}`
         if (req.file) newAccountDetail.avatar = `http://165.22.110.159/${req.file.path}`
@@ -1318,50 +1318,50 @@ class user {
       })
 
 
-      let dataPosition = await tbl_department_positions.findAll({
-        where: { user_id: req.params.id },
-        include: [{ model: tbl_structure_departments, where: { company_id: req.body.company_id } }]
-      })
+      // let dataPosition = await tbl_department_positions.findAll({
+      //   where: { user_id: req.params.id },
+      //   include: [{ model: tbl_structure_departments, where: { company_id: req.body.company_id } }]
+      // })
 
-      let listDivisi = req.body.list_divisi ? JSON.parse(req.body.list_divisi) : []
+      // let listDivisi = req.body.list_divisi ? JSON.parse(req.body.list_divisi) : []
 
-      dataPosition.forEach(async (el) => {
-        let checkAvailable = listDivisi.find(element => el.id === element.id)
-        if (!checkAvailable) await tbl_department_positions.destroy({ where: { id: el.id } })
-      })
+      // dataPosition.forEach(async (el) => {
+      //   let checkAvailable = listDivisi.find(element => el.id === element.id)
+      //   if (!checkAvailable) await tbl_department_positions.destroy({ where: { id: el.id } })
+      // })
 
 
-      listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
-        if (divisi.divisi && divisi.peran) {
-          if (divisi.id) {
-            let checkDepartment = await tbl_structure_departments.findOne({
-              where: { company_id: req.body.company_id, departments_id: divisi.divisi }
-            })
+      // listDivisi && listDivisi.length > 0 && await listDivisi.forEach(async (divisi) => {
+      //   if (divisi.divisi && divisi.peran) {
+      //     if (divisi.id) {
+      //       let checkDepartment = await tbl_structure_departments.findOne({
+      //         where: { company_id: req.body.company_id, departments_id: divisi.divisi }
+      //       })
 
-            if (checkDepartment) {
-              let newPosition = {
-                position_id: divisi.peran,
-                structure_department_id: checkDepartment.id,
-                user_id: req.params.id
-              }
-              await tbl_department_positions.update(newPosition, { where: { id: divisi.id } })
-            }
-          } else {
-            let checkDepartment = await tbl_structure_departments.findOne({
-              where: { company_id: req.body.company_id, departments_id: divisi.divisi }
-            })
+      //       if (checkDepartment) {
+      //         let newPosition = {
+      //           position_id: divisi.peran,
+      //           structure_department_id: checkDepartment.id,
+      //           user_id: req.params.id
+      //         }
+      //         await tbl_department_positions.update(newPosition, { where: { id: divisi.id } })
+      //       }
+      //     } else {
+      //       let checkDepartment = await tbl_structure_departments.findOne({
+      //         where: { company_id: req.body.company_id, departments_id: divisi.divisi }
+      //       })
 
-            if (checkDepartment) {
-              let newPosition = {
-                position_id: divisi.peran,
-                structure_department_id: checkDepartment.id,
-                user_id: req.params.id
-              }
-              await tbl_department_positions.create(newPosition)
-            }
-          }
-        }
-      })
+      //       if (checkDepartment) {
+      //         let newPosition = {
+      //           position_id: divisi.peran,
+      //           structure_department_id: checkDepartment.id,
+      //           user_id: req.params.id
+      //         }
+      //         await tbl_department_positions.create(newPosition)
+      //       }
+      //     }
+      //   }
+      // })
 
       let dataReturning = await tbl_users.findByPk(req.params.id, {
         attributes: {
