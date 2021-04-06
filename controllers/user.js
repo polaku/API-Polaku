@@ -277,7 +277,7 @@ class user {
     let roomMaster, creatorMaster, statusCreatorMaster, statusRoomMaster, creatorAssistant, statusCreatorAssistant, detailUser, MyContactUs, evaluator1, evaluator2
     tbl_users.findOne({
       where: { activated: 1, username: req.body.username },
-      attributes: ['user_id', 'email', 'username', 'role_id', 'activated', 'password'], include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }]
+      attributes: ['user_id', 'email', 'username', 'role_id', 'activated', 'password'], include: [{ as: 'dinas', model: tbl_dinas, include: [{ model: tbl_companys, attributes: ['company_id', 'company_name'] }] }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }]
     })
       .then(async userFound => {
         console.log(req.body.password, userFound.password)
@@ -289,6 +289,11 @@ class user {
               where: { user_id: userFound.user_id },
               include:
                 [
+                  {
+                    model: tbl_companys,
+                    as: 'tbl_company',
+                    attributes: ['company_id', 'company_name']
+                  },
                   {
                     as: "idEvaluator1", model: tbl_users,
                     attributes: {
@@ -338,6 +343,7 @@ class user {
 
             let dinas = [{
               company_id: detailUser.company_id,
+              company_name: detailUser.tbl_company.company_name,
               building_id: detailUser.building_id,
               evaluator: detailUser.name_evaluator_1
             }]
@@ -345,6 +351,7 @@ class user {
             userFound.dinas.length > 0 && userFound.dinas.forEach(el => {
               dinas.push({
                 company_id: el.company_id,
+                company_name: el.tbl_company.company_name,
                 building_id: el.building_id,
                 evaluator: el.evaluator_id
               })
@@ -363,7 +370,7 @@ class user {
 
             let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
 
-
+            console.log(dinas)
             // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({
               message: "Success",
@@ -385,6 +392,7 @@ class user {
               bawahan,
               admin: userFound.tbl_admin_companies || [],
               firstHierarchy: checkFirstHierarchy ? 1 : 0,
+              dinas
             })
 
             // req.headers['user-agent']
@@ -776,6 +784,7 @@ class user {
 
           let dinas = [{
             company_id: detailUser.company_id,
+            company_name: detailUser.tbl_company.company_name,
             building_id: detailUser.building_id,
             evaluator: detailUser.name_evaluator_1
           }]
@@ -783,6 +792,7 @@ class user {
           userFound.dinas.length > 0 && userFound.dinas.forEach(el => {
             dinas.push({
               company_id: el.company_id,
+              company_name: el.tbl_company.company_name,
               building_id: el.building_id,
               evaluator: el.evaluator_id
             })
@@ -810,7 +820,7 @@ class user {
             bawahan,
             admin: userFound.tbl_admin_companies || [],
             firstHierarchy: checkFirstHierarchy ? 1 : 0,
-            // dinas,
+            dinas,
             // PIC: checkPIC
           })
 

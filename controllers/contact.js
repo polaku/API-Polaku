@@ -3,7 +3,6 @@ const logError = require('../helpers/logError')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const { createDateAsUTC } = require('../helpers/convertDate');
-const { query } = require('express');
 
 class contact {
   static async create(req, res) {
@@ -11,8 +10,15 @@ class contact {
 
     let userAccountDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 
-    if (Number(userAccountDetail.name_evaluator_1) !== NaN) evalutor1 = Number(userAccountDetail.name_evaluator_1)
-    if (Number(userAccountDetail.name_evaluator_2) !== NaN) evalutor2 = Number(userAccountDetail.name_evaluator_2)
+    if (req.body.company_id === userAccountDetail.company_id) {
+      if (Number(userAccountDetail.name_evaluator_1) !== NaN) evalutor1 = Number(userAccountDetail.name_evaluator_1)
+      if (Number(userAccountDetail.name_evaluator_2) !== NaN) evalutor2 = Number(userAccountDetail.name_evaluator_2)
+    } else {
+      let userDinas = await tbl_dinas.findOne({ where: { user_id: req.user.user_id, company_id: req.body.company_id } })
+
+      if(userDinas) evalutor1 = Number(userDinas.evaluator_id)
+      else evalutor1 = Number(userAccountDetail.name_evaluator_1)
+    }
 
     newData = {
       name: userAccountDetail.fullname,
@@ -20,7 +26,7 @@ class contact {
       message: req.body.message,
       contact_categories_id: req.body.contactCategoriesId,
       categori_id: req.body.categoriId,
-      company_id: userAccountDetail.company_id,
+      company_id: req.body.company_id,
       user_id: req.user.user_id,
       created_at: createDateAsUTC(new Date()),
       created_expired_date: createDateAsUTC(new Date(new Date().setDate(new Date().getDate() + 1))),
@@ -554,9 +560,11 @@ class contact {
       let conditionCompany = []
 
       if (req.user.user_id !== 1) {
-        let userDetail = await tbl_account_details.findAll({ where: { user_id: req.user.user_id }, attributes: {
-          exclude: ['password']
-        }, })
+        let userDetail = await tbl_account_details.findAll({
+          where: { user_id: req.user.user_id }, attributes: {
+            exclude: ['password']
+          },
+        })
         let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
         let idCompany = []
@@ -583,9 +591,9 @@ class contact {
 
       condition = {
         [Op.and]: [
-          {
-            status: 'approved'
-          },
+          // {
+          //   status: 'approved'
+          // },
           tempCondition,
           {
             [Op.or]: [
@@ -653,15 +661,15 @@ class contact {
           attributes: {
             exclude: ['password']
           },
-          as: "evaluator1", 
+          as: "evaluator1",
           include: [{ model: tbl_account_details }]
         },
         {
           model: tbl_users,
           attributes: {
             exclude: ['password']
-          }, 
-          as: "evaluator2", 
+          },
+          as: "evaluator2",
           include: [{ model: tbl_account_details }]
         }
       ],
