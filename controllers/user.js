@@ -716,7 +716,7 @@ class user {
       attributes: {
         exclude: ['password']
       },
-      include: [{ as: 'dinas', model: tbl_dinas }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }]
+      include: [{ as: 'dinas', model: tbl_dinas, include: [{ model: tbl_companys, attributes: ['company_id', 'company_name'] }] }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }]
     })
       .then(async userFound => {
         if (userFound) {
@@ -725,6 +725,11 @@ class user {
             where: { user_id: userFound.user_id },
             include:
               [
+                {
+                  model: tbl_companys,
+                  as: 'tbl_company',
+                  attributes: ['company_id', 'company_name']
+                },
                 {
                   as: "idEvaluator1",
                   model: tbl_users,
