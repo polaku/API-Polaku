@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     kpim_id: DataTypes.INTEGER,
     month: DataTypes.INTEGER,
     target_monthly: DataTypes.INTEGER,
-    pencapaian_monthly: DataTypes.INTEGER,
+    pencapaian_monthly: DataTypes.STRING,
     bobot: DataTypes.INTEGER,
     score_kpim_monthly: DataTypes.INTEGER,
     active_flag: DataTypes.BOOLEAN,

@@ -568,7 +568,7 @@ class kpim {
           let newData = {
             target_monthly: req.body.target_monthly,
             bobot: req.body.bobot,
-            pencapaian_monthly: req.body.pencapaian_monthly,
+            pencapaian_monthly: +req.body.pencapaian_monthly,
           }
 
           if (kpimSelected.indicator_kpim.toLowerCase() !== "tal") newData.score_kpim_monthly = newScore
@@ -592,7 +592,7 @@ class kpim {
               let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: kpimMonth.kpim_id } })
               let tempScore = 0
               kpimOneYear.forEach(kpimScore => {
-                tempScore += kpimScore.pencapaian_monthly
+                tempScore += +kpimScore.pencapaian_monthly
               })
 
               await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: kpimMonth.kpim_id } })
@@ -648,7 +648,7 @@ class kpim {
                 let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: req.params.id } })
                 let tempScore = 0
                 kpimOneYear.forEach(kpimScore => {
-                  tempScore += kpimScore.pencapaian_monthly
+                  tempScore += +kpimScore.pencapaian_monthly
                 })
                 await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
               }
