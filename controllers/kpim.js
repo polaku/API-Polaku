@@ -552,7 +552,7 @@ class kpim {
           //for update kpim_score kpim newest
           let newScore
           let targetMonthly = Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)
-          let capaianMonthly = Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly)
+          let capaianMonthly = Number(req.body.pencapaian_monthly) || Number(kpimMonth.pencapaian_monthly) || 0
 
           if (kpimSelected.unit.toLowerCase() === "keluhan" || kpimSelected.unit.toLowerCase() === "komplen" || kpimSelected.unit.toLowerCase() === "complain" || kpimSelected.unit.toLowerCase() === "reject" || kpimSelected.is_inverse) {
             statusKhusus = true
@@ -568,7 +568,7 @@ class kpim {
           let newData = {
             target_monthly: req.body.target_monthly,
             bobot: req.body.bobot,
-            pencapaian_monthly: +req.body.pencapaian_monthly,
+            pencapaian_monthly: +req.body.pencapaian_monthly || 0,
           }
 
           if (kpimSelected.indicator_kpim.toLowerCase() !== "tal") newData.score_kpim_monthly = newScore
@@ -592,7 +592,7 @@ class kpim {
               let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: kpimMonth.kpim_id } })
               let tempScore = 0
               kpimOneYear.forEach(kpimScore => {
-                tempScore += +kpimScore.pencapaian_monthly
+                tempScore += +kpimScore.pencapaian_monthly || 0
               })
 
               await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: kpimMonth.kpim_id } })
@@ -625,10 +625,10 @@ class kpim {
               let newData = {
                 bobot: element.bobot,
                 target_monthly: +element.target_monthly,
-                pencapaian_monthly: +element.pencapaian_monthly
+                pencapaian_monthly: +element.pencapaian_monthly || 0
               }
               let targetMonthly = +element.target_monthly
-              let capaianMonthly = +element.pencapaian_monthly
+              let capaianMonthly = +element.pencapaian_monthly || 0
 
               if (req.body.is_inverse) {
                 statusKhusus = true
@@ -648,7 +648,7 @@ class kpim {
                 let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: req.params.id } })
                 let tempScore = 0
                 kpimOneYear.forEach(kpimScore => {
-                  tempScore += +kpimScore.pencapaian_monthly
+                  tempScore += +kpimScore.pencapaian_monthly || 0
                 })
                 await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
               }
