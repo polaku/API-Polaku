@@ -17,6 +17,8 @@ class tal {
 
       if (req.body.weight && req.body.achievement) {
         tempScoreTal = Number(req.body.achievement) * (Number(req.body.weight) / 100)
+
+        if (tempScoreTal > 100) tempScoreTal = 100
       }
 
       let newData = {
@@ -71,7 +73,11 @@ class tal {
             tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
           })
 
-          await tbl_kpim_scores.update({ score_kpim_monthly: (tempScoreTALweek / counterWeek) }, { where: { kpim_score_id: req.body.kpim_score_id } })
+          let newScore = (tempScoreTALweek / counterWeek)
+
+          if (newScore > 100) newScore = 100
+
+          await tbl_kpim_scores.update({ score_kpim_monthly: newScore }, { where: { kpim_score_id: req.body.kpim_score_id } })
           // ========== UPDATE KPIM SCORE (END)  ========== 
 
           if (req.user.user_id === req.body.user_id) {
@@ -321,6 +327,8 @@ class tal {
         if (tempTotalWeight <= 100 || !req.body.weight) {
           let newScore = ((req.body.weight || Number(talScore.weight)) / 100) * (req.body.achievement || Number(talScore.achievement))
 
+          if (newScore > 100) newScore = 100
+
           let newData = {
             weight: req.body.weight,
             load: req.body.load,
@@ -491,7 +499,11 @@ async function updateScoreTALMonth(kpimScoreId, month, userId) {
     }
   })
 
-  await tbl_kpim_scores.update({ score_kpim_monthly: (tempScoreTALweek / counterWeek) }, { where: { kpim_score_id: KPIMScoreUpdate.kpim_score_id } })
+  let newScore = tempScoreTALweek / counterWeek
+
+  if (newScore > 100) newScore = 100
+
+  await tbl_kpim_scores.update({ score_kpim_monthly: newScore }, { where: { kpim_score_id: KPIMScoreUpdate.kpim_score_id } })
   // ========== UPDATE KPIM SCORE (END)  ========== 
 
   return { user_id: KPIMSelected.user_id, year: KPIMSelected.year }

@@ -565,6 +565,8 @@ class kpim {
             newScore = (capaianMonthly / targetMonthly) * 100
           }
 
+          if (newScore > 100) newScore = 100
+
           let newData = {
             target_monthly: req.body.target_monthly,
             bobot: req.body.bobot,
@@ -629,18 +631,23 @@ class kpim {
               }
               let targetMonthly = +element.target_monthly
               let capaianMonthly = +element.pencapaian_monthly || 0
+              let newScore
 
               if (req.body.is_inverse) {
                 statusKhusus = true
 
                 if (targetMonthly < capaianMonthly) {
-                  newData.score_kpim_monthly = 0
+                  newScore = 0
                 } else {
-                  newData.score_kpim_monthly = ((targetMonthly - capaianMonthly) / targetMonthly) * 100
+                  newScore = ((targetMonthly - capaianMonthly) / targetMonthly) * 100
                 }
               } else {
-                newData.score_kpim_monthly = (capaianMonthly / targetMonthly) * 100
+                newScore = (capaianMonthly / targetMonthly) * 100
               }
+
+              if (newScore > 100) newScore = 100
+
+              newData.score_kpim_monthly = newScore
 
               let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: element.kpim_score_id } })
 
