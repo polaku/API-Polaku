@@ -1,10 +1,11 @@
 const router = require('express').Router()
 const contactController = require('../controllers/contact')
 const { authentication, authorizationContact } = require('../middleware/auth')
+const { uploadSingle } = require('../middleware/multer')
 
 router.use(authentication)
 
-router.post('/', contactController.create)
+router.post('/', uploadSingle.single('doctor_letter'), contactController.create)
 router.get('/', contactController.findAll)
 router.get('/allContactUs', contactController.findAllContactUs)
 router.get('/categories', contactController.findAllCategoris)

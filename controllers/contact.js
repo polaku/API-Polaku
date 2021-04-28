@@ -16,7 +16,7 @@ class contact {
     } else {
       let userDinas = await tbl_dinas.findOne({ where: { user_id: req.user.user_id, company_id: req.body.company_id } })
 
-      if(userDinas) evalutor1 = Number(userDinas.evaluator_id)
+      if (userDinas) evalutor1 = Number(userDinas.evaluator_id)
       else evalutor1 = Number(userAccountDetail.name_evaluator_1)
     }
 
@@ -51,6 +51,8 @@ class contact {
       evaluator_2: evalutor2,
     }
 
+    if (req.file) newData.doctor_letter = `http://165.22.110.159/${req.file.path}`
+
     if (req.user.user_id === 265) {
       newData.status = 'approved'
     }
@@ -77,18 +79,21 @@ class contact {
   }
 
   static findAll(req, res) {
+    let monthBefore = new Date().getMonth(), condition = {}
+    let year = new Date().getFullYear()
+
     tbl_contacts.findAll({
       where: {
-        user_id: req.user.user_id,
+        status: { [Op.ne]: 'cancel' },
         [Op.or]: [
-          { status: 'new' },
-          { status: 'new2' },
-          { done_expired_date: { [Op.gte]: new Date() } }, //for contact_us
-          { cancel_date: { [Op.gte]: new Date() } },
-          { date_ijin_absen_start: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` } },
-          { date_imp: { [Op.gte]: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01` } },
-          { type: 'request', done_date: { [Op.gte]: new Date() } },
-          { type: 'request', leave_date: { [Op.ne]: null } },
+          { user_id: req.user.user_id },
+          { evaluator_1: req.user.user_id },
+          { evaluator_2: req.user.user_id },
+        ],
+        [Op.or]: [
+          { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+          { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+          { leave_date_in: { [Op.gt]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
         ]
       },
       include: [
@@ -129,23 +134,24 @@ class contact {
         ['cancel_date', 'DESC'],
       ],
     })
-      .then(data => {
-        let newData = []
-        data.forEach(element => {
-          if (element.leave_date !== null) {
-            let date = element.leave_date.split(',')
-            date = date[date.length - 1]
-            date = date.split(' ')
-            if (date[0] >= `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01`) {
-              newData.push(element)
-            }
-          } else {
-            newData.push(element)
-          }
-        });
-
+      .then(async data => {
+        // let newData = []
+        // data.forEach(element => {
+        //   if (element.leave_date !== null) {
+        //     let date = element.leave_date.split(',')
+        //     date = date[date.length - 1]
+        //     date = date.split(' ')
+        //     if (date[0] >= `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01`) {
+        //       newData.push(element)
+        //     }
+        //   } else {
+        //     newData.push(element)
+        //   }
+        // });
+        let test = await data.filter(el => el.evaluator_1 === 913)
+        console.log(test)
         // res.setHeader('Cache-Control', 'no-cache');
-        res.status(200).json({ message: "Success", length: data.length, data: newData })
+        res.status(200).json({ message: "Success", length: data.length, data: data })
       })
       .catch(err => {
         let error = {
@@ -715,7 +721,7 @@ class contact {
     }
 
     if (!contact.evaluator_2 || req.body.status === 'approved') {
-      if (contact.leave_request) {
+      if (contact.leave_request && !contact.doctor_letter) {
         let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
         let sisaCuti = Number(userDetail.leave) - Number(contact.leave_request)
 

@@ -616,7 +616,8 @@ class user {
 
   static async firstLogin(req, res) {
     let newData
-
+    console.log(req.body)
+console.log(compare(req.body.passwordLama, req.user.password))
     if (compare(req.body.passwordLama, req.user.password)) {
 
       newData = {

@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
     evaluator_1: DataTypes.INTEGER,
     evaluator_2: DataTypes.INTEGER,
     cancel_reason: DataTypes.STRING,
+    doctor_letter: DataTypes.STRING
   }, {
       timestamps: false,
     });
