@@ -84,16 +84,22 @@ class contact {
 
     tbl_contacts.findAll({
       where: {
-        status: { [Op.ne]: 'cancel' },
-        [Op.or]: [
-          { user_id: req.user.user_id },
-          { evaluator_1: req.user.user_id },
-          { evaluator_2: req.user.user_id },
-        ],
-        [Op.or]: [
-          { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
-          { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
-          { leave_date_in: { [Op.gt]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+        [Op.and]: [
+          { status: { [Op.ne]: 'cancel' } },
+          {
+            [Op.or]: [
+              { user_id: req.user.user_id },
+              { evaluator_1: req.user.user_id },
+              { evaluator_2: req.user.user_id },
+            ]
+          },
+          {
+            [Op.or]: [
+              { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              { leave_date_in: { [Op.gt]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+            ]
+          }
         ]
       },
       include: [
