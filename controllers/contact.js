@@ -154,8 +154,7 @@ class contact {
         //     newData.push(element)
         //   }
         // });
-        let test = await data.filter(el => el.evaluator_1 === 913)
-        console.log(test)
+
         // res.setHeader('Cache-Control', 'no-cache');
         res.status(200).json({ message: "Success", length: data.length, data: data })
       })
