@@ -392,7 +392,8 @@ class user {
               bawahan,
               admin: userFound.tbl_admin_companies || [],
               firstHierarchy: checkFirstHierarchy ? 1 : 0,
-              dinas
+              dinas,
+              status_employee: detailUser.status_employee
             })
 
             // req.headers['user-agent']
@@ -616,8 +617,7 @@ class user {
 
   static async firstLogin(req, res) {
     let newData
-    console.log(req.body)
-console.log(compare(req.body.passwordLama, req.user.password))
+
     if (compare(req.body.passwordLama, req.user.password)) {
 
       newData = {
@@ -827,6 +827,7 @@ console.log(compare(req.body.passwordLama, req.user.password))
             admin: userFound.tbl_admin_companies || [],
             firstHierarchy: checkFirstHierarchy ? 1 : 0,
             dinas,
+            status_employee: detailUser.status_employee
             // PIC: checkPIC
           })
 
