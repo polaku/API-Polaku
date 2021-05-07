@@ -39,11 +39,11 @@ class contact {
       design_other_specs: req.body.otherSpecs,
       design_deadline: req.body.deadline,
       review: req.body.review,
-      date_ijin_absen_start: req.body.date_ijin_absen_start && createDateAsUTC(req.body.date_ijin_absen_start),
-      date_ijin_absen_end: req.body.date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end),
+      date_ijin_absen_start: req.body.date_ijin_absen_start,
+      date_ijin_absen_end: req.body.date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end), //not required
       leave_request: req.body.leave_request,
-      leave_date: req.body.leave_date && createDateAsUTC(req.body.leave_date),
-      leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date_in),
+      leave_date: req.body.leave_date,
+      leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date_in), //not required
       date_imp: req.body.date_imp && createDateAsUTC(req.body.date_imp),
       start_time_imp: req.body.start_time_imp,
       end_time_imp: req.body.end_time_imp,
@@ -95,9 +95,11 @@ class contact {
           },
           {
             [Op.or]: [
-              { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              // { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              // { leave_date_in: { [Op.gt]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
               { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
-              { leave_date_in: { [Op.gt]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              { date_ijin_absen_start: { [Op.ne]: null } },
+              { leave_date: { [Op.ne]: null } },
             ]
           }
         ]
@@ -141,22 +143,28 @@ class contact {
       ],
     })
       .then(async data => {
-        // let newData = []
-        // data.forEach(element => {
-        //   if (element.leave_date !== null) {
-        //     let date = element.leave_date.split(',')
-        //     date = date[date.length - 1]
-        //     date = date.split(' ')
-        //     if (date[0] >= `${new Date().getFullYear()}-${new Date().getMonth() + 1}-01`) {
-        //       newData.push(element)
-        //     }
-        //   } else {
-        //     newData.push(element)
-        //   }
-        // });
-
+        let newData = []
+        data.forEach(element => {
+          if (element.leave_date !== null) {
+            if (element.leave_date_in) {
+              if (element.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+            } else {
+              let temp = element.leave_date.split(',')
+              if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+            }
+          } else if (element.date_ijin_absen_start !== null) {
+            if (element.date_ijin_absen_end) {
+              if (element.date_ijin_absen_end >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+            } else {
+              let temp = element.date_ijin_absen_start.split(',')
+              if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+            }
+          } else {
+            newData.push(element)
+          }
+        });
         // res.setHeader('Cache-Control', 'no-cache');
-        res.status(200).json({ message: "Success", length: data.length, data: data })
+        res.status(200).json({ message: "Success", length: newData.length, data: newData })
       })
       .catch(err => {
         let error = {
@@ -256,10 +264,10 @@ class contact {
         design_other_specs: req.body.otherSpecs,
         design_deadline: req.body.deadline,
         review: req.body.review,
-        date_ijin_absen_start: req.body.date_ijin_absen_start && createDateAsUTC(req.body.date_ijin_absen_start),
+        date_ijin_absen_start: req.body.date_ijin_absen_start,
         date_ijin_absen_end: req.body.date_ijin_absen_end && createDateAsUTC(req.body.date_ijin_absen_end),
         leave_request: req.body.leave_request,
-        leave_date: req.body.leave_date && createDateAsUTC(req.body.leave_date),
+        leave_date: req.body.leave_date,
         leave_date_in: req.body.leave_date_in && createDateAsUTC(req.body.leave_date_in),
         date_imp: req.body.date_imp && createDateAsUTC(req.body.date_imp),
         start_time_imp: req.body.start_time_imp,
@@ -500,11 +508,10 @@ class contact {
 
   static async findAllContactUs(req, res) {
     let condition = {}, query = {}
-    if (req.query["for-hr"] === "true") {
-      let monthBefore = new Date().getMonth()
-      let monthCurrent = new Date().getMonth() + 1
-      let year = new Date().getFullYear()
+    let monthBefore = new Date().getMonth()
+    let year = new Date().getFullYear()
 
+    if (req.query["for-hr"] === "true") {
       if (monthBefore === 0) {
         year -= 1
         monthBefore = 12
@@ -522,9 +529,11 @@ class contact {
                 ]
               }, {
                 [Op.or]: [ //data dari sebulan sebelumnya
-                  { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+                  // { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+                  // { leave_date_in: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
                   { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
-                  { leave_date_in: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+                  { date_ijin_absen_start: { [Op.ne]: null } },
+                  { leave_date: { [Op.ne]: null } }
                 ]
               }
             ]
@@ -537,14 +546,15 @@ class contact {
                 ]
               }, {
                 [Op.or]: [
-                  {
-                    date_ijin_absen_end: {
-                      // [Op.between]: [
-                      //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
-                      //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
-                      [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
-                    }
-                  },
+                  // {
+                  //   date_ijin_absen_end: {
+                  //     // [Op.between]: [
+                  //     //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+                  //     //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+                  //     [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
+                  //   }
+                  // },
+                  { date_ijin_absen_start: { [Op.ne]: null } },
                   {
                     date_imp: {
                       // [Op.between]: [
@@ -553,14 +563,15 @@ class contact {
                       [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
                     }
                   },
-                  {
-                    leave_date_in: {
-                      // [Op.between]: [
-                      //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
-                      //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
-                      [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
-                    }
-                  },
+                  // {
+                  //   leave_date_in: {
+                  //     // [Op.between]: [
+                  //     //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+                  //     //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+                  //     [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
+                  //   }
+                  // },
+                  { leave_date: { [Op.ne]: null } }
                 ]
               }
             ]
@@ -612,10 +623,11 @@ class contact {
                 // date_ijin_absen_start: {
                 //   [Op.between]: [req.query["after-date"], req.query["before-date"]]
                 // }
-                [Op.and]: [
-                  { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
-                  { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
-                ]
+                // [Op.and]: [
+                //   { date_ijin_absen_start: { [Op.gte]: new Date(req.query["after-date"]) } },
+                //   { date_ijin_absen_start: { [Op.lte]: new Date(req.query["before-date"]) } },
+                // ]
+                date_ijin_absen_start: { [Op.ne]: null }
               },
               {
                 // date_imp: {
@@ -630,10 +642,11 @@ class contact {
                 // leave_date: {
                 //   [Op.between]: [req.query["after-date"], req.query["before-date"]]
                 // }
-                [Op.and]: [
-                  { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
-                  { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
-                ]
+                // [Op.and]: [
+                //   { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
+                //   { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
+                // ]
+                leave_date: { [Op.ne]: null }
               }
             ]
           }
@@ -695,15 +708,99 @@ class contact {
       ],
     })
       .then(async (data) => {
-        // console.log(data.length)
+        let newData = []
 
-        // let allData = await tbl_contacts.findAll({
-        //   where: condition,
-        // })
+        if (req.query["for-hr"] === "true") {
+          // let data1 = [], data2 = [], tempData = []
+          // data1 = await data.filter(el =>
+          //   el.leave_date === null
+          // )
+
+          // data2 = await data.filter(el =>
+          //   el.leave_date !== null
+          // )
+
+          // data2.forEach(el => {
+          //   if (el.leave_date_in) {
+          //     if (el.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) tempData.push(el)
+          //   } else {
+          //     let temp = el.leave_date.split(',')
+          //     if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) tempData.push(el)
+          //   }
+          // })
+
+          // data = [...data1, ...tempData]
+
+          data.forEach(element => {
+            if (element.leave_date !== null) {
+              if (element.leave_date_in) {
+                if (element.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+              } else {
+                let temp = element.leave_date.split(',')
+                console.log(temp)
+                if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+              }
+            } else if (element.date_ijin_absen_start !== null) {
+              console.log('1')
+              if (element.date_ijin_absen_end) {
+                if (element.date_ijin_absen_end >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+              } else {
+                let temp = element.date_ijin_absen_start.split(',')
+                if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+              }
+            } else {
+              newData.push(element)
+            }
+          });
+        } else {
+          // data1 = await data.filter(el =>
+          //   el.leave_date === null
+          // )
+
+          // data2 = await data.filter(el =>
+          //   el.leave_date !== null
+          // )
+
+          // data2.forEach(el => {
+          //   if (el.leave_date_in) {
+          //     if (el.leave_date_in >= req.query["after-date"]
+          //       && el.leave_date_in <= req.query["before-date"]) tempData.push(el)
+          //   } else {
+          //     let temp = el.leave_date.split(',')
+          //     if (temp[temp.length] >= req.query["after-date"]
+          //       && temp[temp.length] <= req.query["before-date"]) tempData.push(el)
+          //   }
+          // })
+          // data = [...data1, ...tempData]
+
+          data.forEach(element => {
+            if (element.leave_date !== null) {
+              if (element.leave_date_in) {
+                if (element.leave_date_in >= req.query["after-date"]
+                  && element.leave_date_in <= req.query["before-date"]) newData.push(element)
+              } else {
+                let temp = element.leave_date.split(',')
+                if (temp[temp.length] >= req.query["after-date"]
+                  && temp[temp.length] <= req.query["before-date"]) newData.push(element)
+              }
+            } else if (element.date_ijin_absen_start !== null) {
+              if (element.date_ijin_absen_end) {
+                if (element.date_ijin_absen_end >= req.query["after-date"]
+                  && element.date_ijin_absen_end <= req.query["before-date"]) newData.push(element)
+              } else {
+                let temp = element.date_ijin_absen_start.split(',')
+                if (temp[temp.length] >= req.query["after-date"]
+                  && temp[temp.length] <= req.query["before-date"]) newData.push(element)
+              }
+            } else {
+              newData.push(element)
+            }
+          });
+        }
 
         // res.status(200).json({ message: "Success", data, totalData: allData.length })
         // res.setHeader('Cache-Control', 'no-cache');
-        res.status(200).json({ message: "Success", data })
+        res.status(200).json({ message: "Success", data: newData })
       })
       .catch(err => {
         let error = {

@@ -1843,7 +1843,7 @@ class user {
         console.log('User not found');
       }
     } catch (Error) {
-      console.log(createDateAsUTC(new Date()), Error);
+      // console.log(createDateAsUTC(new Date()), Error);
       res.status(500).json({ Error });
     }
   }

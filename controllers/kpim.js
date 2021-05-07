@@ -714,7 +714,7 @@ class kpim {
   static async sendGrade(req, res) {
     let arrayKPIMScoreId = null, tal, day = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     try {
-      console.log(req.body)
+      (req.body)
       if (typeof req.body.arrayKPIMScoreId === 'object') arrayKPIMScoreId = req.body.arrayKPIMScoreId
       else arrayKPIMScoreId = JSON.parse(req.body.arrayKPIMScoreId)
 
