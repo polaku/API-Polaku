@@ -737,11 +737,9 @@ class contact {
                 if (element.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
               } else {
                 let temp = element.leave_date.split(',')
-                console.log(temp)
                 if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
               }
             } else if (element.date_ijin_absen_start !== null) {
-              console.log('1')
               if (element.date_ijin_absen_end) {
                 if (element.date_ijin_absen_end >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
               } else {
@@ -822,7 +820,9 @@ class contact {
       status: req.body.status
     }
 
-    if (!contact.evaluator_2 || req.body.status === 'approved') {
+    // if ((!contact.evaluator_2 && req.body.status === 'approved') ||
+    //   (contact.evaluator_2 && req.body.status === 'approved')) {
+    if (req.body.status === 'approved') {
       if (contact.leave_request && !contact.doctor_letter) {
         let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
         let sisaCuti = Number(userDetail.leave) - Number(contact.leave_request)

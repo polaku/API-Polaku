@@ -4,6 +4,7 @@ const cors = require('cors')
 const route = require('./routes')
 const portServer = process.env.PORT_SERVER
 const morgan = require('morgan')
+const { rescheduleCRON } = require('./helpers/cron');
 
 let app = express()
 
@@ -28,6 +29,7 @@ app.use(morgan('dev'))
 app.use('/', route)
 
 app.listen(portServer, () => {
+  rescheduleCRON()
   console.log(`Server listen on port ${portServer}`);
 })
 

@@ -1,10 +1,11 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins, tbl_admin_companies } = require('../models');
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins, tbl_admin_companies, tbl_status_employee_dates } = require('../models');
 const { compare, hash } = require('../helpers/bcrypt');
 const { sign, verify } = require('../helpers/jwt');
 const { mailOptions, createTransporter, transporter } = require('../helpers/nodemailer');
 const logError = require('../helpers/logError');
 const excelToJson = require('convert-excel-to-json');
 const { createDateAsUTC } = require('../helpers/convertDate');
+const { scheduleAddLeave } = require('../helpers/cron')
 
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -59,10 +60,10 @@ class user {
           address: req.body.address,
           date_of_birth: req.body.dateOfBirth,
           leave: req.body.leave || 0,
-          building_id: req.body.building_id,
+          building_id: req.body.building_id || null,
           location_id: building.location_id || null,
-          company_id: req.body.company_id,
-          position_id: req.body.position_id,
+          company_id: req.body.company_id || null,
+          position_id: req.body.position_id || null,
           designations_id: req.body.designations_id || null,
           phone: req.body.phone,
           name_evaluator_1: req.body.name_evaluator_1,
@@ -92,6 +93,16 @@ class user {
         if (req.file) newAccountDetail.avatar = `http://165.22.110.159/${req.file.path}`
 
         let createAccountDetail = await tbl_account_details.create(newAccountDetail)
+
+        if (req.body.statusEmployee && req.body.dateStatus) {
+          await tbl_status_employee_dates.create({
+            user_id: userId,
+            status: req.body.statusEmployee,
+            start_date: req.body.dateStatus
+          })
+
+          await scheduleAddLeave(userId)
+        }
 
         let findNew = await tbl_users.findByPk(createAccountDetail.user_id, {
           attributes: ['user_id', 'email', 'username', 'role_id', 'activated'],
@@ -166,9 +177,9 @@ class user {
           address: req.body.address,
           date_of_birth: req.body.dateOfBirth,
           leave: req.body.leave || 0,
-          building_id: req.body.building_id,
+          building_id: req.body.building_id || null,
           location_id: building.location_id || null,
-          company_id: req.body.company_id,
+          company_id: req.body.company_id || null,
           designations_id: req.body.designations_id || null,
           phone: req.body.phone,
           name_evaluator_1: req.body.name_evaluator_1 || null,
@@ -236,6 +247,16 @@ class user {
 
         let createAccountDetail = await tbl_account_details.create(newAccountDetail)
 
+        if (req.body.statusEmployee && req.body.dateStatus) {
+          await tbl_status_employee_dates.create({
+            user_id: userId,
+            status: req.body.statusEmployee,
+            start_date: req.body.dateStatus
+          })
+
+          await scheduleAddLeave(userId)
+        }
+
         let findNew = await tbl_users.findByPk(createAccountDetail.user_id, {
           attributes: ['user_id', 'email', 'username', 'role_id', 'activated'],
           include: [{
@@ -280,7 +301,6 @@ class user {
       attributes: ['user_id', 'email', 'username', 'role_id', 'activated', 'password'], include: [{ as: 'dinas', model: tbl_dinas, include: [{ model: tbl_companys, attributes: ['company_id', 'company_name'] }] }, { model: tbl_admin_companies, include: [{ model: tbl_designations, include: [{ model: tbl_user_roles }] }, { model: tbl_companys }] }]
     })
       .then(async userFound => {
-        console.log(req.body.password, userFound.password)
         if (userFound) {
           if (compare(req.body.password, userFound.password)) {
             let token = sign({ user_id: userFound.user_id })
@@ -370,7 +390,6 @@ class user {
 
             let checkFirstHierarchy = await tbl_structure_departments.findOne({ where: { hierarchy: 1 }, include: [{ model: tbl_department_positions, where: { user_id: userFound.user_id } }] })
 
-            console.log(dinas)
             // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({
               message: "Success",
@@ -536,45 +555,51 @@ class user {
         ...condition
       },
       // ...query,
-      include: [{
-        required: true,
-        model: tbl_account_details,
-        // where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
-        where: { ...conditionStatus, ...conditionSearch },
-        include: [{
-          model: tbl_users,
-          attributes: {
-            exclude: ['password']
-          },
-          as: "idEvaluator1",
-          include: [{ model: tbl_account_details }]
+      include: [
+        {
+          required: true,
+          model: tbl_account_details,
+          // where: { ...conditionPT, ...conditionStatus, ...conditionSearch },
+          where: { ...conditionStatus, ...conditionSearch },
+          include: [{
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+            as: "idEvaluator1",
+            include: [
+              { model: tbl_account_details }
+            ],
+          }, {
+            model: tbl_users,
+            attributes: {
+              exclude: ['password']
+            },
+            as: "idEvaluator2",
+            include: [{ model: tbl_account_details }]
+          }, {
+            as: 'tbl_company',
+            model: tbl_companys
+          }, {
+            model: tbl_departments
+          }, {
+            model: tbl_positions
+          }]
         }, {
-          model: tbl_users,
-          attributes: {
-            exclude: ['password']
-          },
-          as: "idEvaluator2",
-          include: [{ model: tbl_account_details }]
+          as: 'dinas',
+          model: tbl_dinas
         }, {
-          as: 'tbl_company',
-          model: tbl_companys
+          model: tbl_department_positions,
+          include: [{
+            model: tbl_structure_departments,
+            include: [{ model: tbl_companys, attributes: ['company_id', 'company_name', 'acronym'] }, { model: tbl_departments, as: "department", attributes: ['deptname'] }]
+          }, {
+            model: tbl_positions
+          }]
         }, {
-          model: tbl_departments
-        }, {
-          model: tbl_positions
+          model: tbl_status_employee_dates
         }]
-      }, {
-        as: 'dinas',
-        model: tbl_dinas
-      }, {
-        model: tbl_department_positions,
-        include: [{
-          model: tbl_structure_departments,
-          include: [{ model: tbl_companys, attributes: ['company_id', 'company_name', 'acronym'] }, { model: tbl_departments, as: "department", attributes: ['deptname'] }]
-        }, {
-          model: tbl_positions
-        }]
-      }],
+      ,
       order
     })
       .then(async (data) => {
@@ -1282,7 +1307,7 @@ class user {
   }
 
   static async update(req, res) {
-    let newData1, newData2
+    let newData1, newData2, statusEmployee = req.body.statusEmployee
 
     newData1 = {
       username: req.body.username && req.body.username !== '' ? req.body.username : req.body.nik,
@@ -1308,7 +1333,7 @@ class user {
       name_evaluator_2: req.body.name_evaluator_2 || null,
       nickname: req.body.nickname,
       departments_id: req.body.departments_id,
-      status_employee: req.body.statusEmployee,
+      status_employee: statusEmployee,
       leave_big: req.body.leaveBig,
       office_email: req.body.officeEmail,
       updatedAt: createDateAsUTC(new Date())
@@ -1396,6 +1421,50 @@ class user {
       let company = await tbl_companys.findByPk(req.body.company_id)
       let userDetail = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 
+      if (req.body.dateStatus) {
+        let userEdited = await tbl_account_details.findOne({ where: { user_id: req.params.id } })
+
+        if (userEdited.status_employee !== statusEmployee) {
+          let statusBefore = await tbl_status_employee_dates.findOne({
+            where: {
+              user_id: req.params.id,
+            },
+            order: [['id', 'DESC']]
+          })
+
+          if (statusBefore) {
+            await tbl_status_employee_dates.update({ end_date: req.body.dateStatus }, { where: { id: statusBefore.id } })
+          }
+
+          await tbl_status_employee_dates.create({
+            user_id: req.params.id,
+            status: statusEmployee,
+            start_date: req.body.dateStatus
+          })
+
+          await scheduleAddLeave(req.params.id)
+        } else {
+          let statusBefore = await tbl_status_employee_dates.findOne({
+            where: {
+              user_id: req.params.id,
+            },
+            order: [['id', 'DESC']]
+          })
+
+          if (statusBefore) {
+            await tbl_status_employee_dates.update({ start_date: req.body.dateStatus }, { where: { id: statusBefore.id } })
+          } else {
+            await tbl_status_employee_dates.create({
+              user_id: req.params.id,
+              status: statusEmployee,
+              start_date: req.body.dateStatus
+            })
+          }
+
+          await scheduleAddLeave(req.params.id)
+        }
+      }
+
       await tbl_log_employees.create({
         employee: req.body.fullname,
         company: company.company_name,
@@ -1451,7 +1520,8 @@ class user {
               R: 'startBigLeave',//
               S: 'bigLeave',//
               T: 'nextFrameDate',//
-              U: 'nextLensaDate'//
+              U: 'nextLensaDate',//
+              V: 'dateStatus'
             }
           }]
         })
@@ -1541,6 +1611,16 @@ class user {
                 newAccountDetail.nik = tempNIK
 
                 await tbl_account_details.create(newAccountDetail)
+
+                if (el.statusEmpolyee && el.dateStatus) {
+                  await tbl_status_employee_dates.create({
+                    user_id: data.null,
+                    status: el.statusEmpolyee,
+                    start_date: el.dateStatus
+                  })
+
+                  await scheduleAddLeave(data.null)
+                }
               })
           }
         })
@@ -1552,7 +1632,7 @@ class user {
           }]
         })
 
-        let userId, nik, fullname, nickname, initial, date_of_birth, address, phone, selfEmail, officeEmail, username, evaluator1, evaluator2, company, leave, statusEmpolyee, joinDate, startBigLeave, bigLeave, nextFrameDate, nextLensaDate
+        let userId, nik, fullname, nickname, initial, date_of_birth, address, phone, selfEmail, officeEmail, username, evaluator1, evaluator2, company, leave, statusEmpolyee, joinDate, startBigLeave, bigLeave, nextFrameDate, nextLensaDate, dateStatus
 
         let header = result.Sheet1[0]
 
@@ -1578,6 +1658,7 @@ class user {
           else if (header[key].indexOf('bigLeave') != -1) bigLeave = key
           else if (header[key].indexOf('nextFrameDate') != -1) nextFrameDate = key
           else if (header[key].indexOf('nextLensaDate') != -1) nextLensaDate = key
+          else if (header[key].indexOf('dateStatus') != -1) dateStatus = key
         }
 
         let listData = result.Sheet1.slice(1, result.Sheet1.length)
@@ -1638,6 +1719,45 @@ class user {
               if (selectEvaluator2) newData2.name_evaluator_2 = selectEvaluator2.user_id
             }
             await tbl_account_details.update(newData2, { where: { user_id: account.user_id } })
+
+            if (statusEmpolyee && dateStatus) {
+              if (account.status_employee !== el[statusEmpolyee]) {
+                let statusBefore = await tbl_status_employee_dates.findOne({
+                  where: {
+                    user_id: account.user_id
+                  },
+                  order: [['id', 'DESC']]
+                })
+
+                if (statusBefore) await tbl_status_employee_dates.update({ end_date: el[dateStatus] }, { where: { id: statusBefore.id } })
+
+
+                await tbl_status_employee_dates.create({
+                  user_id: account.user_id,
+                  status: el[statusEmpolyee],
+                  start_date: el[dateStatus]
+                })
+              } else {
+                let statusBefore = await tbl_status_employee_dates.findOne({
+                  where: {
+                    user_id: account.user_id,
+                  },
+                  order: [['id', 'DESC']]
+                })
+
+                if (statusBefore) {
+                  await tbl_status_employee_dates.update({ start_date: el[dateStatus] }, { where: { id: statusBefore.id } })
+                } else {
+                  await tbl_status_employee_dates.create({
+                    user_id: account.user_id,
+                    status: el[statusEmpolyee],
+                    start_date: el[dateStatus]
+                  })
+                }
+              }
+
+              await scheduleAddLeave(account.user_id)
+            }
           }
         })
       }
@@ -1872,7 +1992,6 @@ class user {
         res.status(400).json({ message: 'token not found' })
       }
     } catch (Error) {
-      console.log('error reset password', createDateAsUTC(new Date()), Error);
       res.status(500).json({ Error });
     }
   }
