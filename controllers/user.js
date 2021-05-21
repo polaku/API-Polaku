@@ -46,7 +46,7 @@ class user {
         if (req.body.dinasId) {
           let newDinas = {
             company_id: req.body.dinasId,
-            building_id: req.body.dinasBuildingId,
+            building_id: req.body.dinasBuildingId || null,
             user_id: userId
           }
           await tbl_dinas.create(newDinas)
@@ -129,7 +129,7 @@ class user {
   }
 
   static async register(req, res) {
-    var tempNIK
+    var tempNIK, userId
     if (req.body.nik) tempNIK = req.body.nik
 
     // //nik, address, initial, date_of_birth
@@ -158,12 +158,12 @@ class user {
     tbl_users.create(newUser)
       .then(async data => {
         let building = await tbl_buildings.findByPk(req.body.building_id)
-        let userId = data.null
+        userId = data.null
 
         if (req.body.dinasId) {
           let newDinas = {
             company_id: req.body.dinasId,
-            building_id: req.body.dinasBuildingId,
+            building_id: req.body.dinasBuildingId || null,
             user_id: userId
           }
           await tbl_dinas.create(newDinas)
@@ -280,7 +280,10 @@ class user {
           updatedAt: createDateAsUTC(new Date())
         })
       })
-      .catch(err => {
+      .catch(async (err) => {
+        if (userId) {
+          await tbl_users.destroy({ where: { user_id: userId } })
+        }
         console.log(err)
         let error = {
           uri: 'http://api.polagroup.co.id/users/register',
