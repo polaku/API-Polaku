@@ -67,7 +67,7 @@ class user {
           designations_id: req.body.designations_id || null,
           phone: req.body.phone,
           name_evaluator_1: req.body.name_evaluator_1,
-          name_evaluator_2: req.body.name_evaluator_2,
+          name_evaluator_2: Number(req.body.name_evaluator_2) !== NaN && req.body.name_evaluator_2,
           nickname: req.body.nickname,
           departments_id: req.body.departments_id,
           status_employee: req.body.statusEmployee,
@@ -183,7 +183,7 @@ class user {
           designations_id: req.body.designations_id || null,
           phone: req.body.phone,
           name_evaluator_1: req.body.name_evaluator_1 || null,
-          name_evaluator_2: req.body.name_evaluator_2 || null,
+          name_evaluator_2: Number(req.body.name_evaluator_2) !== NaN && req.body.name_evaluator_2,
           nickname: req.body.nickname,
           status_employee: req.body.statusEmployee,
           join_date: req.body.joinDate,
@@ -989,7 +989,7 @@ class user {
       phone: req.body.phone,
       nik: req.body.nik,
       name_evaluator_1: req.body.evaluator1,
-      name_evaluator_2: req.body.evaluator2,
+      name_evaluator_2: Number(req.body.evaluator2) !== NaN && req.body.evaluator2,
       updatedAt: createDateAsUTC(new Date())
     }
 
@@ -1333,7 +1333,7 @@ class user {
       position_id: req.body.position_id,
       phone: req.body.phone,
       name_evaluator_1: req.body.name_evaluator_1 || null,
-      name_evaluator_2: req.body.name_evaluator_2 || null,
+      name_evaluator_2: Number(req.body.name_evaluator_2) !== NaN && req.body.name_evaluator_2,
       nickname: req.body.nickname,
       departments_id: req.body.departments_id,
       status_employee: statusEmployee,
