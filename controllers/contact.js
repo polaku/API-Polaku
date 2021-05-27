@@ -99,7 +99,7 @@ class contact {
               // { leave_date_in: { [Op.gt]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
               { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
               { date_ijin_absen_start: { [Op.ne]: null } },
-              { leave_date: { [Op.ne]: null } },
+              { leave_request: { [Op.ne]: null } },
             ]
           }
         ]
@@ -145,7 +145,7 @@ class contact {
       .then(async data => {
         let newData = []
         data.forEach(element => {
-          if (element.leave_date !== null) {
+          if (element.leave_request !== null) {
             if (element.leave_date_in) {
               if (element.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
             } else {
@@ -533,7 +533,7 @@ class contact {
                   // { leave_date_in: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
                   { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
                   { date_ijin_absen_start: { [Op.ne]: null } },
-                  { leave_date: { [Op.ne]: null } }
+                  { leave_request: { [Op.ne]: null } }
                 ]
               }
             ]
@@ -571,7 +571,7 @@ class contact {
                   //     [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
                   //   }
                   // },
-                  { leave_date: { [Op.ne]: null } }
+                  { leave_request: { [Op.ne]: null } }
                 ]
               }
             ]
@@ -646,7 +646,7 @@ class contact {
                 //   { leave_date: { [Op.gte]: new Date(req.query["after-date"]) } },
                 //   { leave_date: { [Op.lte]: new Date(req.query["before-date"]) } },
                 // ]
-                leave_date: { [Op.ne]: null }
+                leave_request: { [Op.ne]: null }
               }
             ]
           }
@@ -703,7 +703,7 @@ class contact {
         ['taken_date', 'DESC'],
         ['done_date', 'DESC'],
         ['date_ijin_absen_start', 'DESC'],
-        ['leave_date', 'DESC'],
+        ['leave_request', 'DESC'],
         ['date_imp', 'DESC'],
       ],
     })
@@ -732,7 +732,7 @@ class contact {
           // data = [...data1, ...tempData]
 
           data.forEach(element => {
-            if (element.leave_date !== null) {
+            if (element.leave_request !== null) {
               if (element.leave_date_in) {
                 if (element.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
               } else {
@@ -765,21 +765,21 @@ class contact {
           //       && el.leave_date_in <= req.query["before-date"]) tempData.push(el)
           //   } else {
           //     let temp = el.leave_date.split(',')
-          //     if (temp[temp.length] >= req.query["after-date"]
-          //       && temp[temp.length] <= req.query["before-date"]) tempData.push(el)
+          //     if (temp[temp.length-1] >= req.query["after-date"]
+          //       && temp[temp.length-1] <= req.query["before-date"]) tempData.push(el)
           //   }
           // })
           // data = [...data1, ...tempData]
 
           data.forEach(element => {
-            if (element.leave_date !== null) {
+            if (element.leave_request !== null) {
               if (element.leave_date_in) {
                 if (element.leave_date_in >= req.query["after-date"]
                   && element.leave_date_in <= req.query["before-date"]) newData.push(element)
               } else {
                 let temp = element.leave_date.split(',')
-                if (temp[temp.length] >= req.query["after-date"]
-                  && temp[temp.length] <= req.query["before-date"]) newData.push(element)
+                if (temp[temp.length-1] >= req.query["after-date"]
+                  && temp[temp.length-1] <= req.query["before-date"]) newData.push(element)
               }
             } else if (element.date_ijin_absen_start !== null) {
               if (element.date_ijin_absen_end) {
@@ -787,8 +787,8 @@ class contact {
                   && element.date_ijin_absen_end <= req.query["before-date"]) newData.push(element)
               } else {
                 let temp = element.date_ijin_absen_start.split(',')
-                if (temp[temp.length] >= req.query["after-date"]
-                  && temp[temp.length] <= req.query["before-date"]) newData.push(element)
+                if (temp[temp.length-1] >= req.query["after-date"]
+                  && temp[temp.length-1] <= req.query["before-date"]) newData.push(element)
               }
             } else {
               newData.push(element)
