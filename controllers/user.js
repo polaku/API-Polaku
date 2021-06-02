@@ -1,4 +1,4 @@
-const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins, tbl_admin_companies, tbl_status_employee_dates } = require('../models');
+const { tbl_users, tbl_account_details, tbl_master_rooms, tbl_master_creators, tbl_contacts, tbl_buildings, tbl_companys, tbl_positions, tbl_dinas, tbl_departments, tbl_designations, tbl_user_roles, tbl_log_employees, tbl_PICs, tbl_structure_departments, tbl_department_positions, tbl_activity_logins, tbl_admin_companies, tbl_status_employee_dates, tbl_team_positions } = require('../models');
 const { compare, hash } = require('../helpers/bcrypt');
 const { sign, verify } = require('../helpers/jwt');
 const { mailOptions, createTransporter, transporter } = require('../helpers/nodemailer');
@@ -1050,6 +1050,18 @@ class user {
         createdAt: createDateAsUTC(new Date()),
         updatedAt: createDateAsUTC(new Date())
       })
+
+      if (!req.body.isActive) {
+        await tbl_master_rooms.destroy({ where: { user_id: req.params.id } })
+        await tbl_master_rooms.update({ chief: null }, { where: { chief: req.params.id } })
+        await tbl_admin_companies.destroy({ where: { user_id: req.params.id } })
+        await tbl_master_creators.destroy({ where: { user_id: req.params.id } })
+        await tbl_master_creators.update({ chief: null }, { where: { chief: req.params.id } })
+        await tbl_dinas.destroy({ where: { user_id: req.params.id } })
+        await tbl_department_positions.update({ user_id: null }, { where: { user_id: req.params.id } })
+        await tbl_PICs.destroy({ where: { user_id: req.params.id } })
+        await tbl_team_positions.update({ user_id: null }, { where: { user_id: req.params.id } })
+      }
     } catch (err) {
       let error = {
         uri: 'http://api.polagroup.co.id/users/editProfil',
@@ -1479,6 +1491,18 @@ class user {
         createdAt: createDateAsUTC(new Date()),
         updatedAt: createDateAsUTC(new Date())
       })
+
+      if (!req.body.isActive) {
+        await tbl_master_rooms.destroy({ where: { user_id: req.params.id } })
+        await tbl_master_rooms.update({ chief: null }, { where: { chief: req.params.id } })
+        await tbl_admin_companies.destroy({ where: { user_id: req.params.id } })
+        await tbl_master_creators.destroy({ where: { user_id: req.params.id } })
+        await tbl_master_creators.update({ chief: null }, { where: { chief: req.params.id } })
+        await tbl_dinas.destroy({ where: { user_id: req.params.id } })
+        await tbl_department_positions.update({ user_id: null }, { where: { user_id: req.params.id } })
+        await tbl_PICs.destroy({ where: { user_id: req.params.id } })
+        await tbl_team_positions.update({ user_id: null }, { where: { user_id: req.params.id } })
+      }
     } catch (err) {
       console.log(err)
       let error = {
