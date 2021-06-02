@@ -78,7 +78,7 @@ class contact {
       })
   }
 
-  static findAll(req, res) {
+  static findAll(req, res) { //FOR MOBILE
     let monthBefore = new Date().getMonth(), condition = {}
     let year = new Date().getFullYear()
 
@@ -518,65 +518,69 @@ class contact {
       }
 
       condition = {
-        [Op.or]: [
+        // [Op.or]: [ // TESTING USE 1 CONDITION
+        //   {
+        [Op.and]: [
           {
-            [Op.and]: [
-              {
-                [Op.or]: [
-                  { user_id: req.user.user_id },
-                  { evaluator_1: req.user.user_id },
-                  { evaluator_2: req.user.user_id },
-                ]
-              }, {
-                [Op.or]: [ //data dari sebulan sebelumnya
-                  // { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
-                  // { leave_date_in: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
-                  { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
-                  { date_ijin_absen_start: { [Op.ne]: null } },
-                  { leave_request: { [Op.ne]: null } }
-                ]
-              }
+            status: { [Op.ne]: 'cancel' }
+          },
+          {
+            [Op.or]: [
+              { user_id: req.user.user_id },
+              { evaluator_1: req.user.user_id },
+              { evaluator_2: req.user.user_id },
             ]
           }, {
-            [Op.and]: [
-              {
-                [Op.or]: [
-                  { evaluator_1: req.user.user_id },
-                  { evaluator_2: req.user.user_id },
-                ]
-              }, {
-                [Op.or]: [
-                  // {
-                  //   date_ijin_absen_end: {
-                  //     // [Op.between]: [
-                  //     //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
-                  //     //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
-                  //     [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
-                  //   }
-                  // },
-                  { date_ijin_absen_start: { [Op.ne]: null } },
-                  {
-                    date_imp: {
-                      // [Op.between]: [
-                      //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
-                      //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
-                      [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
-                    }
-                  },
-                  // {
-                  //   leave_date_in: {
-                  //     // [Op.between]: [
-                  //     //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
-                  //     //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
-                  //     [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
-                  //   }
-                  // },
-                  { leave_request: { [Op.ne]: null } }
-                ]
-              }
+            [Op.or]: [ //data dari sebulan sebelumnya
+              // { date_ijin_absen_end: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              // { leave_date_in: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              { date_imp: { [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01` } },
+              { date_ijin_absen_start: { [Op.ne]: null } },
+              { leave_request: { [Op.ne]: null } }
             ]
           }
         ]
+        //   },  // TESTING USE 1 CONDITION
+        //   {
+        //     [Op.and]: [
+        //       {
+        //         [Op.or]: [
+        //           { evaluator_1: req.user.user_id },
+        //           { evaluator_2: req.user.user_id },
+        //         ]
+        //       }, {
+        //         [Op.or]: [
+        //           // {
+        //           //   date_ijin_absen_end: {
+        //           //     // [Op.between]: [
+        //           //     //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+        //           //     //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+        //           //     [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
+        //           //   }
+        //           // },
+        //           { date_ijin_absen_start: { [Op.ne]: null } },
+        //           {
+        //             date_imp: {
+        //               // [Op.between]: [
+        //               //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+        //               //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+        //               [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
+        //             }
+        //           },
+        //           // {
+        //           //   leave_date_in: {
+        //           //     // [Op.between]: [
+        //           //     //   `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-21`,
+        //           //     //   `${year}-${monthCurrent < 10 ? `0${monthCurrent}` : monthCurrent}-20`]
+        //           //     [Op.gte]: `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`
+        //           //   }
+        //           // },
+        //           { leave_request: { [Op.ne]: null } }
+        //         ]
+        //       }
+        //     ]
+        //   }
+        // ]
       }
     } else if (req.query["for-report-hr"] === "true") {
       let conditionCompany = []
@@ -731,22 +735,35 @@ class contact {
 
           // data = [...data1, ...tempData]
 
-          data.forEach(element => {
-            if (element.leave_request !== null) {
+          await data.forEach(element => {
+            if (element.leave_request) {
               if (element.leave_date_in) {
-                if (element.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+                if (element.leave_date_in >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) {
+                  // console.log(element.contact_id)
+                  newData.push(element)
+                }
               } else {
                 let temp = element.leave_date.split(',')
-                if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+                if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) {
+                  // console.log(element.contact_id)
+                  newData.push(element)
+                }
               }
-            } else if (element.date_ijin_absen_start !== null) {
+            } else if (element.date_ijin_absen_start) {
               if (element.date_ijin_absen_end) {
-                if (element.date_ijin_absen_end >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+                if (element.date_ijin_absen_end >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) {
+                  // console.log(element.contact_id)
+                  newData.push(element)
+                }
               } else {
                 let temp = element.date_ijin_absen_start.split(',')
-                if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) newData.push(element)
+                if (temp[temp.length - 1] >= `${year}-${monthBefore < 10 ? `0${monthBefore}` : monthBefore}-01`) {
+                  // console.log(element.contact_id)
+                  newData.push(element)
+                }
               }
-            } else {
+            } else if (element.date_imp) {
+              // console.log(element.contact_id)
               newData.push(element)
             }
           });
@@ -778,8 +795,8 @@ class contact {
                   && element.leave_date_in <= req.query["before-date"]) newData.push(element)
               } else {
                 let temp = element.leave_date.split(',')
-                if (temp[temp.length-1] >= req.query["after-date"]
-                  && temp[temp.length-1] <= req.query["before-date"]) newData.push(element)
+                if (temp[temp.length - 1] >= req.query["after-date"]
+                  && temp[temp.length - 1] <= req.query["before-date"]) newData.push(element)
               }
             } else if (element.date_ijin_absen_start !== null) {
               if (element.date_ijin_absen_end) {
@@ -787,8 +804,8 @@ class contact {
                   && element.date_ijin_absen_end <= req.query["before-date"]) newData.push(element)
               } else {
                 let temp = element.date_ijin_absen_start.split(',')
-                if (temp[temp.length-1] >= req.query["after-date"]
-                  && temp[temp.length-1] <= req.query["before-date"]) newData.push(element)
+                if (temp[temp.length - 1] >= req.query["after-date"]
+                  && temp[temp.length - 1] <= req.query["before-date"]) newData.push(element)
               }
             } else {
               newData.push(element)
