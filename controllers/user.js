@@ -146,8 +146,8 @@ class user {
     } else {
       if (req.body.dateOfBirth) {
         console.log(req.body.dateOfBirth)
-        let newDateOfBirth = createDateAsUTC(req.body.dateOfBirth)
-        let dateBirth = newDateOfBirth.getDate()
+        let newDateOfBirth = new Date(req.body.dateOfBirth)
+        let dateBirth = newDateOfBirth.getDate() + 1
         let monthBirth = newDateOfBirth.getMonth() + 1
         if (dateBirth < 10) dateBirth = `0${dateBirth}`
         if (monthBirth < 10) monthBirth = `0${monthBirth}`
