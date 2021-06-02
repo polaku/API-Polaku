@@ -146,12 +146,13 @@ class user {
     } else {
       if (req.body.dateOfBirth) {
         console.log(req.body.dateOfBirth)
-        let dateBirth = new Date(req.body.dateOfBirth).getDate()
-        let monthBirth = new Date(req.body.dateOfBirth).getMonth() + 1
+        let newDateOfBirth = createDateAsUTC(req.body.dateOfBirth)
+        let dateBirth = newDateOfBirth.getDate()
+        let monthBirth = newDateOfBirth.getMonth() + 1
         if (dateBirth < 10) dateBirth = `0${dateBirth}`
         if (monthBirth < 10) monthBirth = `0${monthBirth}`
-        console.log(`${dateBirth}${monthBirth}${new Date(req.body.dateOfBirth).getFullYear()}`)
-        newUser.password = hash(`${dateBirth}${monthBirth}${new Date(req.body.dateOfBirth).getFullYear()}`)
+        console.log(`${dateBirth}${monthBirth}${newDateOfBirth.getFullYear()}`)
+        newUser.password = hash(`${dateBirth}${monthBirth}${newDateOfBirth.getFullYear()}`)
       } else {
         newUser.password = hash(`${req.body.nik}`)
       }
