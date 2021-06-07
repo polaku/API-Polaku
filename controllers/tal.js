@@ -416,10 +416,10 @@ class tal {
 
       allTAL.forEach(tal => {
         if (tal.tbl_tal_scores.length > 0) {
-          // console.log("NEW TAL PROCESS >>>>>>>>>>>>>", tal.tal_id)
+          console.log("NEW TAL PROCESS >>>>>>>>>>>>>", tal.tal_id)
           tal.tbl_tal_scores.forEach(async tal_score => {
             if (tal_score.weight && tal_score.achievement) {
-              // console.log("NEW TAL SCORE PROCESS >>>>>>>>>>>>>", tal.tal_id, tal_score.tal_score_id)
+              console.log("NEW TAL SCORE PROCESS >>>>>>>>>>>>>", tal.tal_id, tal_score.tal_score_id)
               let newScore = (Number(tal_score.weight) / 100) * Number(tal_score.achievement)
               if (newScore > 100) newScore = 100
 
@@ -431,10 +431,10 @@ class tal {
               } catch (err) {
                 console.log('Error user_id', tal.user_id)
               }
-              // console.log("END TAL SCORE PROCESS >>>>>>>>>>>>>", tal.tal_id, tal_score.tal_score_id)
+              console.log("END TAL SCORE PROCESS >>>>>>>>>>>>>", tal.tal_id, tal_score.tal_score_id)
             }
           })
-          // console.log("END TAL PROCESS >>>>>>>>>>>>>", tal.tal_id)
+          console.log("END TAL PROCESS >>>>>>>>>>>>>", tal.tal_id)
         }
       })
       res.status(200).json({ message: 'success' })
