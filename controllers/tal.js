@@ -429,6 +429,7 @@ class tal {
                 let updateScoreTAL = await updateScoreTALMonth(tal.kpim_score_id, tal_score.month, tal.user_id)
                 await inputNilaiKPIMTeam(updateScoreTAL.user_id, updateScoreTAL.year, tal_score.month)
               } catch (err) {
+                console.log(err)
                 console.log('Error user_id', tal.user_id)
               }
               console.log("END TAL SCORE PROCESS >>>>>>>>>>>>>", tal.tal_id, tal_score.tal_score_id)
