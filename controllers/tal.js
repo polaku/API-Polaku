@@ -405,6 +405,44 @@ class tal {
       res.status(500).json(err)
     }
   }
+
+  static async updateAllTAL(req, res) {
+    try {
+      let allTAL = await tbl_tals.findAll({
+        include: [
+          { model: tbl_tal_scores }
+        ]
+      })
+
+      allTAL.forEach(tal => {
+        if (tal.tbl_tal_scores.length > 0) {
+          // console.log("NEW TAL PROCESS >>>>>>>>>>>>>", tal.tal_id)
+          tal.tbl_tal_scores.forEach(async tal_score => {
+            if (tal_score.weight && tal_score.achievement) {
+              // console.log("NEW TAL SCORE PROCESS >>>>>>>>>>>>>", tal.tal_id, tal_score.tal_score_id)
+              let newScore = (Number(tal_score.weight) / 100) * Number(tal_score.achievement)
+              if (newScore > 100) newScore = 100
+
+              await tbl_tal_scores.update({ score_tal: newScore }, { where: { tal_score_id: tal_score.tal_score_id } })
+
+              try {
+                let updateScoreTAL = await updateScoreTALMonth(tal.kpim_score_id, tal_score.month, tal.user_id)
+                await inputNilaiKPIMTeam(updateScoreTAL.user_id, updateScoreTAL.year, tal_score.month)
+              } catch (err) {
+                console.log('Error user_id', tal.user_id)
+              }
+              // console.log("END TAL SCORE PROCESS >>>>>>>>>>>>>", tal.tal_id, tal_score.tal_score_id)
+            }
+          })
+          // console.log("END TAL PROCESS >>>>>>>>>>>>>", tal.tal_id)
+        }
+      })
+      res.status(200).json({ message: 'success' })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json(err)
+    }
+  }
 }
 
 function getNumberOfWeek(date) {
