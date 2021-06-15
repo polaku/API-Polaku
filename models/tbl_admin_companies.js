@@ -14,13 +14,15 @@ module.exports = (sequelize, DataTypes) => {
       tbl_admin_companies.belongsTo(models.tbl_users, { foreignKey: 'user_id' })
       tbl_admin_companies.belongsTo(models.tbl_companys, { foreignKey: 'company_id' })
       tbl_admin_companies.belongsTo(models.tbl_designations, { foreignKey: 'designations_id' })
+      tbl_admin_companies.belongsTo(models.tbl_notification_categories, { foreignKey: 'notification_category_id' })
     }
   };
   tbl_admin_companies.init({
     user_id: DataTypes.INTEGER,
     company_id: DataTypes.INTEGER,
     PIC: DataTypes.BOOLEAN,
-    designations_id: DataTypes.INTEGER
+    designations_id: DataTypes.INTEGER,
+    notification_category_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'tbl_admin_companies',

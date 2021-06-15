@@ -36,7 +36,15 @@ class designation {
 
       let checkPIC = await tbl_admin_companies.findOne({ where: { user_id: req.body.userId, company_id: req.body.companyId, PIC: 0, designations_id: designation_id } })
       if (!checkPIC) {
-        await tbl_admin_companies.create({ user_id: req.body.userId, company_id: req.body.companyId, PIC: 0, designations_id: designation_id })
+        let newDataAdmin = {
+          user_id: req.body.userId,
+          company_id: req.body.companyId,
+          PIC: 0,
+          designations_id: designation_id
+        }
+        if (req.body.notification_category_id) newDataAdmin.notification_category_id = req.body.notification_category_id
+
+        await tbl_admin_companies.create(newDataAdmin)
       }
 
       // res.setHeader('Cache-Control', 'no-cache');
@@ -111,19 +119,24 @@ class designation {
         }
 
         if (req.user.user_id !== 1) {
-          let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
+          if (!req.query.company) {
+            let userAdmin = await tbl_admin_companies.findAll({ where: { user_id: req.user.user_id } })
 
-          let tempCondition = [], idCompany = []
+            let tempCondition = [], idCompany = []
 
-          userAdmin && userAdmin.forEach(el => {
-            if (idCompany.indexOf(el.company_id) === -1) {
-              idCompany.push(el.company_id)
-              tempCondition.push({
-                company_id: el.company_id,
-              })
-            }
-          })
-          condition = { [Op.or]: tempCondition }
+            userAdmin && userAdmin.forEach(el => {
+              if (idCompany.indexOf(el.company_id) === -1) {
+                idCompany.push(el.company_id)
+                tempCondition.push({
+                  company_id: el.company_id,
+                })
+              }
+            })
+
+            condition = { [Op.or]: tempCondition }
+          } else {
+            condition = { company_id: req.query.company }
+          }
         }
 
         // data = await tbl_account_details.findAll({
@@ -340,6 +353,33 @@ class designation {
       let error = {
         uri: `http://api.polagroup.co.id/address/log`,
         method: 'delete',
+        status: 500,
+        message: err,
+        user_id: req.user.user_id
+      }
+      logError(error)
+      res.status(500).json({ err })
+    }
+  }
+
+  static async changeRole(req, res) {
+    try {
+      let newData = {
+        edited: req.body.role.edited,
+        created: req.body.role.created,
+        deleted: req.body.role.deleted
+      }
+      await tbl_user_roles.update(newData, { where: { user_role_id: req.params.id } })
+
+      await tbl_admin_companies.update({ user_id: req.body.userId, company_id: req.body.companyId }, { where: { id: req.body.admin_companies_id } })
+
+      // res.setHeader('Cache-Control', 'no-cache');
+      res.status(200).json({ message: "Success" })
+    } catch (err) {
+      console.log(err)
+      let error = {
+        uri: `http://api.polagroup.co.id/designation/role/${req.params.id}`,
+        method: 'put',
         status: 500,
         message: err,
         user_id: req.user.user_id

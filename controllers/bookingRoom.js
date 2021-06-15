@@ -202,6 +202,7 @@ class bookingRoom {
                         let creatorBookingRoom = await tbl_event_responses.create(newDataEventResponse)
 
                         if (partisipan.length != 0) {
+                          let id_created = `MeetingUser${req.user.user_id}Date${Date()}`
                           partisipan.forEach(async el => {
                             if (Number(el) === Number(req.user.user_id)) {
                               tbl_event_responses.update({ response: 'waiting' }, { where: { event_response_id: creatorBookingRoom.null, user_id: el } })
@@ -237,11 +238,14 @@ class bookingRoom {
                                   newDes = newDes.join(" ")
                                 }
                                 let newData = {
-                                  description: newDes,
+                                  link: `/event/detailEvent/${createEvent.null}`,
+                                  description: `<p>${newDes}</p>`,
                                   from_user_id: req.user.user_id,
                                   to_user_id: dataValues.user_id,
-                                  value: "Meeting",
-                                  link: `/event/detailEvent/${createEvent.null}`,
+                                  created_at: new Date(),
+                                  title: "Meeting",
+                                  is_notif_polaku: true,
+                                  id_created
                                 }
                                 await tbl_notifications.create(newData)
 
@@ -511,9 +515,11 @@ class bookingRoom {
     )
       .then(async () => {
         if (dataWillDelete.user_id !== req.user.user_id || req.user.user_id !== 1) {
-          let accountCreator = await tbl_users.findOne({ where: { user_id: dataWillDelete.user_id }, attributes: {
-            exclude: ['password']
-          } })
+          let accountCreator = await tbl_users.findOne({
+            where: { user_id: dataWillDelete.user_id }, attributes: {
+              exclude: ['password']
+            }
+          })
           let accountAdmin = await tbl_account_details.findOne({ where: { user_id: req.user.user_id } })
 
           mailOptions.subject = "Your meeting room had cancelled"

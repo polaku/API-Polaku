@@ -6,6 +6,7 @@ router.use(authentication)
 router.post('/', designationController.create)
 router.get('/', designationController.findAll)
 router.get('/log', designationController.findAllLog)
+router.put('/role/:id', designationController.changeRole)
 router.delete('/user/:id', designationController.deleteUser)
 router.delete('/:id', designationController.delete)
 

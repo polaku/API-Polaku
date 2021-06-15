@@ -8,10 +8,11 @@ router.use(authentication)
 router.post('/', notificationController.create)
 router.get('/', notificationController.findAll)
 router.put('/', notificationController.updateReadInline)
+router.get('/category/setting', notificationController.findAllSettingCategory)
 router.put('/category/:id', uploadSingle.single('icon'), notificationController.editCategory)
 router.delete('/category/:id', notificationController.deleteCategory)
 router.post('/category', uploadSingle.single('icon'), notificationController.createCategory)
-router.get('/category', notificationController.findAllCategory)
+router.get('/category', notificationController.findAlCategory)
 router.put('/:id', notificationController.updateRead)
 
 module.exports = router

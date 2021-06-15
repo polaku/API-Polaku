@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       tbl_notification_categories.belongsTo(models.tbl_users, { foreignKey: 'user_id' })
+      tbl_notification_categories.hasMany(models.tbl_admin_companies, { foreignKey: 'notification_category_id' })
     }
   };
   tbl_notification_categories.init({
