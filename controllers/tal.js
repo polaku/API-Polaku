@@ -70,7 +70,7 @@ class tal {
               counterWeek++
             }
 
-            tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
+            tempScoreTALweek = tempScoreTALweek + +tal_score.score_tal
           })
 
           let newScore = (tempScoreTALweek / counterWeek)
@@ -325,7 +325,7 @@ class tal {
         }
 
         if (tempTotalWeight <= 100 || !req.body.weight) {
-          let newScore = ((req.body.weight || Number(talScore.weight)) / 100) * (req.body.achievement || Number(talScore.achievement))
+          let newScore = ((+req.body.weight || Number(talScore.weight)) / 100) * (+req.body.achievement || Number(talScore.achievement))
 
           if (newScore > 100) newScore = 100
 
@@ -534,7 +534,7 @@ async function updateScoreTALMonth(kpimScoreId, month, userId) {
     }
     // if ((tal_score.month === month && tal_score.week < weekDate20) || (tal_score.month === month && tal_score.week === weekDate20 && ((tal_score.when_day && day.indexOf(tal_score.when_day) <= new Date(`${KPIMSelected.year}-${month}-20`).getDay()) || (tal_score.when_date && Number(tal_score.when_date) <= 20)))) {
     if (tal_score.month === month) {
-      tempScoreTALweek = tempScoreTALweek + tal_score.score_tal
+      tempScoreTALweek = tempScoreTALweek + +tal_score.score_tal
     }
   })
 

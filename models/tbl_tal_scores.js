@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     when_date: DataTypes.STRING,
     weight: DataTypes.STRING,
     achievement: DataTypes.STRING,
-    score_tal: DataTypes.INTEGER,
+    score_tal: DataTypes.DECIMAL,
     link: DataTypes.STRING,
     week: DataTypes.INTEGER,
     month: DataTypes.INTEGER,
@@ -19,9 +19,15 @@ module.exports = (sequelize, DataTypes) => {
     active_flag: DataTypes.BOOLEAN,
     created_at: DataTypes.DATE,
     hasConfirm: DataTypes.BOOLEAN,
+    status: DataTypes.BOOLEAN,
+    achievement_star: DataTypes.INTEGER,
+    review: DataTypes.STRING,
+    time_start: DataTypes.TIME,
+    time_stop: DataTypes.TIME,
+    timesheet: DataTypes.STRING,
   }, {
-      timestamps: false,
-    });
+    timestamps: false,
+  });
   tbl_tal_scores.removeAttribute('id');
 
   tbl_tal_scores.associate = function (models) {

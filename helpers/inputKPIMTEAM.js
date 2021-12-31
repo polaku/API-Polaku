@@ -25,7 +25,7 @@ module.exports = async function inputNilaiKPIMTeam(userId, year, month, isAtasan
     });
 
     tempKPIM.forEach(kpimMonth => {
-      tempScoreKPIM += kpimMonth.tbl_kpim_scores[0].score_kpim_monthly * (Number(kpimMonth.tbl_kpim_scores[0].bobot) / 100)
+      tempScoreKPIM += +kpimMonth.tbl_kpim_scores[0].score_kpim_monthly * (Number(kpimMonth.tbl_kpim_scores[0].bobot) / 100)
     })
 
     let scoreKPIMTEAM = Math.ceil(tempScoreKPIM / counterUserKPIM)

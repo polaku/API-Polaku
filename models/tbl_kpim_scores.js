@@ -7,10 +7,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     kpim_id: DataTypes.INTEGER,
     month: DataTypes.INTEGER,
-    target_monthly: DataTypes.INTEGER,
+    target_monthly: DataTypes.DECIMAL,
     pencapaian_monthly: DataTypes.STRING,
-    bobot: DataTypes.INTEGER,
-    score_kpim_monthly: DataTypes.INTEGER,
+    bobot: DataTypes.DECIMAL,
+    score_kpim_monthly: DataTypes.DECIMAL,
     active_flag: DataTypes.BOOLEAN,
     hasConfirm: DataTypes.BOOLEAN,
   }, {

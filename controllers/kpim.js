@@ -7,7 +7,7 @@ class kpim {
   static async create(req, res) {
     try {
       let targetPerbulan
-
+      console.log(req.body)
       if (req.body.monthly) {
         if (typeof req.body.monthly === 'object') targetPerbulan = req.body.monthly
         else targetPerbulan = JSON.parse(req.body.monthly)
@@ -87,7 +87,7 @@ class kpim {
 
           let newKPIMScore = {
             indicator_kpim: req.body.indicator_kpim,
-            target: req.body.target,
+            target: +req.body.target,
             unit: req.body.unit,
             year: req.body.year,
             user_id: req.body.user_id,
@@ -98,7 +98,7 @@ class kpim {
 
           if (createKPIM) {
             await targetPerbulan.forEach(async (element, index) => {
-              if (element.target_monthly !== 0 || element.target_monthly) {
+              if (+element.target_monthly !== 0 || +element.target_monthly) {
                 let newData = {
                   kpim_id: createKPIM.null,
                   month: index + 1,
@@ -145,7 +145,7 @@ class kpim {
         } else {
           let newKPIMScore = {
             indicator_kpim: req.body.indicator_kpim,
-            target: req.body.target,
+            target: +req.body.target,
             unit: req.body.unit,
             year: req.body.year,
             user_id: req.body.user_id,
@@ -156,7 +156,7 @@ class kpim {
 
           if (createKPIM) {
             await targetPerbulan.forEach(async (element, index) => {
-              if (element.target_monthly !== 0 || element.target_monthly) {
+              if (+element.target_monthly !== 0 || +element.target_monthly) {
                 let newData = {
                   kpim_id: createKPIM.null,
                   month: index + 1,
@@ -183,8 +183,9 @@ class kpim {
   }
 
   static async findAll(req, res) {
-    let situationKPIM, listBawahan, situationBawahanId = []
-
+    let situationKPIM, listBawahan, situationBawahanId = [], queryPT = {}, queryEmployee = {}
+    console.log("bawahan", req.query.bawahan)
+    console.log("perusahaan", req.query.perusahaan)
     if (req.query["for-setting"] === "true") {
       listBawahan = await tbl_account_details.findAll({ where: { name_evaluator_1: req.user.user_id } })
 
@@ -308,6 +309,22 @@ class kpim {
         ],
       }
     } else if (req.query["for-report"] === "true") {
+      if (req.query["is-admin-hr"]) {
+        let temp = []
+        req.query.perusahaan.forEach(el => temp.push({ company_HRD: el }, { company_id: el }))
+
+        queryPT = {
+          [Op.or]: temp
+        }
+      } else if (req.query["is-supervisor"]) {
+        let temp = []
+        req.query.bawahan.forEach(el => temp.push({ user_id: el }))
+
+        queryEmployee = {
+          [Op.or]: temp
+        }
+      }
+
       situationKPIM = {
         where: {
           year: req.query.year
@@ -318,13 +335,15 @@ class kpim {
         include: [
           {
             model: tbl_users,
+            where: queryEmployee,
             attributes: {
               exclude: ['user_id', 'password', 'flag_password']
             },
             include: [{
               // as: "tbl_account_detail",
               model: tbl_account_details,
-              attributes: ['fullname', 'avatar', 'nik', 'company_id', 'initial'],
+              where: queryPT,
+              attributes: ['fullname', 'avatar', 'nik', 'company_id', 'company_HRD', 'initial'],
               include: [{
                 model: tbl_users,
                 as: "idEvaluator1",
@@ -437,14 +456,26 @@ class kpim {
           })
         } else if (req.query["for-report"] === "true") {
           allTAL = await tbl_tals.findAll({
+            where: queryEmployee,
             include: [{
               required: true,
               model: tbl_tal_scores,
               where: {
-                month: req.query.month,
-                year: req.query.year,
+                month: Number(req.query.month),
+                year: Number(req.query.year),
                 hasConfirm: 1
               }
+            },
+            {
+              model: tbl_users,
+              attributes: {
+                exclude: ['password', 'flag_password']
+              },
+              include: [{
+                model: tbl_account_details,
+                where: queryPT,
+                attributes: ['user_id', 'account_details_id', 'nik', 'company_id', 'company_hrd'],
+              }]
             }]
           })
         } else {
@@ -542,13 +573,13 @@ class kpim {
 
           allKPIMUser.forEach(kpim => { //
             if (Number(kpim.tbl_kpim_scores[0].kpim_score_id) === Number(req.params.id)) {
-              kpim.tbl_kpim_scores[0].bobot = req.body.bobot
+              kpim.tbl_kpim_scores[0].bobot = +req.body.bobot
             }
             totalBobotAfter += Number(kpim.tbl_kpim_scores[0].bobot)
           })
         }
 
-        if (totalBobotAfter <= 100 || !req.body.bobot) {
+        if (+totalBobotAfter <= 100 || !req.body.bobot) {
           //for update kpim_score kpim newest
           let newScore
           let targetMonthly = Number(req.body.target_monthly) || Number(kpimMonth.target_monthly)
@@ -568,8 +599,8 @@ class kpim {
           if (newScore > 100) newScore = 100
 
           let newData = {
-            target_monthly: req.body.target_monthly,
-            bobot: req.body.bobot,
+            target_monthly: +req.body.target_monthly,
+            bobot: +req.body.bobot,
             pencapaian_monthly: +req.body.pencapaian_monthly || 0,
           }
 
@@ -579,7 +610,7 @@ class kpim {
 
           // UPDATE BOBOT KPIM SELANJUTNYA SAMPAI AKHIR TAHUN
           if (req.body.bobot) {
-            await tbl_kpim_scores.update({ bobot: req.body.bobot }, {
+            await tbl_kpim_scores.update({ bobot: +req.body.bobot }, {
               where: {
                 kpim_id: kpimMonth.kpim_id,
                 month: {
@@ -590,7 +621,7 @@ class kpim {
           }
 
           if (updateKPIMScore) {
-            if (req.body.pencapaian_monthly || statusKhusus) { //for update pencapaian kpim tahunan
+            if (+req.body.pencapaian_monthly || statusKhusus) { //for update pencapaian kpim tahunan
               let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: kpimMonth.kpim_id } })
               let tempScore = 0
               kpimOneYear.forEach(kpimScore => {
@@ -610,12 +641,13 @@ class kpim {
         }
 
       } else {
+        console.log(typeof req.body.monthly)
         if (typeof req.body.monthly === 'object') targetPerbulan = req.body.monthly
         else targetPerbulan = JSON.parse(req.body.monthly)
 
         let newKPIM = {
           indicator_kpim: req.body.indicator_kpim,
-          target: req.body.target,
+          target: +req.body.target,
           unit: req.body.unit,
         }
 
@@ -625,7 +657,7 @@ class kpim {
           await targetPerbulan.forEach(async (element, index) => {
             if (+req.body.month > index) {
               let newData = {
-                bobot: element.bobot,
+                bobot: +element.bobot,
                 target_monthly: +element.target_monthly,
                 pencapaian_monthly: +element.pencapaian_monthly || 0
               }

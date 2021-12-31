@@ -6,9 +6,9 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     indicator_kpim: DataTypes.STRING,
-    target: DataTypes.STRING,
+    target: DataTypes.DECIMAL,
     unit: DataTypes.STRING,
-    pencapaian: DataTypes.STRING,
+    pencapaian: DataTypes.DECIMAL,
     year: DataTypes.STRING,
     user_id: DataTypes.INTEGER,
     created_at: DataTypes.DATE,
