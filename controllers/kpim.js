@@ -101,7 +101,7 @@ class kpim {
               if (+element.target_monthly !== 0 || +element.target_monthly) {
                 let newData = {
                   kpim_id: createKPIM.null,
-                  month: index + 1,
+                  month: element.month,
                   target_monthly: +element.target_monthly || 0
                 }
                 let check = await tbl_kpim_scores.create(newData)
@@ -599,7 +599,7 @@ class kpim {
           if (newScore > 100) newScore = 100
 
           let newData = {
-            target_monthly: +req.body.target_monthly,
+            target_monthly: targetMonthly,
             bobot: +req.body.bobot,
             pencapaian_monthly: +req.body.pencapaian_monthly || 0,
           }
@@ -641,7 +641,6 @@ class kpim {
         }
 
       } else {
-        console.log(typeof req.body.monthly)
         if (typeof req.body.monthly === 'object') targetPerbulan = req.body.monthly
         else targetPerbulan = JSON.parse(req.body.monthly)
 
@@ -655,9 +654,9 @@ class kpim {
 
         if (updateKPIM && req.body.monthly) {
           await targetPerbulan.forEach(async (element, index) => {
-            if (+req.body.month > index) {
+            // if (+req.body.month > index) {
               let newData = {
-                bobot: +element.bobot,
+                bobot: !isNaN(element.bobot) && +element.bobot,
                 target_monthly: +element.target_monthly,
                 pencapaian_monthly: +element.pencapaian_monthly || 0
               }
@@ -691,7 +690,7 @@ class kpim {
                 })
                 await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
               }
-            }
+            // }
           });
           let kpimSelected = await tbl_kpims.findByPk(req.params.id)
 
@@ -870,29 +869,6 @@ async function createKPIMTeam(userIdBawahan, year, month) {
   }
 }
 
-function getNumberOfWeek(date) {
-  let theDay = date
-  var target = new Date(theDay);
-  var dayNr = (new Date(theDay).getDay() + 6) % 7;
-
-  target.setDate(target.getDate() - dayNr + 3);
-
-  var reference = new Date(target.getFullYear(), 0, 4);
-  var dayDiff = (target - reference) / 86400000;
-  var weekNr = 1 + Math.ceil(dayDiff / 7);
-
-  return weekNr;
-}
-
-// CALENDER GOOGLE
-// function getNumberOfWeek(date) {
-//   //yyyy-mm-dd (first date in week)
-//   var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-//   var dayNum = d.getUTCDay() || 7;
-//   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-//   var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-//   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
-// }
 
 function compareMonth(a, b) {
   if (Number(a.month) < Number(b.month)) {

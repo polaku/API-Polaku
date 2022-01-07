@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     when_date: DataTypes.STRING,
     weight: DataTypes.STRING,
     achievement: DataTypes.STRING,
-    score_tal: DataTypes.DECIMAL,
+    score_tal: DataTypes.STRING,
     link: DataTypes.STRING,
     week: DataTypes.INTEGER,
     month: DataTypes.INTEGER,
