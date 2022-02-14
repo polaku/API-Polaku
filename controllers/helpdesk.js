@@ -405,7 +405,7 @@ class helpdesk {
               let newData = {
                 question_id: req.params.id,
                 option: 'company',
-                company_id: element.company_id
+                company_id: option.company_id
               }
               await tbl_question_fors.create(newData)
             }
@@ -422,7 +422,7 @@ class helpdesk {
               let newData = {
                 question_id: req.params.id,
                 option: 'department',
-                departments_id: element.departments_id
+                departments_id: option.departments_id
               }
               await tbl_question_fors.create(newData)
             }
