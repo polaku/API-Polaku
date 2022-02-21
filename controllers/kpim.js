@@ -593,7 +593,8 @@ class kpim {
               newScore = ((targetMonthly - capaianMonthly) / targetMonthly) * 100
             }
           } else {
-            newScore = (capaianMonthly / targetMonthly) * 100
+            if (!capaianMonthly && !targetMonthly) newScore = 0
+            else newScore = (capaianMonthly / targetMonthly) * 100
           }
 
           if (newScore > 100) newScore = 100
@@ -631,7 +632,7 @@ class kpim {
               await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: kpimMonth.kpim_id } })
             }
 
-            inputNilaiKPIMTeam(kpimSelected.user_id, kpimSelected.year, kpimMonth.month, 'atas')
+            await inputNilaiKPIMTeam(kpimSelected.user_id, kpimSelected.year, kpimMonth.month, 'atas')
 
             // res.setHeader('Cache-Control', 'no-cache');
             res.status(200).json({ message: "Success", data: updateKPIMScore })
@@ -655,41 +656,42 @@ class kpim {
         if (updateKPIM && req.body.monthly) {
           await targetPerbulan.forEach(async (element, index) => {
             // if (+req.body.month > index) {
-              let newData = {
-                bobot: !isNaN(element.bobot) && +element.bobot,
-                target_monthly: +element.target_monthly,
-                pencapaian_monthly: +element.pencapaian_monthly || 0
-              }
-              let targetMonthly = +element.target_monthly
-              let capaianMonthly = +element.pencapaian_monthly || 0
-              let newScore
+            let newData = {
+              bobot: !isNaN(element.bobot) && +element.bobot,
+              target_monthly: +element.target_monthly,
+              pencapaian_monthly: +element.pencapaian_monthly || 0
+            }
+            let targetMonthly = +element.target_monthly
+            let capaianMonthly = +element.pencapaian_monthly || 0
+            let newScore
 
-              if (req.body.is_inverse) {
-                statusKhusus = true
+            if (req.body.is_inverse) {
+              statusKhusus = true
 
-                if (targetMonthly < capaianMonthly) {
-                  newScore = 0
-                } else {
-                  newScore = ((targetMonthly - capaianMonthly) / targetMonthly) * 100
-                }
+              if (targetMonthly < capaianMonthly) {
+                newScore = 0
               } else {
-                newScore = (capaianMonthly / targetMonthly) * 100
+                newScore = ((targetMonthly - capaianMonthly) / targetMonthly) * 100
               }
+            } else {
+              if (!capaianMonthly && !targetMonthly) newScore = 0
+              else newScore = (capaianMonthly / targetMonthly) * 100
+            }
 
-              if (newScore > 100) newScore = 100
+            if (newScore > 100) newScore = 100
 
-              newData.score_kpim_monthly = newScore
+            newData.score_kpim_monthly = newScore
 
-              let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: element.kpim_score_id } })
+            let updateKPIMScore = await tbl_kpim_scores.update(newData, { where: { kpim_score_id: element.kpim_score_id } })
 
-              if (updateKPIMScore) {
-                let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: req.params.id } })
-                let tempScore = 0
-                kpimOneYear.forEach(kpimScore => {
-                  tempScore += +kpimScore.pencapaian_monthly || 0
-                })
-                await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
-              }
+            if (updateKPIMScore) {
+              let kpimOneYear = await tbl_kpim_scores.findAll({ where: { kpim_id: req.params.id } })
+              let tempScore = 0
+              kpimOneYear.forEach(kpimScore => {
+                tempScore += +kpimScore.pencapaian_monthly || 0
+              })
+              await tbl_kpims.update({ pencapaian: tempScore }, { where: { kpim_id: req.params.id } })
+            }
             // }
           });
           let kpimSelected = await tbl_kpims.findByPk(req.params.id)
