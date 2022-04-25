@@ -430,7 +430,7 @@ class user {
               uri: 'http://api.polagroup.co.id/users/signin',
               method: 'post',
               status: 400,
-              message: 'Username/password invalid',
+              message: `Username/password invalid. ${req.body.username}, ${req.body.password}`,
             }
             logError(error)
             res.status(400).json({ msg: "Username/password invalid" })
@@ -441,7 +441,7 @@ class user {
             uri: 'http://api.polagroup.co.id/users/signin',
             method: 'post',
             status: 400,
-            message: 'Username/password invalid',
+            message: `Username/password invalid. ${req.body.username}, ${req.body.password}`,
           }
           logError(error)
           res.status(400).json({ msg: "Username/password invalid" })

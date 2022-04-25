@@ -311,7 +311,11 @@ class kpim {
     } else if (req.query["for-report"] === "true") {
       if (req.query["is-admin-hr"]) {
         let temp = []
-        req.query.perusahaan.forEach(el => temp.push({ company_HRD: el }, { company_id: el }))
+
+        if (req.query.perusahaan) {
+          if (Array.isArray(req.query.perusahaan)) req.query.perusahaan.forEach(el => temp.push({ company_HRD: el }, { company_id: el }))
+          else temp.push({ company_HRD: req.query.perusahaan }, { company_id: req.query.perusahaan })
+        }
 
         queryPT = {
           [Op.or]: temp
